@@ -32,7 +32,7 @@ This contains the code for the work on embedded voting done during my internship
 Features
 --------
 
-* TODO
+* TODO (soon)
 
 Credits
 -------
