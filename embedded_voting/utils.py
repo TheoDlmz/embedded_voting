@@ -52,6 +52,19 @@ def create_3D_plot(fig, intfig=[1, 1, 1]):
     return ax
 
 
+def create_2D_plot(fig, intfig=[1, 1, 1]):
+    ax = fig.add_subplot(intfig[0], intfig[1], intfig[2])
+    ax.set_xlim(np.pi/2+0.15, 0-0.15)
+    ax.set_ylim(np.pi/2+0.15, 0-0.15)
+
+    ax.grid(False)
+    ax.set_ylabel("Phi")
+    ax.set_xlabel("Theta")
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    return ax
+
+
 def _cache(f):
     """
     Auxiliary decorator used by ``cached_property``.

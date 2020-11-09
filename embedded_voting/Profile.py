@@ -8,7 +8,7 @@ This file is part of Embedded Voting.
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from embedded_voting.utils import create_3D_plot, normalize
+from embedded_voting.utils import create_3D_plot, normalize, create_2D_plot
 
 
 class Profile:
@@ -60,7 +60,7 @@ class Profile:
             embeddings.append(self.profile[i] * s)
         return np.array(embeddings)
 
-    def plot_profile_3D(self, title="Profile of voters", fig=None, intfig=[1, 1, 1]):
+    def plot_profile_3D(self, title="Profile of voters", fig=None, intfig=[1, 1, 1], show=True):
         """
         Plot the profile of voters
         """
@@ -72,7 +72,27 @@ class Profile:
             ax.plot([0, v[0]], [0, v[1]], [0, v[2]], color=self.color_groups[g], alpha=0.3)
             ax.scatter([v[0]], [v[1]], [v[2]], color='k', s=1)
         ax.set_title(title, fontsize=24)
-        plt.show()
+        if show:
+            plt.show()
+        return ax
+
+    def plot_profile_2D(self, title="Profile of voters", fig=None, intfig=[1, 1, 1], show=True):
+        """
+        Plot the profile of voters in 2D
+        """
+        if fig == None:
+            fig = plt.figure(figsize=(5, 5))
+        ax = create_2D_plot(fig, intfig)
+        for i, v in enumerate(self.profile):
+            g = self.groups[i]
+            phi = np.arccos(v[2])
+            temp = min(1, v[0]/np.sin(phi))
+            theta = np.arccos(temp)
+            ax.scatter([theta], [phi], color=self.color_groups[g], alpha=0.5)
+        ax.set_title(title, fontsize=16)
+        if show:
+            plt.show()
+        return ax
 
     def plot_scores_3D(self, scores, title="", fig=None, intfig=[1, 1, 1], show=True):
         """
@@ -89,11 +109,36 @@ class Profile:
             plt.show()
         return ax
 
+    def plot_scores_2D(self, scores, title="", fig=None, intfig=[1, 1, 1], show=True):
+        """
+        Plot the profile with some scores in 3D space
+        """
+        if fig == None:
+            fig = plt.figure(figsize=(10, 10))
+        ax = create_2D_plot(fig, intfig)
+        for i, (v, s) in enumerate(zip(self.profile, scores)):
+            g = self.groups[i]
+            phi = np.arccos(v[2])
+            temp = min(1, v[0]/np.sin(phi))
+            theta = np.arccos(temp)
+            ax.scatter([theta], [phi], color=self.color_groups[g], alpha=0.5, s=s*100)
+        ax.set_title(title, fontsize=16)
+        if show:
+            plt.show()
+        return ax
+
     def plot_cand_3D(self, cand, fig=None, intfig=[1, 1, 1], show=True):
         """
         Plot one candidate of the election in 3D space
         """
         self.plot_scores_3D(self.scores[::, cand], title="Candidate #%i" % (cand + 1), fig=fig, intfig=intfig,
+                            show=show)
+
+    def plot_cand_2D(self, cand, fig=None, intfig=[1, 1, 1], show=True):
+        """
+        Plot one candidate of the election in 3D space
+        """
+        self.plot_scores_2D(self.scores[::, cand], title="Candidate #%i" % (cand + 1), fig=fig, intfig=intfig,
                             show=show)
 
     def plot_cands_3D(self, list_cand=None, list_titles=None):
@@ -113,6 +158,27 @@ class Profile:
         intfig = [n_rows, 6, 1]
         for cand, title in (zip(list_cand, list_titles)):
             self.plot_scores_3D(self.scores[::, cand], title=title, fig=fig, intfig=intfig, show=False)
+            intfig[2] += 1
+
+        plt.show()
+
+    def plot_cands_2D(self, list_cand=None, list_titles=None):
+        """
+        Plot candidates of the elections in a 3D space
+        """
+        if list_cand == None:
+            list_cand = range(self.m)
+        if list_titles == None:
+            list_titles = ["Candidate %i" % (c + 1) for c in list_cand]
+        else:
+            list_titles = ["%s (#%i)" % (t, c+1) for (t, c) in zip(list_titles, list_cand)]
+
+        n_cand = len(list_cand)
+        n_rows = (n_cand - 1) // 6 + 1
+        fig = plt.figure(figsize=(30, n_rows * 5))
+        intfig = [n_rows, 6, 1]
+        for cand, title in (zip(list_cand, list_titles)):
+            self.plot_scores_2D(self.scores[::, cand], title=title, fig=fig, intfig=intfig, show=False)
             intfig[2] += 1
 
         plt.show()
