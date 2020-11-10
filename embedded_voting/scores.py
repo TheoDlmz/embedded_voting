@@ -20,6 +20,7 @@ CANONICAL_BASIS = 801
 SVD_BASIS = 802
 SCORED_SVD_BASIS = 803
 
+
 ### Single-Winner scoring rules
 
 class ScoringFunction(DeleteCacheMixin):
@@ -198,9 +199,9 @@ class FeaturesRule(ScoringFunction):
                                                   show=False)
 
                 fbis = np.maximum(f[cand], 0)
-                fbis = fbis/np.linalg.norm(fbis)
+                fbis = fbis / np.linalg.norm(fbis)
                 phi = np.arccos(fbis[2])
-                temp = min(1, fbis[0]/np.sin(phi))
+                temp = min(1, fbis[0] / np.sin(phi))
                 theta = np.arccos(temp)
                 ax.scatter([theta], [phi], color='k', s=50)
             else:
@@ -293,11 +294,13 @@ class ExtrapoleRule(ScoringFunction):
             for i in range(self.profile_.dim):
                 if features[i, 0] < 0:
                     features[i] = - features[i]
-                ax.plot([0, features[i, 0]], [0, features[i, 1]], [0, features[i, 2]], color='k', alpha=0.8, linewidth=2)
+                ax.plot([0, features[i, 0]], [0, features[i, 1]], [0, features[i, 2]], color='k', alpha=0.8,
+                        linewidth=2)
                 ax.scatter([features[i, 0]], [features[i, 1]], [features[i, 2]], color='k', alpha=0.8, s=5)
             intfig[2] += 1
 
         plt.show()
+
 
 
 ### Multiwinner Scoring rules
@@ -378,10 +381,10 @@ class IterRules(MultiwinnerRules):
             v_temp = np.maximum(v, 0)
             v_temp = normalize(v_temp)
             phi = np.arccos(v_temp[2])
-            temp = min(1, v_temp[0]/np.sin(phi))
+            temp = min(1, v_temp[0] / np.sin(phi))
             theta = np.arccos(temp)
             ax.scatter([theta], [phi], color="k", alpha=0.8)
-            plt.text(theta, phi, '#%i'%(i+1), alpha=0.8)
+            plt.text(theta, phi, '#%i' % (i + 1), alpha=0.8)
         plt.show()
 
     def plot_voters(self):
@@ -687,3 +690,5 @@ class WeightedSquareIterFeatures(WeightedIterRules):
         temp = [np.dot(self.profile_.profile[i], vec) for i in range(self.profile_.n)]
         temp = [self.profile_.scores[i, winner_j] * temp[i] for i in range(self.profile_.n)]
         return temp
+
+
