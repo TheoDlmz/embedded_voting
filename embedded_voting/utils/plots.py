@@ -47,7 +47,7 @@ def create_3D_plot(fig, intfig=None):
     return ax
 
 
-def create_ternary_plot(fig, intfig=None):
+def create_ternary_plot(fig, position=None):
     """
         Create the background for a 2D ternary plot of the positive orthan.
 
@@ -56,15 +56,15 @@ def create_ternary_plot(fig, intfig=None):
         matplotlib.pyplot.ax
 
     """
-    if intfig is None:
-        intfig = [1, 1, 1]
-    ax = fig.add_subplot(intfig[0], intfig[1], intfig[2], projection='3d')
+    if position is None:
+        position = [1, 1, 1]
+    ax = fig.add_subplot(position[0], position[1], position[2])
     figure, tax = ternary.figure(ax=ax, scale=1)
-    figure.set_size_inches(5, 5)
+    #figure.set_size_inches(5, 5)
 
     tax.boundary(linewidth=2.0)
     tax.gridlines(multiple=0.1, color="blue")
-    tax.ticks(axis='lbr', linewidth=1, multiple=0.1, ticks=["%.1f"%(i/10) for i in range(11)])
+    tax.ticks(axis='lbr', linewidth=1, multiple=0.1, ticks=["%.1f" % (i/10) for i in range(11)])
     tax.clear_matplotlib_ticks()
     tax.get_axes().axis('off')
 

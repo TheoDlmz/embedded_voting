@@ -113,43 +113,11 @@ class Profile(DeleteCacheMixin):
 
         return self
 
-    def dilate_profile_fan(self):
-        profile = self.embeddings
+    def dilate_profile(self):
+        """
+        Dilate the profile of voters so the voters are more orthogonally distributed
+        """
 
-        if self.n_voters < 2:
-            raise ValueError("Cannot dilate a profile with less than 2 candidates")
-
-        min_value = np.dot(profile[0], profile[1])
-        min_index = (0, 1)
-        for i in range(self.n_voters):
-            for j in range(i + 1, self.n_voters):
-                val = np.dot(profile[i], profile[j])
-                if val < min_value:
-                    min_value = val
-                    min_index = (i, j)
-
-        (i, j) = min_index
-        center = (profile[i] + profile[j]) / 2
-        center = normalize(center)
-
-        theta_max = np.arccos(min_value)
-        k = np.pi / (2 * theta_max)
-
-        new_profile = np.zeros((self.n_voters, self.n_dim))
-        for i in range(self.n_voters):
-            v_i = self.embeddings[i]
-            theta_i = np.arccos(np.dot(v_i, center))
-            if theta_i == 0:
-                new_profile[i] = v_i
-            else:
-                p_1 = np.dot(center, v_i) * center
-                p_2 = v_i - p_1
-                e_2 = normalize(p_2)
-                new_profile[i] = center * np.cos(k * theta_i) + e_2 * np.sin(k * theta_i)
-
-        self.embeddings = new_profile
-
-    def dilate_profile_umbrella(self):
         profile = self.embeddings
 
         if self.n_voters < 2:
@@ -179,22 +147,6 @@ class Profile(DeleteCacheMixin):
                 new_profile[i] = center * np.cos(k * theta_i) + e_2 * np.sin(k * theta_i)
 
         self.embeddings = new_profile
-
-    def dilate_profile(self, method="umbrella"):
-        """
-        Dilate the profile of voters so the voters are more orthogonally distributed
-
-        Parameters
-        _______
-        method : ["umbrella","fan"]
-            The selected method for the dilatation
-        """
-        if method == "umbrella":
-            self.dilate_profile_umbrella()
-        elif method == "fan":
-            self.dilate_profile_fan()
-        else:
-            raise ValueError("Incorrect method (select one among 'umbrella', 'fan')")
 
     def standardize(self, cut_one=True):
         """
@@ -254,13 +206,12 @@ class Profile(DeleteCacheMixin):
         return matrix
 
     def plot_profile_3D(self, fig, dim, position=None):
-
         ax = create_3D_plot(fig, position)
         for i, v in enumerate(self.embeddings):
             x1 = v[dim[0]]
             x2 = v[dim[1]]
             x3 = v[dim[2]]
-            ax.plot([0, x1], [0, x2], [0, x3], color=(x1 * 0.8, x2 * 0.8, x2 * 0.8), alpha=0.4)
+            ax.plot([0, x1], [0, x2], [0, x3], color=(x1 * 0.8, x2 * 0.8, x3 * 0.8), alpha=0.4)
             ax.scatter([x1], [x2], [x3], color='k', s=1)
         return ax
 
@@ -268,10 +219,10 @@ class Profile(DeleteCacheMixin):
         tax = create_ternary_plot(fig, position)
         for i, v in enumerate(self.embeddings):
             x1 = v[dim[0]]
-            x2 = v[dim[1]]
-            x3 = v[dim[2]]
+            x2 = v[dim[2]]
+            x3 = v[dim[1]]
             vec = [x1, x2, x3]
-            tax.scatter(normalize(vec)**2, color=(x1 * 0.8, x2 * 0.8, x3), alpha=0.6, s=10)
+            tax.scatter([normalize(vec)**2], color=(x1 * 0.8, x3 * 0.8, x2 * 0.8), alpha=0.9, s=30)
 
         return tax
 
@@ -302,7 +253,7 @@ class Profile(DeleteCacheMixin):
                 raise ValueError("The number of dimensions should be 3")
 
         if fig is None:
-            fig = plt.figure(figsize=(10, 10))
+            fig = plt.figure(figsize=(8, 8))
 
         if plot_kind == "3D":
             ax = self.plot_profile_3D(fig, dim, position)
@@ -316,9 +267,6 @@ class Profile(DeleteCacheMixin):
         return ax
 
     def plot_scores_3D(self, scores, fig, position, dim):
-        if fig is None:
-            fig = plt.figure(figsize=(10, 10))
-
         ax = create_3D_plot(fig, position)
         for i, (v, s) in enumerate(zip(self.embeddings, scores)):
             x1 = v[dim[0]]
@@ -332,10 +280,10 @@ class Profile(DeleteCacheMixin):
         tax = create_ternary_plot(fig, position)
         for i, (v, s) in enumerate(zip(self.embeddings, scores)):
             x1 = v[dim[0]]
-            x2 = v[dim[1]]
-            x3 = v[dim[2]]
+            x2 = v[dim[2]]
+            x3 = v[dim[1]]
             vec = [x1, x2, x3]
-            tax.scatter(normalize(vec)**2, color=(x1 * 0.8, x2 * 0.8, x3 * 0.8), alpha=0.8, s=s * 50)
+            tax.scatter([normalize(vec)**2], color=(x1 * 0.8, x3 * 0.8, x2 * 0.8), alpha=0.7, s=max(s * 50, 1))
 
         return tax
 
@@ -347,7 +295,7 @@ class Profile(DeleteCacheMixin):
                 raise ValueError("The number of dimensions should be 3")
 
         if fig is None:
-            fig = plt.figure(figsize=(10, 10))
+            fig = plt.figure(figsize=(8, 8))
 
         if plot_kind == "3D":
             ax = self.plot_scores_3D(scores, fig, position, dim)
@@ -391,7 +339,7 @@ class Profile(DeleteCacheMixin):
                          position=position,
                          show=show)
 
-    def plot_candidates(self, plot_kind="3D", dim=None, list_candidates=None, list_titles=None):
+    def plot_candidates(self, plot_kind="3D", dim=None, list_candidates=None, list_titles=None, row_size=5):
         """
         Plot the profile of the voters for every candidates or a list of candidate,
         using the scores given by the voters. The plot is either on a 3D plot, or on a ternary plot.
@@ -409,6 +357,8 @@ class Profile(DeleteCacheMixin):
         list_titles : array of string
             should be the same length than list_candidates. Contains the title of the plots.
             default is for default list_candidates.
+        row_size : int
+            number of figures by row. Default is 5
         """
         if list_candidates is None:
             list_candidates = range(self.n_candidates)
@@ -418,9 +368,9 @@ class Profile(DeleteCacheMixin):
             list_titles = ["%s (#%i)" % (t, c + 1) for (t, c) in zip(list_titles, list_candidates)]
 
         n_candidates = len(list_candidates)
-        n_rows = (n_candidates - 1) // 6 + 1
-        fig = plt.figure(figsize=(30, n_rows * 5))
-        position = [n_rows, 6, 1]
+        n_rows = (n_candidates - 1) // row_size + 1
+        fig = plt.figure(figsize=(5 * row_size, n_rows * 5))
+        position = [n_rows, row_size, 1]
         for candidate, title in (zip(list_candidates, list_titles)):
             self.plot_scores(self.scores[::, candidate],
                              title=title,
