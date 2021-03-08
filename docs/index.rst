@@ -8,6 +8,7 @@ Welcome to Embedded Voting's documentation!
    readme
    installation
    usage
+   notebooks/tuto
    reference
    contributing
    authors

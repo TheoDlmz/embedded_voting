@@ -2,17 +2,10 @@
 Reference
 =========
 
-A Nice Section
---------------
 
-.. autoclass:: embedded_voting.MyClass1
-    :members:
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
-Another Nice Section
---------------------
-
-.. autoclass:: embedded_voting.MyClass2
-    :members:
-
-.. autoclass:: embedded_voting.MyClass3
-    :members:
+   profile
+   singlewinner

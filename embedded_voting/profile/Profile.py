@@ -8,8 +8,8 @@ This file is part of Embedded Voting.
 import numpy as np
 import matplotlib.pyplot as plt
 from embedded_voting.utils.miscellaneous import normalize
-from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.utils.plots import create_2D_plot, create_3D_plot
+from embedded_voting.utils.cached import DeleteCacheMixin
+from embedded_voting.utils.plots import create_ternary_plot, create_3D_plot
 
 
 class Profile(DeleteCacheMixin):
@@ -18,208 +18,126 @@ class Profile(DeleteCacheMixin):
 
     Parameters
     _________
-    m : int
+    n_candidates : int
         The number of candidate for this profile
-    dim : int
+    n_dim : int
         The number of dimensions for the voters' embeddings
 
     Attributes
     ___________
-    n : int
+    n_voters : int
         The number of voter of the profile
-    embs : n x dim numpy array
+    n_candidates : int
+        The number of candidate for this profile
+    n_dim : int
+        The number of dimensions for the voters' embeddings
+    embeddings : n_voters x n_dim numpy array
         The embeddings of the voters
-    scoring : n x m numpy array
+    scores : n_voters x n_candidates numpy array
         The scoring of the candidates
     """
 
-    def __init__(self, m, dim):
-        self.embs = np.zeros((0, dim))
-        self.scores = np.zeros((0, m))
-        self.m = m
-        self.dim = dim
-        self.n = 0
+    def __init__(self, n_candidates, n_dim):
+        self.embeddings = np.zeros((0, n_dim))
+        self.scores = np.zeros((0, n_candidates))
+        self.n_candidates = n_candidates
+        self.n_dim = n_dim
+        self.n_voters = 0
 
-    def add_voter(self, embs, scores):
+    def add_voter(self, embeddings, scores, normalize_embs=True):
         """
-        Add one voter
+        Add one voter to the profile
 
         Parameters
         _______
-        embs : np.array of length dim
+        embeddings : np.array of length dim
             The embeddings of the voter
-        scoring : np.array of length m
-            The scoring given by the voter
+        scores : np.array of length m
+            The scores given by the voter
+        normalize_embs : boolean
+            If True, then normalize the embeddings in parameter
+            default True
         """
-        # We normalize the embedding vector
-        embs = normalize(embs)
-        self.embs = np.concatenate([self.embs, [embs]])
+        if normalize_embs:
+            embeddings = normalize(embeddings)
+        self.embeddings = np.concatenate([self.embeddings, [embeddings]])
         self.scores = np.concatenate([self.scores, [scores]])
-        self.n += 1
+        self.n_voters += 1
 
         return self
 
-    def add_voters(self, embs, scores):
+    def add_voters(self, embeddings, scores, normalize_embs=True):
         """
-        Add a group of voter
+        Add a group of n voters to the profile
 
         Parameters
         _______
-        embs : np.array of length dim
-            The embeddings of the voter
-        scoring : np.array of length m
-            The scoring given by the voter
+        embs : np.array of shape n,dim
+            The embeddings of the voters
+        scores : np.array of shape n,m
+            The scores given by the voters
+        normalize_embs : boolean
+            If True, then normalize the embeddings in parameter
+            default True
         """
-        # We normalize the embedding vectors
-        embs = (embs.T/np.sqrt((embs**2).sum(axis=1))).T
-        self.embs = np.concatenate([self.embs, embs])
+        if normalize_embs:
+            embeddings = (embeddings.T / np.sqrt((embeddings ** 2).sum(axis=1))).T
+        self.embeddings = np.concatenate([self.embeddings, embeddings])
         self.scores = np.concatenate([self.scores, scores])
-        self.n += len(embs)
+        self.n_voters += len(embeddings)
 
         return self
 
-    def add_group(self, n_voters, center, scores, dev_center=0, dev_scores=0):
+    def uniform_distribution(self, n_voters):
         """
-        Add a centered group of voter
+        Add n_voters voters uniformly distributed on the positive ortan to the profile.
 
         Parameters
         _______
         n_voters : int
-            number of voters to add
-        center : np.array of length dim
-            embeddings of the center of the group
-        scoring : np.array of length m
-            average score of the group for each candidate
-        dev_center : float
-            deviation from the center for the embeddings
-        dev_scores : float
-            deviation from the average scoring vector
+            number of voters in the profile
         """
 
-        new_group = np.array([center] * n_voters) + np.random.normal(0, 1, (n_voters, self.dim))* dev_center
-        new_group = np.maximum(0, new_group)
-        new_group = np.array([normalize(x) for x in new_group])
-        self.embs = np.concatenate([self.embs, new_group])
+        new_group = np.zeros((n_voters, self.n_dim))
 
-        new_scores = np.array([scores] * n_voters) + np.random.normal(0, 1, (n_voters, self.m)) * dev_scores
-        new_scores = np.minimum(1, new_scores)
-        new_scores = np.maximum(0, new_scores)
-        self.scores = np.concatenate([self.scores, new_scores])
-
-        self.n += n_voters
-
-        return self
-
-    def uniform_distribution(self, n):
-        """
-        Set a uniform distribution for the profile
-
-        Parameters
-        _______
-        n : int
-            number of voters to add
-        """
-
-        new_group = np.zeros((n, self.dim))
-
-        for i in range(n):
-            new_vec = np.abs(np.random.randn(self.dim))
+        for i in range(n_voters):
+            new_vec = np.abs(np.random.randn(self.n_dim))
             new_vec = normalize(new_vec)
             new_group[i] = new_vec
 
-        self.embs = np.concatenate([self.embs, new_group])
-        self.n += n
+        self.embeddings = np.concatenate([self.embeddings, new_group])
+        self.n_voters += n_voters
 
-        new_scores = np.random.rand(n, self.m)
+        new_scores = np.random.rand(n_voters, self.n_candidates)
         self.scores = np.concatenate([self.scores, new_scores])
 
         return self
 
-    def quasiorth_distribution(self, n, score_matrix, orth=0, corr=0, prob=None):
+    def dilate_profile_fan(self):
+        profile = self.embeddings
 
-        if prob is None:
-            prob = np.ones(self.dim)*1/self.dim
-
-        new_group = np.zeros((n, self.dim))
-        for i in range(n):
-            r = np.random.choice(range(self.dim), p=prob)
-            init_vec = np.zeros(self.dim)
-            init_vec[r] = 1
-            new_vec = 0.5*np.abs(np.random.randn(self.dim))
-            new_vec = orth*init_vec + (1-orth)*new_vec
-            new_vec = normalize(new_vec)
-            new_group[i] = new_vec
-
-        self.embs = np.concatenate([self.embs, new_group])
-        self.n += n
-
-        new_scores = corr*(new_group**2).dot(score_matrix.T) + (1-corr)*0.5*(1+np.random.randn(n, self.m))
-        new_scores = np.minimum(new_scores, 1)
-        new_scores = np.maximum(new_scores, 0)
-        self.scores = np.concatenate([self.scores, new_scores])
-
-
-        return self
-
-
-
-
-    def dilate_profile_eventail(self):
-        profile = self.embs
-
-        if self.n < 2:
+        if self.n_voters < 2:
             raise ValueError("Cannot dilate a profile with less than 2 candidates")
 
         min_value = np.dot(profile[0], profile[1])
         min_index = (0, 1)
-        for i in range(self.n):
-            for j in range(i+1, self.n):
+        for i in range(self.n_voters):
+            for j in range(i + 1, self.n_voters):
                 val = np.dot(profile[i], profile[j])
                 if val < min_value:
                     min_value = val
                     min_index = (i, j)
 
         (i, j) = min_index
-        center = (profile[i] + profile[j])/2
+        center = (profile[i] + profile[j]) / 2
         center = normalize(center)
 
         theta_max = np.arccos(min_value)
-        k = np.pi/(2*theta_max)
+        k = np.pi / (2 * theta_max)
 
-        new_profile = np.zeros((self.n, self.dim))
-        for i in range(self.n):
-            v_i = self.embs[i]
-            theta_i = np.arccos(np.dot(v_i, center))
-            if theta_i == 0:
-                new_profile[i] = v_i
-            else:
-                p_1 = np.dot(center, v_i)*center
-                p_2 = v_i - p_1
-                e_2 = normalize(p_2)
-                new_profile[i] = center*np.cos(k*theta_i) + e_2*np.sin(k*theta_i)
-
-        self.embs = new_profile
-
-    def dilate_profile_parapluie(self):
-        profile = self.embs
-
-        if self.n < 2:
-            raise ValueError("Cannot dilate a profile with less than 2 candidates")
-
-        center = self.embs.sum(axis=0)
-        center = center/np.linalg.norm(center)
-        min_value = np.dot(profile[0], center)
-        for i in range(self.n):
-            val = np.dot(profile[i], center)
-            if val < min_value:
-                min_value = val
-
-        theta_max = np.arccos(min_value)
-        k = np.pi / (4 * theta_max)
-
-        new_profile = np.zeros((self.n, self.dim))
-        for i in range(self.n):
-            v_i = self.embs[i]
+        new_profile = np.zeros((self.n_voters, self.n_dim))
+        for i in range(self.n_voters):
+            v_i = self.embeddings[i]
             theta_i = np.arccos(np.dot(v_i, center))
             if theta_i == 0:
                 new_profile[i] = v_i
@@ -229,20 +147,68 @@ class Profile(DeleteCacheMixin):
                 e_2 = normalize(p_2)
                 new_profile[i] = center * np.cos(k * theta_i) + e_2 * np.sin(k * theta_i)
 
-        self.embs = new_profile
+        self.embeddings = new_profile
 
-    def dilate_profile(self, method="parapluie"):
-        if method == "parapluie":
-            self.dilate_profile_parapluie()
-        elif method == "eventail":
-            self.dilate_profile_eventail()
+    def dilate_profile_umbrella(self):
+        profile = self.embeddings
+
+        if self.n_voters < 2:
+            raise ValueError("Cannot dilate a profile with less than 2 candidates")
+
+        center = self.embeddings.sum(axis=0)
+        center = center / np.linalg.norm(center)
+        min_value = np.dot(profile[0], center)
+        for i in range(self.n_voters):
+            val = np.dot(profile[i], center)
+            if val < min_value:
+                min_value = val
+
+        theta_max = np.arccos(min_value)
+        k = np.pi / (4 * theta_max)
+
+        new_profile = np.zeros((self.n_voters, self.n_dim))
+        for i in range(self.n_voters):
+            v_i = self.embeddings[i]
+            theta_i = np.arccos(np.dot(v_i, center))
+            if theta_i == 0:
+                new_profile[i] = v_i
+            else:
+                p_1 = np.dot(center, v_i) * center
+                p_2 = v_i - p_1
+                e_2 = normalize(p_2)
+                new_profile[i] = center * np.cos(k * theta_i) + e_2 * np.sin(k * theta_i)
+
+        self.embeddings = new_profile
+
+    def dilate_profile(self, method="umbrella"):
+        """
+        Dilate the profile of voters so the voters are more orthogonally distributed
+
+        Parameters
+        _______
+        method : ["umbrella","fan"]
+            The selected method for the dilatation
+        """
+        if method == "umbrella":
+            self.dilate_profile_umbrella()
+        elif method == "fan":
+            self.dilate_profile_fan()
         else:
-            raise ValueError("Incorrect method (select one among 'parpluie', 'eventail')")
+            raise ValueError("Incorrect method (select one among 'umbrella', 'fan')")
 
-    def standardization_score(self, cut_one=False):
+    def standardize(self, cut_one=True):
+        """
+        Standardize the score between the different voters
+
+        Parameters
+        _______
+        cut_one : boolean
+            if True, then the maximum score is one. The minimum score is always 0
+        """
+
         mu = self.scores.mean(axis=1)
         sigma = self.scores.std(axis=1)
-        new_scores = self.scores.T - np.tile(mu, (self.m, 1))
+        new_scores = self.scores.T - np.tile(mu, (self.n_candidates, 1))
         new_scores = new_scores / sigma
         new_scores += 1
         new_scores /= 2
@@ -251,192 +217,228 @@ class Profile(DeleteCacheMixin):
             new_scores = np.minimum(new_scores, 1)
         self.scores = new_scores.T
 
-    def scored_embeddings(self, cand, rc=False):
+    def scored_embeddings(self, candidate, rc=False):
+        """
+        Return the embeddings matrix with each voter's embedding multiplied by the score it gives
+        to the candidate
+
+        Parameters
+        _______
+        candidate : int
+            the candidate of who we use the scores.
+        rc : boolean
+            if True, we multiply by the square root of the score instead of the score itself
+
+        """
+
         embeddings = []
-        for i in range(self.n):
+        for i in range(self.n_voters):
             if rc:
-                s = np.sqrt(self.scores[i, cand])
+                s = np.sqrt(self.scores[i, candidate])
             else:
-                s = self.scores[i, cand]
-            embeddings.append(self.embs[i] * s)
+                s = self.scores[i, candidate]
+            embeddings.append(self.embeddings[i] * s)
         return np.array(embeddings)
 
-    def fake_covariance_matrix(self, cand, f, rc=False):
-        matrix = np.zeros((self.n, self.n))
+    def fake_covariance_matrix(self, candidate, f, rc=False):
+        matrix = np.zeros((self.n_voters, self.n_voters))
 
-        for i in range(self.n):
-            for j in range(i, self.n):
-                s = self.scores[i, cand]*self.scores[j, cand]
+        for i in range(self.n_voters):
+            for j in range(i, self.n_voters):
+                s = self.scores[i, candidate] * self.scores[j, candidate]
                 if rc:
                     s = np.sqrt(s)
-                matrix[i, j] = f(self.embs[i], self.embs[j])*s
+                matrix[i, j] = f(self.embeddings[i], self.embeddings[j]) * s
                 matrix[j, i] = matrix[i, j]
 
         return matrix
 
-    def plot_profile_3D(self, title="Profile of voters", fig=None, intfig=[1, 1, 1], show=True):
+    def plot_profile_3D(self, fig, dim, position=None):
+
+        ax = create_3D_plot(fig, position)
+        for i, v in enumerate(self.embeddings):
+            x1 = v[dim[0]]
+            x2 = v[dim[1]]
+            x3 = v[dim[2]]
+            ax.plot([0, x1], [0, x2], [0, x3], color=(x1 * 0.8, x2 * 0.8, x2 * 0.8), alpha=0.4)
+            ax.scatter([x1], [x2], [x3], color='k', s=1)
+        return ax
+
+    def plot_profile_ternary(self, fig, dim, position=None):
+        tax = create_ternary_plot(fig, position)
+        for i, v in enumerate(self.embeddings):
+            x1 = v[dim[0]]
+            x2 = v[dim[1]]
+            x3 = v[dim[2]]
+            vec = [x1, x2, x3]
+            tax.scatter(normalize(vec)**2, color=(x1 * 0.8, x2 * 0.8, x3), alpha=0.6, s=10)
+
+        return tax
+
+    def plot_profile(self, plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """
-        Plot the profile of voters
+        Plot the profile of the voters, either on a 3D plot, or on a ternary plots. Only
+        three dimensions are represented.
+
+        Parameters
+        _______
+        plot_kind : ["3D", "ternary"]
+            the kind of plot we want to show.
+        dim : array of length 3
+            the three dimensions of the embeddings we want to plot.
+            default are [0,1,2]
+        fig : matplotlib figure or None
+            if None, the figure is a default 10x10 matplotlib figure
+        position : array of length 3 or None
+            the position of the plot on the figure. Default is [1,1,1]
+        show : boolean
+            if True, execute plt.show() at the end of the function
         """
-        if fig == None:
+
+        if dim is None:
+            dim = [0, 1, 2]
+        else:
+            if len(dim) != 3:
+                raise ValueError("The number of dimensions should be 3")
+
+        if fig is None:
             fig = plt.figure(figsize=(10, 10))
-        ax = create_3D_plot(fig, intfig)
-        for i, v in enumerate(self.embs):
-            ax.plot([0, v[0]], [0, v[1]], [0, v[2]], color=(v[0]*0.8, v[1]*0.8, v[2]*0.8), alpha=0.3)
-            ax.scatter([v[0]], [v[1]], [v[2]], color='k', s=1)
-        ax.set_title(title, fontsize=24)
+
+        if plot_kind == "3D":
+            ax = self.plot_profile_3D(fig, dim, position)
+        elif plot_kind == "ternary":
+            ax = self.plot_profile_ternary(fig, dim, position)
+        else:
+            raise ValueError("plot_kind should '3D' or 'ternary'")
+        ax.set_title("Profile of voters (%i,%i,%i)" % (dim[0], dim[1], dim[2]), fontsize=24)
         if show:
             plt.show()
         return ax
 
-    def plot_profile_2D(self, title="Profile of voters", show=True):
-        """
-        Plot the profile of voters in 2D
-        """
-        tax = create_2D_plot()
-        for i, v in enumerate(self.embs):
-            tax.scatter([v**2], color=(v[0]*0.8, v[1]*0.8, 0), alpha=0.5, s=10)
-        tax.set_title(title, fontsize=16)
-        if show:
-            plt.show()
+    def plot_scores_3D(self, scores, fig, position, dim):
+        if fig is None:
+            fig = plt.figure(figsize=(10, 10))
+
+        ax = create_3D_plot(fig, position)
+        for i, (v, s) in enumerate(zip(self.embeddings, scores)):
+            x1 = v[dim[0]]
+            x2 = v[dim[1]]
+            x3 = v[dim[2]]
+            ax.plot([0, s * x1], [0, s * x2], [0, s * x3], color=(x1 * 0.8, x2 * 0.8, x3 * 0.8), alpha=0.4)
+
+        return ax
+
+    def plot_scores_ternary(self, scores, fig, position, dim):
+        tax = create_ternary_plot(fig, position)
+        for i, (v, s) in enumerate(zip(self.embeddings, scores)):
+            x1 = v[dim[0]]
+            x2 = v[dim[1]]
+            x3 = v[dim[2]]
+            vec = [x1, x2, x3]
+            tax.scatter(normalize(vec)**2, color=(x1 * 0.8, x2 * 0.8, x3 * 0.8), alpha=0.8, s=s * 50)
+
         return tax
 
-    def plot_scores_3D(self, scores, title="", fig=None, intfig=[1, 1, 1], show=True):
-        """
-        Plot the profile with some scoring in 3D space
-        """
-        if fig == None:
+    def plot_scores(self, scores, title="", plot_kind="3D", dim=None, fig=None, position=None, show=True):
+        if dim is None:
+            dim = [0, 1, 2]
+        else:
+            if len(dim) != 3:
+                raise ValueError("The number of dimensions should be 3")
+
+        if fig is None:
             fig = plt.figure(figsize=(10, 10))
-        ax = create_3D_plot(fig, intfig)
-        for i, (v, s) in enumerate(zip(self.embs, scores)):
-            ax.plot([0, s * v[0]], [0, s * v[1]], [0, s * v[2]], color=(v[0]*0.8, v[1]*0.8, v[2]*0.8), alpha=0.3)
+
+        if plot_kind == "3D":
+            ax = self.plot_scores_3D(scores, fig, position, dim)
+        elif plot_kind == "ternary":
+            ax = self.plot_scores_ternary(scores, fig, position, dim)
+        else:
+            raise ValueError("plot_kind should '3D' or 'ternary'")
+
         ax.set_title(title, fontsize=16)
         if show:
             plt.show()
+
         return ax
 
-    def plot_scores_2D(self, scores, title="", show=True):
+    def plot_candidate(self, candidate, plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """
-        Plot the profile with some scoring in 3D space
-        """
-        tax = create_2D_plot()
-        for i, (v, s) in enumerate(zip(self.embs, scores)):
-            tax.scatter([v**2], color=(v[0]*0.8,v[1]*0.8,0), alpha=0.5, s=s*50)
-        tax.set_title(title, fontsize=16)
-        if show:
-            plt.show()
-        return tax
+        Plot the profile of the voters for one particular candidate, using the scores given by the voters.
+        The plot is either on a 3D plot, or on a ternary plot. Only three dimensions are represented.
 
-    def plot_cand_3D(self, cand, fig=None, intfig=[1, 1, 1], show=True):
+        Parameters
+        _______
+        candidate : int < self.n_candidates
+            the id of the candidate to plot
+        plot_kind : ["3D", "ternary"]
+            the kind of plot we want to show.
+        dim : array of length 3
+            the three dimensions of the embeddings we want to plot.
+            default are [0,1,2]
+        fig : matplotlib figure or None
+            if None, the figure is a default 10x10 matplotlib figure
+        position : array of length 3 or None
+            the position of the plot on the figure. Default is [1,1,1]
+        show : boolean
+            if True, execute plt.show() at the end of the function
         """
-        Plot one candidate of the election in 3D space
-        """
-        self.plot_scores_3D(self.scores[::, cand], title="Candidate #%i" % (cand + 1), fig=fig, intfig=intfig,
-                            show=show)
+        self.plot_scores(self.scores[::, candidate],
+                         title="Candidate #%i" % (candidate + 1),
+                         plot_kind=plot_kind,
+                         dim=dim,
+                         fig=fig,
+                         position=position,
+                         show=show)
 
-    def plot_cand_2D(self, cand, show=True):
+    def plot_candidates(self, plot_kind="3D", dim=None, list_candidates=None, list_titles=None):
         """
-        Plot one candidate of the election in 3D space
-        """
-        self.plot_scores_2D(self.scores[::, cand], title="Candidate #%i" % (cand + 1), show=show)
+        Plot the profile of the voters for every candidates or a list of candidate,
+        using the scores given by the voters. The plot is either on a 3D plot, or on a ternary plot.
+        Only three dimensions are represented.
 
-    def plot_cands_3D(self, list_cand=None, list_titles=None):
+        Parameters
+        _______
+        plot_kind : ["3D", "ternary"]
+            the kind of plot we want to show.
+        dim : array of length 3
+            the three dimensions of the embeddings we want to plot.
+            default are [0,1,2]
+        list_candidates : array of int < self.n_candidates
+            the list of candidates to plot. Default is range(n_candidates)
+        list_titles : array of string
+            should be the same length than list_candidates. Contains the title of the plots.
+            default is for default list_candidates.
         """
-        Plot candidates of the elections in a 3D space
-        """
-        if list_cand == None:
-            list_cand = range(self.m)
-        if list_titles == None:
-            list_titles = ["Candidate %i" % (c + 1) for c in list_cand]
+        if list_candidates is None:
+            list_candidates = range(self.n_candidates)
+        if list_titles is None:
+            list_titles = ["Candidate #%i" % c for c in list_candidates]
         else:
-            list_titles = ["%s (#%i)" % (t, c+1) for (t, c) in zip(list_titles, list_cand)]
+            list_titles = ["%s (#%i)" % (t, c + 1) for (t, c) in zip(list_titles, list_candidates)]
 
-        n_cand = len(list_cand)
-        n_rows = (n_cand - 1) // 6 + 1
+        n_candidates = len(list_candidates)
+        n_rows = (n_candidates - 1) // 6 + 1
         fig = plt.figure(figsize=(30, n_rows * 5))
-        intfig = [n_rows, 6, 1]
-        for cand, title in (zip(list_cand, list_titles)):
-            self.plot_scores_3D(self.scores[::, cand], title=title, fig=fig, intfig=intfig, show=False)
-            intfig[2] += 1
+        position = [n_rows, 6, 1]
+        for candidate, title in (zip(list_candidates, list_titles)):
+            self.plot_scores(self.scores[::, candidate],
+                             title=title,
+                             plot_kind=plot_kind,
+                             dim=dim,
+                             fig=fig,
+                             position=position,
+                             show=False)
+            position[2] += 1
 
         plt.show()
 
-    def plot_cands_2D(self, list_cand=None, list_titles=None):
+    def copy(self):
         """
-        Plot candidates of the elections in a 3D space
+        Return a copy of this profile
         """
-        if list_cand == None:
-            list_cand = range(self.m)
-        if list_titles == None:
-            list_titles = ["Candidate %i" % (c + 1) for c in list_cand]
-        else:
-            list_titles = ["%s (#%i)" % (t, c+1) for (t, c) in zip(list_titles, list_cand)]
-
-        n_cand = len(list_cand)
-        n_rows = (n_cand - 1) // 6 + 1
-        fig = plt.figure(figsize=(30, n_rows * 5))
-        intfig = [n_rows, 6, 1]
-        for cand, title in (zip(list_cand, list_titles)):
-            self.plot_scores_2D(self.scores[::, cand], title=title, show=True)
-            intfig[2] += 1
-
-        plt.show()
-
-
-    def copy(self, p):
-        assert((self.m == p.m) and (self.dim == p.dim))
-        p.profile = self.embs
-        p.n = self.n
+        p = Profile(self.n_candidates, self.n_dim)
+        p.embeddings = self.embeddings
+        p.n_voters = self.n_voters
         p.scores = self.scores
-
-
-class ParametriqueProfile(Profile):
-
-    def init_profiles(self, n, score_matrix=None, prob=None):
-
-        if prob is None:
-            prob = np.ones(self.dim)
-
-        if score_matrix is None:
-            score_matrix = np.random.rand(self.m, self.dim)
-
-        self.score_matrix = score_matrix
-        self.orth_profile = np.zeros((n, self.dim))
-        self.random_profile = np.zeros((n, self.dim))
-        self.thetas = np.zeros(n)
-
-        for i in range(n):
-            new_vec = np.abs(np.random.randn(self.dim))
-            r = np.argmax(new_vec*prob)
-            new_vec = normalize(new_vec)
-            self.orth_profile[i, r] = 1
-            self.random_profile[i] = new_vec
-
-            theta = np.arccos(np.dot(self.random_profile[i], self.orth_profile[i]))
-            self.thetas[i] = theta
-
-        return self
-
-    def set_parameters(self, polarisation=0, coherence=0):
-
-        n = len(self.thetas)
-        profile = np.zeros((n, self.dim))
-        for i in range(n):
-            p_1 = np.dot(self.orth_profile[i], self.random_profile[i]) * self.orth_profile[i]
-            p_2 = self.random_profile[i] - p_1
-            e_2 = normalize(p_2)
-            profile[i] = self.orth_profile[i] * np.cos(self.thetas[i]*(1-polarisation)) + e_2*np.sin(self.thetas[i]*(1-polarisation))
-
-        self.embs = profile
-
-        self.n = n
-
-        new_scores = coherence*(profile**2).dot(self.score_matrix.T) + (1-coherence)*np.random.rand(n, self.m)
-        new_scores = np.minimum(new_scores, 1)
-        new_scores = np.maximum(new_scores, 0)
-        self.scores = new_scores
-
-        return self
-
-
-
+        return p

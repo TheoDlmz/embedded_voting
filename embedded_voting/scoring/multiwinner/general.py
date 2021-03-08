@@ -8,13 +8,13 @@ This file is part of Embedded Voting.
 import numpy as np
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.utils.miscellaneous import normalize
-from embedded_voting.utils.plots import create_3D_plot, create_2D_plot
 import matplotlib.pyplot as plt
 
 DROOP_QUOTA = 701
 CLASSIC_QUOTA = 700
 DROOP_QUOTA_MIN = 711
 CLASSIC_QUOTA_MIN = 710
+
 
 class MultiwinnerRules(DeleteCacheMixin):
     """
@@ -160,7 +160,6 @@ class IterRules(MultiwinnerRules):
             v_temp = np.maximum(v, 0)
             v_temp = normalize(v_temp)
             ax.scatter([v_temp**2], color="k", alpha=0.8)
-            #plt.text([v_temp**2], '#%i' % (i + 1), alpha=0.8)
         plt.show()
 
 
