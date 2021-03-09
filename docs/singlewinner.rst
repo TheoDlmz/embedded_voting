@@ -6,6 +6,7 @@ Single-Winner voting rules
    :maxdepth: 2
    :caption: Contents:
 
+   singlewinner/general
    singlewinner/trivial
    singlewinner/geometric
    singlewinner/svd

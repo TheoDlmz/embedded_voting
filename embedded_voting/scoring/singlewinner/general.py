@@ -10,20 +10,20 @@ import numpy as np
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 
 
-class ScoringFunction(DeleteCacheMixin):
+class ScoringRule(DeleteCacheMixin):
     """
-    The general class of scoring functions
+    The general class of functions for ScoringRules
 
     Parameters
     _______
     profile: Profile
         the profile of voter on which we run the election
 
-
     """
 
     def __init__(self, profile=None):
         self.profile_ = None
+        self.score_components = 1
         if profile is not None:
             self(profile)
 
@@ -32,13 +32,13 @@ class ScoringFunction(DeleteCacheMixin):
         self.delete_cache()
         return self
 
-    def score_(self, cand):
+    def score_(self, candidate):
         """
-        Compute the score of some candidate
+        Return the score of a given candidate. Need to be implemented for each scoring rule.
 
         Parameters
         _____
-        cand : int
+        candidate : int
             Index of the candidate for which we want the score
         """
         raise NotImplementedError
@@ -46,28 +46,35 @@ class ScoringFunction(DeleteCacheMixin):
     @cached_property
     def scores_(self):
         """
-        Compute the score of all candidates
+        Return the score of all candidates in the election
         """
-        return [self.score_(cand) for cand in range(self.profile_.m)]
+        return [self.score_(candidate) for candidate in range(self.profile_.m)]
 
     @cached_property
     def ranking_(self):
         """
-        Compute the ranking over all candidates
+        Return the ranking of the candidates depending on there scores
         """
-        return np.argsort(self.scores_)[::-1]
+        if self.score_components == 1:
+            return np.argsort(self.scores_)[::-1]
+        else:
+            full_scores = []
+            for i in range(self.score_components):
+                full_scores.append([s[i] for s in self.scores_])
+            full_scores = full_scores[::-1]
+            return np.lexsort(full_scores)[::-1]
 
     @cached_property
     def winner_(self):
         """
-        Compute the winner of the election
+        Return the winner of the election
         """
         return self.ranking_[0]
 
     @cached_property
     def welfare_(self):
         """
-        Compute the score of all candidates
+        Return the welfare of all candidates
         """
         scores = self.scores_
         max_score = np.max(scores)
@@ -76,10 +83,42 @@ class ScoringFunction(DeleteCacheMixin):
             return np.ones(self.profile_.m)
         return (scores - min_score)/(max_score - min_score)
 
-    def plot_winner(self):
+    def plot_winner(self, plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """
-        Plot the winner of the election on a 3D Plot
+        Plot the winner of the election
+
+        Parameters
+        __________
+        plot_kind : ["3D", "ternary"]
+            the kind of plot we want to show.
+        dim : array of length 3
+            the three dimensions of the embeddings we want to plot.
+            default are [0,1,2]
+        fig : matplotlib figure or None
+            if None, the figure is a default 10x10 matplotlib figure
+        position : array of length 3 or None
+            the position of the plot on the figure. Default is [1,1,1]
+        show : boolean
+            if True, execute plt.show() at the end of the function
         """
-        raise NotImplementedError
+        winner = self.winner_
+        self.profile_.plot_candidate(winner, plot_kind=plot_kind, dim=dim, fig=fig, position=position, show=show)
 
+    def plot_ranking(self, plot_kind="3D", dim=None, row_size=5):
+        """
+        Plot the candidates in the order of the ranking.
 
+        Parameters
+        _______
+        plot_kind : ["3D", "ternary"]
+            the kind of plot we want to show.
+        dim : array of length 3
+            the three dimensions of the embeddings we want to plot.
+            default are [0,1,2]
+        row_size : int
+            number of figures by row. Default is 5
+        """
+        ranking = self.ranking_
+        titles = ["#%i. Candidate %i" % (i+1, c) for i, c in enumerate(ranking)]
+        self.profile_.plot_candidates(plot_kind=plot_kind, dim=dim, list_candidates=ranking,
+                                      list_titles=titles, row_size=row_size)

@@ -11,5 +11,5 @@ __________
 MaxCube
 ________
 
-.. autoclass:: embedded_voting.maxCubeRule
+.. autoclass:: embedded_voting.MaxCubeRule
     :members:

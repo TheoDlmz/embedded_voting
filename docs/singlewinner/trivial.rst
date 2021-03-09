@@ -2,14 +2,14 @@
 Trivial Rules
 ===============
 
-Range Voting
-______________
+Sum of scores (Range Voting)
+______________________________
 
-.. autoclass:: embedded_voting.RangeVoting
+.. autoclass:: embedded_voting.SumScores
     :members:
 
-Nash
-________
+Product of scores (Nash)
+_____________________________
 
-.. autoclass:: embedded_voting.Nash
+.. autoclass:: embedded_voting.ProductScores
     :members:

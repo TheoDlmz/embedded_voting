@@ -7,10 +7,10 @@ This file is part of Embedded Voting.
 """
 import numpy as np
 from embedded_voting.utils.cached import cached_property
-from embedded_voting.scoring.singlewinner.general import ScoringFunction
+from embedded_voting.scoring.singlewinner.general import ScoringRule
 
 
-class PositionalRuleExtension(ScoringFunction):
+class PositionalRuleExtension(ScoringRule):
     """
     Class to extend a voting rule to ordinal input with a positional scoring rule
 
@@ -146,7 +146,7 @@ class BordaExtension(PositionalRuleExtension):
         points = [m-i-1 for i in range(m)]
         super().__init__(profile, points, rule)
 
-class InstantRunoffExtension(ScoringFunction):
+class InstantRunoffExtension(ScoringRule):
     """
     Class to extend a voting rule to ordinal input with IRV
 

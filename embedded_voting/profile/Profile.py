@@ -169,7 +169,7 @@ class Profile(DeleteCacheMixin):
             new_scores = np.minimum(new_scores, 1)
         self.scores = new_scores.T
 
-    def scored_embeddings(self, candidate, rc=False):
+    def scored_embeddings(self, candidate, square_root=True):
         """
         Return the embeddings matrix with each voter's embedding multiplied by the score it gives
         to the candidate
@@ -185,20 +185,20 @@ class Profile(DeleteCacheMixin):
 
         embeddings = []
         for i in range(self.n_voters):
-            if rc:
+            if square_root:
                 s = np.sqrt(self.scores[i, candidate])
             else:
                 s = self.scores[i, candidate]
             embeddings.append(self.embeddings[i] * s)
         return np.array(embeddings)
 
-    def fake_covariance_matrix(self, candidate, f, rc=False):
+    def fake_covariance_matrix(self, candidate, f, square_root=False):
         matrix = np.zeros((self.n_voters, self.n_voters))
 
         for i in range(self.n_voters):
             for j in range(i, self.n_voters):
                 s = self.scores[i, candidate] * self.scores[j, candidate]
-                if rc:
+                if square_root:
                     s = np.sqrt(s)
                 matrix[i, j] = f(self.embeddings[i], self.embeddings[j]) * s
                 matrix[j, i] = matrix[i, j]
@@ -331,13 +331,13 @@ class Profile(DeleteCacheMixin):
         show : boolean
             if True, execute plt.show() at the end of the function
         """
-        self.plot_scores(self.scores[::, candidate],
-                         title="Candidate #%i" % (candidate + 1),
-                         plot_kind=plot_kind,
-                         dim=dim,
-                         fig=fig,
-                         position=position,
-                         show=show)
+        return self.plot_scores(self.scores[::, candidate],
+                                title="Candidate #%i" % (candidate + 1),
+                                plot_kind=plot_kind,
+                                dim=dim,
+                                fig=fig,
+                                position=position,
+                                show=show)
 
     def plot_candidates(self, plot_kind="3D", dim=None, list_candidates=None, list_titles=None, row_size=5):
         """

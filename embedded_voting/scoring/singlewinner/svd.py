@@ -6,118 +6,157 @@ theo.delemazure@ens.fr
 This file is part of Embedded Voting.
 """
 import numpy as np
-from embedded_voting.utils.cached import cached_property
-from embedded_voting.scoring.singlewinner.general import ScoringFunction
+from embedded_voting.scoring.singlewinner.general import ScoringRule
 
 
-class SVDRule(ScoringFunction):
+class SVDRule(ScoringRule):
     """
-    Voting rule based on singular values of the matrix
+    Voting rule based on singular values of the embedding matrix
 
     Parameters
     _______
     profile: Profile
         the profile of voter on which we run the election
-    agg_rule: function np.array -> float
-        the aggregation rule for singular values
-    rc: boolean
-        if True, use the square root of score in the matrix
+    aggregation_rule: function np.array -> float
+        the aggregation rule for singular values. Default is product.
+    square_root: boolean
+        if True, use the square root of score in the matrix. Default is True.
     use_rank : boolean
         if True, consider the rank of the matrix when doing the ranking
 
     """
-    def __init__(self, profile=None, agg_rule=np.prod, rc=False, use_rank=False):
-        self.rc = rc
-        self.agg_rule = agg_rule
+    def __init__(self, profile=None, aggregation_rule=np.prod, square_root=True, use_rank=False):
+        self.square_root = square_root
+        self.aggregation_rule = aggregation_rule
         self.use_rank = use_rank
+        if use_rank:
+            self.score_components = 2
+        else:
+            self.score_components = 1
         super().__init__(profile=profile)
 
-    def score_(self, cand):
-        embeddings = self.profile_.scored_embeddings(cand, rc=self.rc)
+    def score_(self, candidate):
+        embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
 
         if embeddings.shape[0] < embeddings.shape[1]:
-            M_embeddings = embeddings.dot(embeddings.T)
+            embeddings_matrix = embeddings.dot(embeddings.T)
         else:
-            M_embeddings = embeddings.T.dot(embeddings)
+            embeddings_matrix = embeddings.T.dot(embeddings)
 
-        s = np.linalg.eigvals(M_embeddings)
+        s = np.linalg.eigvals(embeddings_matrix)
         s = np.maximum(s, np.zeros(len(s)))
         s = np.sqrt(s)
         if self.use_rank:
             matrix_rank = np.linalg.matrix_rank(embeddings)
-            return matrix_rank, self.agg_rule(s[:matrix_rank])
+            return matrix_rank, self.aggregation_rule(s[:matrix_rank])
         else:
-            return self.agg_rule(s)
-
-    @cached_property
-    def ranking_(self):
-        if self.use_rank:
-            rank = [s[0] for s in self.scores_]
-            scores = [s[1] for s in self.scores_]
-            return np.lexsort((scores, rank))[::-1]
-        else:
-            return super().ranking_
+            return self.aggregation_rule(s)
 
     def set_rule(self, agg_rule):
-        self.agg_rule = agg_rule
+        self.aggregation_rule = agg_rule
         self.delete_cache()
         return self
 
-    def plot_winners(self, rule_list, rule_name, verbose=False, space="3D"):
-        winners = []
-        titles = []
-        for (rule, name) in zip(rule_list, rule_name):
-            self.set_rule(rule)
-            if verbose:
-                print("%s : %s" % (name, str(self.scores_)))
-                print("Ranking : ", self.ranking_)
-            winners.append(self.winner_)
-            titles.append("Winner with SVD + %s" % name)
-
-        if space == "3D":
-            self.profile_.plot_cands_3D(list_cand=winners, list_titles=titles)
-        elif space == "2D":
-            self.profile_.plot_cands_2D(list_cand=winners, list_titles=titles)
-        else:
-            raise ValueError("Incorrect space value (3D/2D)")
-
-
 
 class SVDNash(SVDRule):
-    def __init__(self, profile=None, rc=False, use_rank=False):
-        self.rc = rc
-        self.agg_rule = np.prod
-        self.use_rank = use_rank
-        super().__init__(profile=profile)
+    """
+    Voting rule based on the product of the singular values of the embedding matrix
+
+    Parameters
+    _______
+    profile: Profile
+        the profile of voter on which we run the election
+    aggregation_rule: function np.array -> float
+        the aggregation rule for singular values. Default is product.
+    square_root: boolean
+        if True, use the square root of score in the matrix. Default is True.
+    use_rank : boolean
+        if True, consider the rank of the matrix when doing the ranking
+
+    """
+    def __init__(self, profile=None, square_root=False, use_rank=False):
+        super().__init__(profile=profile, aggregation_rule=np.prod, square_root=square_root, use_rank=use_rank)
 
 
 class SVDSum(SVDRule):
-    def __init__(self, profile=None, rc=False, use_rank=False):
-        self.rc = rc
-        self.agg_rule = np.sum
-        self.use_rank = use_rank
-        super().__init__(profile=profile)
+    """
+    Voting rule based on the sum of the singular values of the embedding matrix
+
+    Parameters
+    _______
+    profile: Profile
+        the profile of voter on which we run the election
+    aggregation_rule: function np.array -> float
+        the aggregation rule for singular values. Default is product.
+    square_root: boolean
+        if True, use the square root of score in the matrix. Default is True.
+    use_rank : boolean
+        if True, consider the rank of the matrix when doing the ranking
+
+    """
+    def __init__(self, profile=None, square_root=False, use_rank=False):
+        super().__init__(profile=profile, aggregation_rule=np.sum, square_root=square_root, use_rank=use_rank)
 
 
 class SVDMin(SVDRule):
-    def __init__(self, profile=None, rc=False, use_rank=False):
-        self.rc = rc
-        self.agg_rule = np.min
-        self.use_rank = use_rank
-        super().__init__(profile=profile)
+    """
+    Voting rule based on the minimum of the singular values of the embedding matrix
+
+    Parameters
+    _______
+    profile: Profile
+        the profile of voter on which we run the election
+    aggregation_rule: function np.array -> float
+        the aggregation rule for singular values. Default is product.
+    square_root: boolean
+        if True, use the square root of score in the matrix. Default is True.
+    use_rank : boolean
+        if True, consider the rank of the matrix when doing the ranking
+
+    """
+    def __init__(self, profile=None, square_root=False, use_rank=False):
+        super().__init__(profile=profile, aggregation_rule=np.min, square_root=square_root, use_rank=use_rank)
 
 
 class SVDMax(SVDRule):
-    def __init__(self, profile=None, rc=False, use_rank=False):
-        self.rc = rc
-        self.agg_rule = np.max
-        self.use_rank = use_rank
-        super().__init__(profile=profile)
+    """
+    Voting rule based on the maximum of the singular values of the embedding matrix
+
+    Parameters
+    _______
+    profile: Profile
+        the profile of voter on which we run the election
+    aggregation_rule: function np.array -> float
+        the aggregation rule for singular values. Default is product.
+    square_root: boolean
+        if True, use the square root of score in the matrix. Default is True.
+    use_rank : boolean
+        if True, consider the rank of the matrix when doing the ranking
+
+    """
+    def __init__(self, profile=None, square_root=False, use_rank=False):
+        super().__init__(profile=profile, aggregation_rule=np.max, square_root=square_root, use_rank=use_rank)
 
 
 class SVDLog(SVDRule):
-    def __init__(self, profile=None, c=1, rc=False, use_rank=False):
-        self.rc = rc
-        self.agg_rule = lambda x: np.sum(np.log(1+x/c))
-        self.use_rank = use_rank
-        super().__init__(profile=profile)
+    """
+    Voting rule based on the sum of the log of 1 + the singular values of the embedding matrix divided
+    by some constant.
+
+    Parameters
+    _______
+    profile: Profile
+        the profile of voter on which we run the election
+    const : float > 0
+        the constant in the log function
+    aggregation_rule: function np.array -> float
+        the aggregation rule for singular values. Default is product.
+    square_root: boolean
+        if True, use the square root of score in the matrix. Default is True.
+    use_rank : boolean
+        if True, consider the rank of the matrix when doing the ranking
+
+    """
+    def __init__(self, profile=None, const=1, square_root=False, use_rank=False):
+        sum_log = lambda x: np.sum(np.log(1+x/const))
+        super().__init__(profile=profile, aggregation_rule=sum_log, square_root=square_root, use_rank=use_rank)

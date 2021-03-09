@@ -7,10 +7,10 @@ This file is part of Embedded Voting.
 """
 import numpy as np
 from embedded_voting.utils.cached import cached_property
-from embedded_voting.scoring.singlewinner.general import ScoringFunction
+from embedded_voting.scoring.singlewinner.general import ScoringRule
 
 
-class FakeSVDRule(ScoringFunction):
+class FakeSVDRule(ScoringRule):
     """
     Voting rule that apply the SVD method on another metrics than the matrix MM^t
 

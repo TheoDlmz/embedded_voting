@@ -8,7 +8,8 @@ coverage
 Sphinx
 sphinx_rtd_theme
 twine
-
+numpy
+matplotlib
 pytest
 pytest-runner
 pytest-cov
