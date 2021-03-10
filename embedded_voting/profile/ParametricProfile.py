@@ -12,22 +12,56 @@ from embedded_voting.profile.Profile import Profile
 
 class ParametricProfile(Profile):
     """
-    A parametric profile of voter. It creates two profiles : one orthogonal and one uniformly distributed.
+    A parametric profile of voter. It creates two profiles : one with orthogonal preferences
+    and one drawn at random. You can then creates profiles between these two extremes by playing
+    with the parameters.
 
     Parameters
     _________
     n_candidates : int
-        The number of candidate for this profile
+        The number of candidates in the profile
     n_dim : int
         The number of dimensions for the voters' embeddings
     n_voters : int
-        The number of voter of the profile
-    scores_matrix : n_dim x n_candidates matrix of float
-        scores_matrix[i,j] is the score given by the group represented by the dimension i
-        to the candidate j. Default is random with uniform distribution.
-    prob : array of length n_dim
-        prob[i] is the probability for a voter to be on the group represented by the dimension i.
-        default is uniform distribution.
+        The number of voters in the profile
+    scores_matrix : np.ndarray
+        Matrix of shape :attr:`n_dim`, :attr:`n_candidates` containing the scores given by
+        each group. More precisely, `scores_matrix[i,j]` is the score given by the group
+        represented by the dimension i to the candidate j.
+        By default, it is set at random with a uniform distribution.
+    prob : np.ndarray or list
+        `prob[i]` is the probability for a voter to be on the group represented by the dimension i.
+        Should be of length :attr:`n_dim`.
+        By default, it is the set at 1/:attr:`n_dim` for every dimension.
+
+    Attributes
+    ----------
+    n_candidates : int
+        The number of candidates in the profile.
+    n_dim : int
+        The number of dimensions for the voters' embeddings.
+    n_voters : int
+        The number of voters in the profile.
+    orthogonal_profile : np.ndarray
+        matrix of shape :attr:`n_voters`, :attr:`n_dim` containing the "orthogonal" profile.
+    random_profile : np.ndarray
+        matrix of shape :attr:`n_voters`, :attr:`n_dim` containing the "random" profile.
+    thetas : list
+        list of length :attr:`n_voters` containing angular distance between the embeddings of the two
+        profiles for each voter.
+
+    Examples
+    --------
+    >>> my_profile = ParametricProfile(4, 3, 100)
+    >>> my_profile.n_voters
+    100
+    >>> my_profile.n_dim
+    3
+    >>> my_profile.n_candidates
+    4
+    >>> len(my_profile.thetas)
+    100
+
     """
 
     def __init__(self, n_candidates, n_dim, n_voters, scores_matrix=None, prob=None):
@@ -54,19 +88,38 @@ class ParametricProfile(Profile):
             theta = np.arccos(np.dot(self.random_profile[i], self.orthogonal_profile[i]))
             self.thetas[i] = theta
 
+        self.set_parameters()
+
     def set_parameters(self, polarisation=0, coherence=0):
         """
-        Set the parameters of the parametric profile to create a real profile
+        Set the parameters of the parametric profile to create a real profile.
 
         Parameters
         _________
-        polarisation : float between 0 and 1.
+        polarisation : float
+            Should be between 0 and 1.
             If it is equal to 0, then the embeddings are uniformly distributed. If it is equal to 1,
             then each voter's embeddings align to the dimension of its group.
-        coherence : float between 0 and 1.
+        coherence : float
+            Should be between 0 and 1.
             If it is equal to 0, the scores are randomly drawn and does not depends on voters' embeddings.
             If it is equal to 1, the scores given by a voter only depend on its embeddings.
+
+        Return
+        ------
+        Profile
+            the profile itself
+
+        Examples
+        --------
+        >>> my_profile = ParametricProfile(4, 3, 100)
+        >>> my_profile.set_parameters(.8, .8)
+        <embedded_voting.profile.ParametricProfile.ParametricProfile object at ...>
         """
+
+        if polarisation > 1 or coherence > 1:
+            raise ValueError("Parameters should be between 0 and 1")
+
         n = len(self.thetas)
         profile = np.zeros((n, self.n_dim))
         for i in range(n):

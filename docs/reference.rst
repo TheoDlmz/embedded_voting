@@ -7,5 +7,5 @@ Reference
    :maxdepth: 2
    :caption: Contents:
 
-   profile
+   profile/index
    singlewinner
