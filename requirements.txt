@@ -3,3 +3,4 @@ setuptools~=41.4.0
 numpy~=1.19.4
 matplotlib~=3.2.1
 python-ternary~=1.0.7
+nbsphinx
