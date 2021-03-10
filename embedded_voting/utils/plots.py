@@ -14,12 +14,12 @@ def create_3D_plot(fig, position=None):
     Create the background for a 3D plot on the positive ortan.
 
     Parameters
-    ______
+    ----------
     fig : The matplotlib figure on which we are drawing
     position : The position of the subplot on which we are drawing
 
     Return
-    ______
+    ------
     matplotlib ax
 
     """

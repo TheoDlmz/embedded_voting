@@ -14,13 +14,19 @@ def normalize(x):
     Normalize the input vector
 
     Parameters
-    ______
-    x : np.array
+    ----------
+    x : np.ndarray
 
     Return
-    ______
-    np.array
+    ------
+    np.ndarray
         The normalized vector of x
+
+    Examples
+    --------
+    >>> my_vector = np.arange(3)
+    >>> normalize(my_vector)
+    array([0.        , 0.4472136 , 0.89442719])
 
     """
     return x / np.linalg.norm(x)
