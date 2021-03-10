@@ -16,8 +16,8 @@ class PositionalRuleExtension(ScoringRule):
     Class to extend a voting rule to ordinal input with a positional scoring rule
 
     Parameters
-    _______
-    profile: Profile
+    ----------
+    profile : Profile
         the profile of voter on which we run the election
     points : np.array
         the vector of the positional scoring rule

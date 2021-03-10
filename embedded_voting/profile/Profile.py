@@ -17,24 +17,43 @@ class Profile(DeleteCacheMixin):
     A profile of voter
 
     Parameters
-    _________
+    ----------
     n_candidates : int
         The number of candidate for this profile
     n_dim : int
         The number of dimensions for the voters' embeddings
 
     Attributes
-    ___________
+    ----------
     n_voters : int
         The number of voter of the profile
     n_candidates : int
         The number of candidate for this profile
     n_dim : int
         The number of dimensions for the voters' embeddings
-    embeddings : n_voters x n_dim numpy array
-        The embeddings of the voters
-    scores : n_voters x n_candidates numpy array
-        The scoring of the candidates
+    embeddings :np.ndarray
+        The embeddings of the voters. Its dimensions are :attr:`n_voters`, :attr:`n_dim`
+    scores : np.ndarray
+        The scores given by the voters to the candidates.
+        Its dimensions are :attr:`n_voters`, :attr:`n_candidates`
+
+    Examples
+    --------
+    >>> my_profile = Profile(5, 3)
+    >>> my_profile.uniform_distribution(100)
+    <embedded_voting.profile.Profile.Profile object at ...>
+    >>> my_profile.add_voter([.1, .5, .5], [1]*5)
+    <embedded_voting.profile.Profile.Profile object at ...>
+    >>> my_profile.n_candidates
+    5
+    >>> my_profile.n_dim
+    3
+    >>> my_profile.n_voters
+    101
+    >>> my_profile.embeddings[-1]
+    array([0.14002801, 0.70014004, 0.70014004])
+    >>> my_profile.scores[-1]
+    array([1., 1., 1., 1., 1.])
     """
 
     def __init__(self, n_candidates, n_dim):
@@ -46,17 +65,33 @@ class Profile(DeleteCacheMixin):
 
     def add_voter(self, embeddings, scores, normalize_embs=True):
         """
-        Add one voter to the profile
+        Add one voter to the profile.
 
         Parameters
-        _______
-        embeddings : np.array of length dim
-            The embeddings of the voter
-        scores : np.array of length m
-            The scores given by the voter
+        ----------
+        embeddings : np.ndarray or list
+            The embedding vector of the voter.
+            Should be of size :attr:`n_dim`
+        scores : np.ndarray or list
+            The scores given by the voter to the candidates.
+            Should be of size :attr:`n_candidates`
         normalize_embs : boolean
-            If True, then normalize the embeddings in parameter
-            default True
+            If True, then normalize the embeddings in parameter.
+
+        Return
+        ------
+        Profile
+            The profile itself
+
+        Examples
+        ________
+        >>> my_profile = Profile(5, 3)
+        >>> my_profile.n_voters
+        0
+        >>> my_profile.add_voter([.1, .5, .5], [1]*5)
+        <embedded_voting.profile.Profile.Profile object at ...>
+        >>> my_profile.n_voters
+        1
         """
         if normalize_embs:
             embeddings = normalize(embeddings)
@@ -71,15 +106,32 @@ class Profile(DeleteCacheMixin):
         Add a group of n voters to the profile
 
         Parameters
-        _______
-        embs : np.array of shape n,dim
-            The embeddings of the voters
-        scores : np.array of shape n,m
-            The scores given by the voters
+        ----------
+        embeddings : np.ndarray
+            The embeddings vectors of the new voters.
+            Should be of size `n_new_voters`, :attr:`n_dim`
+        scores : np.ndarray
+            The scores given by the new voters.
+            Should be of size `n_new_voters`, :attr:`n_candidates`
         normalize_embs : boolean
-            If True, then normalize the embeddings in parameter
-            default True
+            If True, then normalize the embeddings in parameter.
+
+        Return
+        ------
+        Profile
+            The profile itself
+
+        Examples
+        ________
+        >>> my_profile = Profile(5, 3)
+        >>> my_profile.n_voters
+        0
+        >>> my_profile.add_voters(np.random.rand(10, 3), np.random.rand(10, 5))
+        <embedded_voting.profile.Profile.Profile object at ...>
+        >>> my_profile.n_voters
+        10
         """
+
         if normalize_embs:
             embeddings = (embeddings.T / np.sqrt((embeddings ** 2).sum(axis=1))).T
         self.embeddings = np.concatenate([self.embeddings, embeddings])
@@ -90,12 +142,29 @@ class Profile(DeleteCacheMixin):
 
     def uniform_distribution(self, n_voters):
         """
-        Add n_voters voters uniformly distributed on the positive ortan to the profile.
+        Add `n_voters` voters to the profile.
+        The embeddings of these voters are uniformly distributed on the positive ortan and there score
+        are uniformly distributed between 0 and 1.
 
         Parameters
-        _______
+        ----------
         n_voters : int
-            number of voters in the profile
+            Number of new voters to add in the profile
+
+        Return
+        ------
+        Profile
+            The profile itself
+
+        Examples
+        ________
+        >>> my_profile = Profile(5, 3)
+        >>> my_profile.n_voters
+        0
+        >>> my_profile.uniform_distribution(100)
+        <embedded_voting.profile.Profile.Profile object at ...>
+        >>> my_profile.n_voters
+        100
         """
 
         new_group = np.zeros((n_voters, self.n_dim))
@@ -115,7 +184,28 @@ class Profile(DeleteCacheMixin):
 
     def dilate_profile(self):
         """
-        Dilate the profile of voters so the voters are more orthogonally distributed
+        Dilate the embeddings of the voters so that the
+        embeddings take all the space possible in the positive ortan.
+
+        Return
+        ------
+        Profile
+            The profile itself
+
+        Examples
+        --------
+        >>> my_profile = Profile(5, 3)
+        >>> embeddings = np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]])
+        >>> scores = np.random.rand(3, 5)
+        >>> _ = my_profile.add_voters(embeddings, scores, normalize_embs=True)
+        >>> my_profile.embeddings
+        array([[0.66226618, 0.52981294, 0.52981294],
+           [0.52981294, 0.52981294, 0.66226618],
+           [0.52981294, 0.66226618, 0.52981294]])
+        >>> my_profile.dilate_profile().embeddings
+        array([[0.98559856, 0.11957316, 0.11957316],
+           [0.11957316, 0.11957316, 0.98559856],
+           [0.11957316, 0.98559856, 0.11957316]])
         """
 
         profile = self.embeddings
@@ -148,14 +238,31 @@ class Profile(DeleteCacheMixin):
 
         self.embeddings = new_profile
 
+        return self
+
     def standardize(self, cut_one=True):
         """
-        Standardize the score between the different voters
+        Standardize the score between the different voters.
 
         Parameters
-        _______
+        ----------
         cut_one : boolean
             if True, then the maximum score is one. The minimum score is always 0
+
+        Return
+        ------
+        Profile
+            The profile itself
+
+        Examples
+        --------
+        >>> my_profile = Profile(3, 3)
+        >>> _ = my_profile.add_voter(np.random.rand(3), [.6, .8, 1])
+        >>> _ = my_profile.add_voter(np.random.rand(3), [.4, .5, .3])
+        >>> my_profile.scores.mean(axis=0)
+        array([0.5 , 0.65, 0.65])
+        >>> my_profile.standardize().scores.mean(axis=0)
+        array([0.25, 0.75, 0.5 ])
         """
 
         mu = self.scores.mean(axis=1)
@@ -169,18 +276,40 @@ class Profile(DeleteCacheMixin):
             new_scores = np.minimum(new_scores, 1)
         self.scores = new_scores.T
 
+        return self
+
     def scored_embeddings(self, candidate, square_root=True):
         """
         Return the embeddings matrix with each voter's embedding multiplied by the score it gives
-        to the candidate
+        to the given candidate.
 
         Parameters
-        _______
+        ----------
         candidate : int
             the candidate of who we use the scores.
-        rc : boolean
-            if True, we multiply by the square root of the score instead of the score itself
+        square_root : boolean
+            if True, we multiply by the square root of the score given to the candidate
+            instead of the score itself.
 
+        Return
+        ------
+        np.ndarray
+            The embedding matrix, of shape :attr:`n_voters`, :attr:`n_dim`
+
+        Examples
+        --------
+        >>> my_profile = Profile(1, 3)
+        >>> _ = my_profile.add_voter([0, .5, .5], [.5])
+        >>> _ = my_profile.add_voter([.5, .5, 0], [.2])
+        >>> my_profile.embeddings
+        array([[0.        , 0.70710678, 0.70710678],
+            [0.70710678, 0.70710678, 0.        ]])
+        >>> my_profile.scored_embeddings(0)
+        array([[0.        , 0.5       , 0.5       ],
+            [0.31622777, 0.31622777, 0.        ]])
+        >>> my_profile.scored_embeddings(0, square_root=False)
+        array([[0.        , 0.35355339, 0.35355339],
+            [0.14142136, 0.14142136, 0.        ]])
         """
 
         embeddings = []
@@ -193,6 +322,9 @@ class Profile(DeleteCacheMixin):
         return np.array(embeddings)
 
     def fake_covariance_matrix(self, candidate, f, square_root=False):
+        """
+
+        """
         matrix = np.zeros((self.n_voters, self.n_voters))
 
         for i in range(self.n_voters):
@@ -205,7 +337,7 @@ class Profile(DeleteCacheMixin):
 
         return matrix
 
-    def plot_profile_3D(self, fig, dim, position=None):
+    def _plot_profile_3D(self, fig, dim, position=None):
         ax = create_3D_plot(fig, position)
         for i, v in enumerate(self.embeddings):
             x1 = v[dim[0]]
@@ -215,7 +347,7 @@ class Profile(DeleteCacheMixin):
             ax.scatter([x1], [x2], [x3], color='k', s=1)
         return ax
 
-    def plot_profile_ternary(self, fig, dim, position=None):
+    def _plot_profile_ternary(self, fig, dim, position=None):
         tax = create_ternary_plot(fig, position)
         for i, v in enumerate(self.embeddings):
             x1 = v[dim[0]]
@@ -232,7 +364,7 @@ class Profile(DeleteCacheMixin):
         three dimensions are represented.
 
         Parameters
-        _______
+        ----------
         plot_kind : ["3D", "ternary"]
             the kind of plot we want to show.
         dim : array of length 3
@@ -256,9 +388,9 @@ class Profile(DeleteCacheMixin):
             fig = plt.figure(figsize=(8, 8))
 
         if plot_kind == "3D":
-            ax = self.plot_profile_3D(fig, dim, position)
+            ax = self._plot_profile_3D(fig, dim, position)
         elif plot_kind == "ternary":
-            ax = self.plot_profile_ternary(fig, dim, position)
+            ax = self._plot_profile_ternary(fig, dim, position)
         else:
             raise ValueError("plot_kind should '3D' or 'ternary'")
         ax.set_title("Profile of voters (%i,%i,%i)" % (dim[0], dim[1], dim[2]), fontsize=24)
@@ -266,7 +398,7 @@ class Profile(DeleteCacheMixin):
             plt.show()
         return ax
 
-    def plot_scores_3D(self, scores, fig, position, dim):
+    def _plot_scores_3D(self, scores, fig, position, dim):
         ax = create_3D_plot(fig, position)
         for i, (v, s) in enumerate(zip(self.embeddings, scores)):
             x1 = v[dim[0]]
@@ -276,7 +408,7 @@ class Profile(DeleteCacheMixin):
 
         return ax
 
-    def plot_scores_ternary(self, scores, fig, position, dim):
+    def _plot_scores_ternary(self, scores, fig, position, dim):
         tax = create_ternary_plot(fig, position)
         for i, (v, s) in enumerate(zip(self.embeddings, scores)):
             x1 = v[dim[0]]
@@ -288,6 +420,9 @@ class Profile(DeleteCacheMixin):
         return tax
 
     def plot_scores(self, scores, title="", plot_kind="3D", dim=None, fig=None, position=None, show=True):
+        """
+
+        """
         if dim is None:
             dim = [0, 1, 2]
         else:
@@ -298,9 +433,9 @@ class Profile(DeleteCacheMixin):
             fig = plt.figure(figsize=(8, 8))
 
         if plot_kind == "3D":
-            ax = self.plot_scores_3D(scores, fig, position, dim)
+            ax = self._plot_scores_3D(scores, fig, position, dim)
         elif plot_kind == "ternary":
-            ax = self.plot_scores_ternary(scores, fig, position, dim)
+            ax = self._plot_scores_ternary(scores, fig, position, dim)
         else:
             raise ValueError("plot_kind should '3D' or 'ternary'")
 

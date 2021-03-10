@@ -324,11 +324,11 @@ class FeaturesRule(ScoringFunction):
         f = self.features_
         for cand in range(n_cand):
             if space == "3D":
-                ax = self.profile_.plot_scores_3D(self.profile_.scores[::, cand],
-                                                  title="Candidate %i" % (cand + 1),
-                                                  fig=fig,
-                                                  intfig=intfig,
-                                                  show=False)
+                ax = self.profile_._plot_scores_3D(self.profile_.scores[::, cand],
+                                                   title="Candidate %i" % (cand + 1),
+                                                   fig=fig,
+                                                   intfig=intfig,
+                                                   show=False)
                 ax.plot([0, f[cand, 0]], [0, f[cand, 1]], [0, f[cand, 2]], color='k', linewidth=2)
                 ax.scatter([f[cand, 0]], [f[cand, 1]], [f[cand, 2]], color='k', s=5)
             elif space == "2D":
@@ -411,11 +411,11 @@ class ExtrapoleRule(ScoringFunction):
         fig = plt.figure(figsize=(30, n_rows * 5))
         intfig = [n_rows, 6, 1]
         for cand in range(n_cand):
-            ax = self.profile_.plot_scores_3D(self.profile_.scores[::, cand],
-                                              title="Candidate %i" % (cand + 1),
-                                              fig=fig,
-                                              intfig=intfig,
-                                              show=False)
+            ax = self.profile_._plot_scores_3D(self.profile_.scores[::, cand],
+                                               title="Candidate %i" % (cand + 1),
+                                               fig=fig,
+                                               intfig=intfig,
+                                               show=False)
             if self.basis == CANONICAL_BASIS:
                 features = np.eye(self.profile_.dim)
             elif self.basis == SVD_BASIS:
@@ -544,11 +544,11 @@ class IterRules(MultiwinnerRules):
         intfig = [n_rows, 6, 1]
         _, vectors = self.winner_k()
         for cand in range(n_cand):
-            ax = self.profile_.plot_scores_3D(self.profile_.scores[::, cand],
-                                              title="Candidate %i" % (cand + 1),
-                                              fig=fig,
-                                              intfig=intfig,
-                                              show=False)
+            ax = self.profile_._plot_scores_3D(self.profile_.scores[::, cand],
+                                               title="Candidate %i" % (cand + 1),
+                                               fig=fig,
+                                               intfig=intfig,
+                                               show=False)
 
             ax.plot([0, vectors[cand][0]], [0, vectors[cand][1]], [0, vectors[cand][2]], color='k', linewidth=2)
             ax.scatter([vectors[cand][0]], [vectors[cand][1]], [vectors[cand][2]], color='k', s=5)
@@ -717,11 +717,11 @@ class WeightedIterRules(IterRules):
         fig = plt.figure(figsize=(60, n_rows * 10))
         intfig = [n_rows, 6, 1]
         for i in range(n_cand):
-            _ = self.profile_.plot_scores_3D(self.ls_weight[i],
-                                             title="Step %i" % i,
-                                             fig=fig,
-                                             intfig=intfig,
-                                             show=False)
+            _ = self.profile_._plot_scores_3D(self.ls_weight[i],
+                                              title="Step %i" % i,
+                                              fig=fig,
+                                              intfig=intfig,
+                                              show=False)
 
             intfig[2] += 1
 

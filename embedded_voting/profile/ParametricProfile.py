@@ -37,9 +37,9 @@ class ParametricProfile(Profile):
             prob = np.ones(self.n_dim)
 
         if scores_matrix is None:
-            scores_matrix = np.random.rand(self.n_candidates, self.n_dim)
+            scores_matrix = np.random.rand(self.n_dim, self.n_candidates)
 
-        self.score_matrix = scores_matrix
+        self.score_matrix = np.array(scores_matrix).T
         self.orthogonal_profile = np.zeros((n_voters, self.n_dim))
         self.random_profile = np.zeros((n_voters, self.n_dim))
         self.thetas = np.zeros(n_voters)

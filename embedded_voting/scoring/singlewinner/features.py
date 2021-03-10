@@ -9,6 +9,7 @@ import numpy as np
 from embedded_voting.utils.cached import cached_property
 from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.scoring.singlewinner.general import ScoringRule
+from embedded_voting.profile.ParametricProfile import ParametricProfile
 import matplotlib.pyplot as plt
 
 
@@ -17,10 +18,16 @@ class FeaturesRule(ScoringRule):
     Voting rule based on the norm of the feature vector of each candidate
 
     Parameters
-    _______
-    profile: Profile
+    ----------
+    profile : Profile
         the profile of voter on which we run the election
 
+    Examples
+    ---------
+    >>> np.random.seed(42)
+    >>> profile = ParametricProfile(3, 3, 100, [[.8, .2, .2], [.5, .5, .5], [.9, .5, 0]], [.5, .3, .2])
+    >>> profile.set_parameters(.9, .9)  # DOCTEST: ELLIPSIS
+    <embedded_voting.profile.ParametricProfile.ParametricProfile object at ...>
     """
 
     @cached_property
@@ -40,7 +47,7 @@ class FeaturesRule(ScoringRule):
         This function plot the features for every candidate in the given dimensions
 
         Parameters
-        _______
+        ----------
         plot_kind : ["3D", "ternary"]
             the kind of plot we want to show.
         dim : array of length 3

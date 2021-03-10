@@ -15,17 +15,15 @@ class ScoringRule(DeleteCacheMixin):
     The general class of functions for ScoringRules
 
     Parameters
-    _______
+    ----------
     profile: Profile
         the profile of voter on which we run the election
 
     """
 
     def __init__(self, profile=None):
-        self.profile_ = None
+        self.profile_ = profile
         self.score_components = 1
-        if profile is not None:
-            self(profile)
 
     def __call__(self, profile):
         self.profile_ = profile
@@ -37,7 +35,7 @@ class ScoringRule(DeleteCacheMixin):
         Return the score of a given candidate. Need to be implemented for each scoring rule.
 
         Parameters
-        _____
+        ----------
         candidate : int
             Index of the candidate for which we want the score
         """
