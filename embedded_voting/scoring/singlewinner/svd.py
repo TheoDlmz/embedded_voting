@@ -26,6 +26,7 @@ class SVDRule(ScoringRule):
 
     """
     def __init__(self, profile=None, aggregation_rule=np.prod, square_root=True, use_rank=False):
+        super().__init__(profile=profile)
         self.square_root = square_root
         self.aggregation_rule = aggregation_rule
         self.use_rank = use_rank
@@ -33,7 +34,6 @@ class SVDRule(ScoringRule):
             self.score_components = 2
         else:
             self.score_components = 1
-        super().__init__(profile=profile)
 
     def score_(self, candidate):
         embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
@@ -74,7 +74,7 @@ class SVDNash(SVDRule):
         if True, consider the rank of the matrix when doing the ranking
 
     """
-    def __init__(self, profile=None, square_root=False, use_rank=False):
+    def __init__(self, profile=None, square_root=True, use_rank=False):
         super().__init__(profile=profile, aggregation_rule=np.prod, square_root=square_root, use_rank=use_rank)
 
 
@@ -94,7 +94,7 @@ class SVDSum(SVDRule):
         if True, consider the rank of the matrix when doing the ranking
 
     """
-    def __init__(self, profile=None, square_root=False, use_rank=False):
+    def __init__(self, profile=None, square_root=True, use_rank=False):
         super().__init__(profile=profile, aggregation_rule=np.sum, square_root=square_root, use_rank=use_rank)
 
 
@@ -114,7 +114,7 @@ class SVDMin(SVDRule):
         if True, consider the rank of the matrix when doing the ranking
 
     """
-    def __init__(self, profile=None, square_root=False, use_rank=False):
+    def __init__(self, profile=None, square_root=True, use_rank=False):
         super().__init__(profile=profile, aggregation_rule=np.min, square_root=square_root, use_rank=use_rank)
 
 
@@ -134,7 +134,7 @@ class SVDMax(SVDRule):
         if True, consider the rank of the matrix when doing the ranking
 
     """
-    def __init__(self, profile=None, square_root=False, use_rank=False):
+    def __init__(self, profile=None, square_root=True, use_rank=False):
         super().__init__(profile=profile, aggregation_rule=np.max, square_root=square_root, use_rank=use_rank)
 
 
@@ -157,6 +157,6 @@ class SVDLog(SVDRule):
         if True, consider the rank of the matrix when doing the ranking
 
     """
-    def __init__(self, profile=None, const=1, square_root=False, use_rank=False):
-        sum_log = lambda x: np.sum(np.log(1+x/const))
-        super().__init__(profile=profile, aggregation_rule=sum_log, square_root=square_root, use_rank=use_rank)
+    def __init__(self, profile=None, const=1, square_root=True, use_rank=False):
+        super().__init__(profile=profile, aggregation_rule=lambda x: np.sum(np.log(1+x/const)),
+                         square_root=square_root, use_rank=use_rank)

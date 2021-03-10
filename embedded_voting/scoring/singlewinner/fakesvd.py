@@ -6,13 +6,12 @@ theo.delemazure@ens.fr
 This file is part of Embedded Voting.
 """
 import numpy as np
-from embedded_voting.utils.cached import cached_property
 from embedded_voting.scoring.singlewinner.general import ScoringRule
 
 
 class FakeSVDRule(ScoringRule):
     """
-    Voting rule that apply the SVD method on another metrics than the matrix MM^t
+    Voting rule that apply the SVD method on another matrix than the embeddings matrix.
 
     Parameters
     _______
@@ -20,43 +19,40 @@ class FakeSVDRule(ScoringRule):
         the profile of voter on which we run the election
     similarity : function np.array, np.array -> float
         the similarity function between two voters' embeddings
-    agg_rule: function np.array -> float
-        the aggregation rule for singular values
-    rc: boolean
-        if True, use the square root of score in the matrix
+    aggregation_rule: function np.array -> float
+        the aggregation rule for singular values.
+        Default is product.
+    square_root: boolean
+        if True, use the square root of score in the matrix.
+        Default is True.
     use_rank : boolean
-        if True, consider the rank of the matrix when doing the ranking
+        if True, consider the rank of the matrix when doing the ranking.
+        Default is false
 
     """
-    def __init__(self,  profile=None, similarity=None, agg_rule=np.prod, rc=False, use_rank=False):
-        self.rc = rc
-        self.agg_rule = agg_rule
+    def __init__(self,  profile=None, similarity=None, aggregation_rule=np.prod, square_root=True, use_rank=False):
+        super().__init__(profile=profile)
+        self.square_root = square_root
+        self.aggregation_rule = aggregation_rule
         self.use_rank = use_rank
         self.similarity = similarity
-        super().__init__(profile=profile)
+        if use_rank:
+            self.score_components = 2
 
-    def score_(self, cand):
-        M_embeddings = self.profile_.fake_covariance_matrix(cand, self.similarity, rc=self.rc)
+    def set_rule(self, aggregation_rule):
+        self.aggregation_rule = aggregation_rule
+        self.delete_cache()
+        return self
 
-        s = np.linalg.eigvals(M_embeddings)
+    def score_(self, candidates):
+        embeddings_matrix = self.profile_.fake_covariance_matrix(candidates,
+                                                                 self.similarity,
+                                                                 square_root=self.square_root)
+        s = np.linalg.eigvals(embeddings_matrix)
         s = np.maximum(s, np.zeros(len(s)))
         s = np.sqrt(s)
         if self.use_rank:
-            matrix_rank = np.linalg.matrix_rank(M_embeddings)
-            return matrix_rank, self.agg_rule(s[:matrix_rank])
+            matrix_rank = np.linalg.matrix_rank(embeddings_matrix)
+            return matrix_rank, self.aggregation_rule(s[:matrix_rank])
         else:
-            return self.agg_rule(s)
-
-    @cached_property
-    def ranking_(self):
-        if self.use_rank:
-            rank = [s[0] for s in self.scores_]
-            scores = [s[1] for s in self.scores_]
-            return np.lexsort((scores, rank))[::-1]
-        else:
-            return super().ranking_
-
-    def set_rule(self, agg_rule):
-        self.agg_rule = agg_rule
-        self.delete_cache()
-        return self
+            return self.aggregation_rule(s)

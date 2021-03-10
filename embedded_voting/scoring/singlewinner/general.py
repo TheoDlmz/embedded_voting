@@ -48,7 +48,7 @@ class ScoringRule(DeleteCacheMixin):
         """
         Return the score of all candidates in the election
         """
-        return [self.score_(candidate) for candidate in range(self.profile_.m)]
+        return [self.score_(candidate) for candidate in range(self.profile_.n_candidates)]
 
     @cached_property
     def ranking_(self):
@@ -76,12 +76,18 @@ class ScoringRule(DeleteCacheMixin):
         """
         Return the welfare of all candidates
         """
-        scores = self.scores_
-        max_score = np.max(scores)
-        min_score = np.min(scores)
-        if max_score == min_score:
-            return np.ones(self.profile_.m)
-        return (scores - min_score)/(max_score - min_score)
+        if self.score_components == 1:
+            scores = self.scores_
+            max_score = np.max(scores)
+            min_score = np.min(scores)
+            if max_score == min_score:
+                return np.ones(self.profile_.n_candidates)
+            return (scores - min_score) / (max_score - min_score)
+        else:
+            scores = self.scores_
+            best_score = self.scores_[self.winner_]
+            welfare = np.zeros(self.profile_.n_candidates)
+            raise ValueError("Not implemented for this rule")
 
     def plot_winner(self, plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """
@@ -102,7 +108,8 @@ class ScoringRule(DeleteCacheMixin):
             if True, execute plt.show() at the end of the function
         """
         winner = self.winner_
-        self.profile_.plot_candidate(winner, plot_kind=plot_kind, dim=dim, fig=fig, position=position, show=show)
+        ax = self.profile_.plot_candidate(winner, plot_kind=plot_kind, dim=dim, fig=fig, position=position, show=show)
+        return ax
 
     def plot_ranking(self, plot_kind="3D", dim=None, row_size=5):
         """

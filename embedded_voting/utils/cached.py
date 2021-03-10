@@ -7,7 +7,6 @@ This file is part of Embedded Voting.
 """
 
 
-
 def _cache(f):
     """
     Auxiliary decorator used by ``cached_property``.
@@ -31,6 +30,7 @@ def _cache(f):
             value = f(*args)
             args[0]._cached_properties = {name: value}
             return value
+
     _f.__doc__ = f.__doc__
     return _f
 

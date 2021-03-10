@@ -35,8 +35,8 @@ class ProductScores(ScoringRule):
 
     """
     def __init__(self, profile):
-        self.score_components = 2
         super().__init__(profile)
+        self.score_components = 2
 
     def score_(self, candidate):
         scores = self.profile_.scores[::, candidate]

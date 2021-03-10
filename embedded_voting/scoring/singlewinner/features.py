@@ -55,7 +55,7 @@ class FeaturesRule(ScoringRule):
             if len(dim) != 3:
                 raise ValueError("The number of dimensions should be 3")
 
-        n_candidate = self.profile_.m
+        n_candidate = self.profile_.n_candidates
         n_rows = (n_candidate - 1) // row_size + 1
         fig = plt.figure(figsize=(row_size * 5, n_rows * 5))
         position = [n_rows, row_size, 1]
@@ -72,7 +72,7 @@ class FeaturesRule(ScoringRule):
                 x2 = features[candidate, dim[1]]
                 x3 = features[candidate, dim[2]]
                 ax.plot([0, x1], [0, x2], [0, x3], color='k', linewidth=2)
-                ax.scatter([x1, x2, x3], color='k', s=5)
+                ax.scatter([x1], [x2], [x3], color='k', s=5)
             elif plot_kind == "ternary":
                 x1 = features[candidate, dim[0]]
                 x2 = features[candidate, dim[2]]

@@ -365,7 +365,7 @@ class Profile(DeleteCacheMixin):
         if list_titles is None:
             list_titles = ["Candidate #%i" % c for c in list_candidates]
         else:
-            list_titles = ["%s (#%i)" % (t, c + 1) for (t, c) in zip(list_titles, list_candidates)]
+            list_titles = ["%s " % t for t in list_titles]
 
         n_candidates = len(list_candidates)
         n_rows = (n_candidates - 1) // row_size + 1

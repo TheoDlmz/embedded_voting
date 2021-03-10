@@ -8,6 +8,7 @@ This file is part of Embedded Voting.
 
 import numpy as np
 
+
 def normalize(x):
     """
     Normalize the input vector
@@ -23,7 +24,3 @@ def normalize(x):
 
     """
     return x / np.linalg.norm(x)
-
-
-
-

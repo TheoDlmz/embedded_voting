@@ -16,7 +16,7 @@ DROOP_QUOTA_MIN = 711
 CLASSIC_QUOTA_MIN = 710
 
 
-class MultiwinnerRules(DeleteCacheMixin):
+class MultiwinnerRule(DeleteCacheMixin):
     """
     A class for rules that elect a committee of candidates
 
@@ -48,7 +48,7 @@ class MultiwinnerRules(DeleteCacheMixin):
         raise NotImplementedError
 
 
-class IterRules(MultiwinnerRules):
+class IterRules(MultiwinnerRule):
     """
     A class for iteratives multi winner rules
 
@@ -161,7 +161,6 @@ class IterRules(MultiwinnerRules):
             v_temp = normalize(v_temp)
             ax.scatter([v_temp**2], color="k", alpha=0.8)
         plt.show()
-
 
     def plot_vectors(self):
         n_cand = self.profile_.m
