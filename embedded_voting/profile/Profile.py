@@ -453,14 +453,6 @@ class Profile(DeleteCacheMixin):
         matplotlib ax
             The matplotlib ax with the figure, if you want to add something to it.
 
-        Examples
-        --------
-        >>> my_profile = Profile(5, 3)
-        >>> _ = my_profile.uniform_distribution(100)
-        >>> my_profile.plot_profile("3D", show=False)
-        <matplotlib.axes._subplots.Axes3DSubplot object at ...>
-        >>> my_profile.plot_profile("ternary", show=False)
-        TernaryAxesSubplot: ...
         """
 
         if dim is None:
@@ -656,12 +648,6 @@ class Profile(DeleteCacheMixin):
         show : bool
             If True, plot the figure at the end of the function.
 
-        Examples
-        --------
-        >>> my_profile = Profile(5, 3)
-        >>> _ = my_profile.uniform_distribution(100)
-        >>> my_profile.plot_candidates("3D", show=False)
-        >>> my_profile.plot_candidates("ternary", show=False)
         """
 
         if list_candidates is None:
