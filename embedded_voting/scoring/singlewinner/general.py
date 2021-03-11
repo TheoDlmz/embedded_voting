@@ -108,6 +108,7 @@ class ScoringRule(DeleteCacheMixin):
         float list
             Return the welfare of every candidate, where the welfare is defined as
             `(score - score_min)/(score_max - score_min)`. Not defined if :attr:`_score_components` > 1.
+
         """
         if self._score_components == 1:
             scores = self.scores_
@@ -136,6 +137,12 @@ class ScoringRule(DeleteCacheMixin):
             `[n_rows, n_columns, position]`.
         show : bool
             If True, show the figure at the end of the function
+
+        Return
+        ------
+        matplotlib ax
+            The ax with the plot
+
         """
         winner = self.winner_
         ax = self.profile_.plot_candidate(winner, plot_kind=plot_kind, dim=dim, fig=fig, position=position, show=show)

@@ -43,6 +43,11 @@ class FeaturesRule(ScoringRule):
     def features_(self):
         """
         This function return the feature vector of every candidate
+
+        Return
+        ------
+        np.ndarray
+            The matrix of features. Its shape is :attr:`n_candidates`, :attr:`n_dim`
         """
         embeddings = self.profile_.embeddings
         scores = self.profile_.scores

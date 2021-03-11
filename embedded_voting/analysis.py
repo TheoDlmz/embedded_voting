@@ -346,11 +346,11 @@ class ManipulationIRV(ManipulationExtension):
                 fake_profile = self.create_fake_scores(el, scores)
                 fake_profile[i] = np.ones(self.profile_.m)
                 self.profile_.scores = fake_profile
-                scores_max = self.extended_rule.rule_(self.profile_).scores_
+                scores_max = self.extended_rule._rule(self.profile_).scores_
 
                 fake_profile[i] = np.zeros(self.profile_.m)
                 self.profile_.scores = fake_profile
-                scores_min = self.extended_rule.rule_(self.profile_).scores_
+                scores_min = self.extended_rule._rule(self.profile_).scores_
 
                 all_scores = [(s, j, 1) for j, s in enumerate(scores_max) if j not in el] \
                              + [(s, j, 0) for j, s in enumerate(scores_min) if j not in el]

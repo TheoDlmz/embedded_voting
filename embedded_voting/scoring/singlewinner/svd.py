@@ -98,6 +98,11 @@ class SVDRule(ScoringRule):
             The new aggregation rule for the singular values.
             Input : float list. Output : float.
 
+        Return
+        ------
+        SVDRule
+            The object itself
+
         Examples
         --------
         >>> my_profile = Profile(3, 2)

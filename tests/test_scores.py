@@ -3,6 +3,7 @@ from embedded_voting.scoring.singlewinner.svd import SVDNash
 from embedded_voting.scoring.singlewinner.geometric import *
 from embedded_voting.profile.Profile import Profile
 import numpy as np
+import pytest
 
 
 def test_plot():
@@ -12,7 +13,12 @@ def test_plot():
     election(my_profile)
     election.plot_winner(show=False)
     election.plot_ranking(show=False)
-    election.plot_features(show=False)
+    election.plot_features("3D", show=False)
+    election.plot_features("ternary", show=False)
+    with pytest.raises(ValueError):
+        election.plot_features("toto", show=False)
+    with pytest.raises(ValueError):
+        election.plot_features("3D", dim=[1, 2, 3, 4], show=False)
 
 
 def test_special_cases():
