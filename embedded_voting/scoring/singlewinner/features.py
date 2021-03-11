@@ -103,8 +103,6 @@ class FeaturesRule(ScoringRule):
                 feature_bis = np.maximum(feature_bis, 0)
                 feature_bis = normalize(feature_bis)
                 ax.scatter([feature_bis ** 2], color='k', s=50)
-            else:
-                raise ValueError("Incorrect value for 'plot_kind'. Should be '3D' or 'ternary'")
             position[2] += 1
 
         if show:

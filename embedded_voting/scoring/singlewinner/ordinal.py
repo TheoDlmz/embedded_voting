@@ -58,7 +58,7 @@ class PositionalRuleExtension(ScoringRule):
     [1, 3, 0, 2]
     """
 
-    def __init__(self, profile=None,  points=None, rule=None):
+    def __init__(self, profile,  points, rule=None):
         super().__init__(profile)
         if len(points) != self.profile_.n_candidates:
             raise ValueError("The positional rule must be of length %i" % self.profile_.n_candidates)
@@ -72,7 +72,8 @@ class PositionalRuleExtension(ScoringRule):
     def __call__(self, profile):
         self.profile_ = profile
         self.fake_profile_ = self._create_fake_profile()
-        self._rule = self.base_rule(self.fake_profile_)
+        if self.base_rule is not None:
+            self._rule = self.base_rule(self.fake_profile_)
         self.delete_cache()
         return self
 
@@ -121,17 +122,33 @@ class PositionalRuleExtension(ScoringRule):
     def score_(self, candidate):
         return self._rule.scores_[candidate]
 
-    def plot_fake_profile(self,  dim=None, list_candidates=None, list_titles=None, row_size=5):
+    def plot_fake_profile(self, plot_kind="3D", dim=None, list_candidates=None, list_titles=None, row_size=5, show=True):
         """
         This function plot the candidate in the fake profile, using the scoring vector :attr:`points`.
+
+        Parameters
+        ----------
+        plot_kind : str
+            The kind of plot we want to show. Can be "3D" or "ternary".
+        dim : list
+            The 3 dimensions we are using for our plot.
+        list_candidates : int list
+            The list of candidates we want to plot. Should contains integer lower than
+            :attr:`n_candidates`. Default is range(:attr:`n_candidates`).
+        list_titles : str list
+            Contains the title of the plots.Should be the same length than list_candidates.
+        row_size : int
+            Number of subplots by row. Default is set to 5.
+        show : bool
+            If True, plot the figure at the end of the function.
 
         Return
         ------
         Profile
             The fake profile
         """
-        self.fake_profile_.plot_candidates(dim=dim, list_candidates=list_candidates,
-                                           list_titles=list_titles, row_size=row_size)
+        self.fake_profile_.plot_candidates(plot_kind=plot_kind, dim=dim, list_candidates=list_candidates,
+                                           list_titles=list_titles, row_size=row_size, show=show)
 
 
 class PluralityExtension(PositionalRuleExtension):
