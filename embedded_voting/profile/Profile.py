@@ -57,6 +57,7 @@ class Profile(DeleteCacheMixin):
     """
 
     def __init__(self, n_candidates, n_dim):
+        self.welfare_ = None
         self.embeddings = np.zeros((0, n_dim))
         self.scores = np.zeros((0, n_candidates))
         self.n_candidates = n_candidates

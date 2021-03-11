@@ -99,9 +99,6 @@ class MaxCubeRule(ScoringRule):
     def score_(self, candidate):
         embeddings = self.profile_.scored_embeddings(candidate)
         matrix_rank = np.linalg.matrix_rank(embeddings)
-        if matrix_rank == 0:
-            return 0, 0
-
         volume = 0
         n_voters = self.profile_.n_voters
         current_subset = list(np.arange(matrix_rank))
