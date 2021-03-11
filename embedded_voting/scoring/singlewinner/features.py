@@ -51,19 +51,20 @@ class FeaturesRule(ScoringRule):
     def score_(self, candidate):
         return (self.features_[candidate] ** 2).sum()
 
-    def plot_features(self, plot_kind="3D", dim=None, row_size=5):
+    def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
-        This function plot the features for every candidate in the given dimensions
+        This function plot the features for every candidate in the given dimensions.
 
         Parameters
         ----------
-        plot_kind : ["3D", "ternary"]
-            the kind of plot we want to show.
-        dim : array of length 3
-            the three dimensions of the embeddings we want to plot.
-            default are [0,1,2]
+        plot_kind : str
+            The kind of plot we want to show. Can be "3D" or "ternary".
+        dim : list
+            The 3 dimensions we are using for our plot.
         row_size : int
-            number of figures by row. Default is 5
+            Number of subplots by row. Default is set to 5.
+        show : bool
+            If True, plot the figure at the end of the function.
         """
         if dim is None:
             dim = [0, 1, 2]
@@ -100,4 +101,6 @@ class FeaturesRule(ScoringRule):
             else:
                 raise ValueError("Incorrect value for 'plot_kind'. Should be '3D' or 'ternary'")
             position[2] += 1
-        plt.show()
+
+        if show:
+            plt.show()
