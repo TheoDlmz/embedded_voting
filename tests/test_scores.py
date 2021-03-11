@@ -15,18 +15,26 @@ def test_plot():
     election.plot_features(show=False)
 
 
-def special_case():
+def test_special_cases():
     my_profile = Profile(3, 3)
-    my_profile.add_voters(np.random.rand(10, 3), np.ones(10, 3))
+    my_profile.add_voters(np.random.rand(10, 3), np.ones((10, 3)))
     election = FeaturesRule(my_profile)
-    assert election.welfare_ == np.ones(3)
-    _ = SVDNash(my_profile, use_rank=True)
+    welfare = election.welfare_
+    for s in welfare:
+        assert s == 1
 
     my_profile = Profile(3, 3)
-    my_profile.add_voters(np.ones(10, 3), np.ones(10, 3))
+    my_profile.add_voters(np.ones((10, 3)), np.ones((10, 3)))
     election = ZonotopeRule(my_profile)
-    assert election.scores_ == [(1, 1)]*10
+    scores = election.scores_
+    for s in scores:
+        assert s == (1, 10)
     election = MaxCubeRule(my_profile)
-    assert election.scores_ == [(1, 1)]*10
+    scores = election.scores_
+    for s in scores:
+        assert s == (1, 1)
 
-
+    my_profile = Profile(3, 10)
+    my_profile.add_voters(np.ones((3, 10)), np.random.rand(3, 3))
+    election = SVDNash(my_profile, use_rank=True)
+    _ = election.ranking_
