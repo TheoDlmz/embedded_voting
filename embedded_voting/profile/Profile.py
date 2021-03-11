@@ -93,6 +93,7 @@ class Profile(DeleteCacheMixin):
         >>> my_profile.n_voters
         1
         """
+        embeddings = np.array(embeddings)
         if normalize_embs:
             embeddings = normalize(embeddings)
         self.embeddings = np.concatenate([self.embeddings, [embeddings]])
@@ -107,10 +108,10 @@ class Profile(DeleteCacheMixin):
 
         Parameters
         ----------
-        embeddings : np.ndarray
+        embeddings : np.ndarray or list
             The embeddings vectors of the new voters.
             Should be of size `n_new_voters`, :attr:`n_dim`
-        scores : np.ndarray
+        scores : np.ndarray or list
             The scores given by the new voters.
             Should be of size `n_new_voters`, :attr:`n_candidates`
         normalize_embs : bool
@@ -131,7 +132,7 @@ class Profile(DeleteCacheMixin):
         >>> my_profile.n_voters
         10
         """
-
+        embeddings = np.array(embeddings)
         if normalize_embs:
             embeddings = (embeddings.T / np.sqrt((embeddings ** 2).sum(axis=1))).T
         self.embeddings = np.concatenate([self.embeddings, embeddings])
@@ -640,7 +641,7 @@ class Profile(DeleteCacheMixin):
         Only three dimensions are represented.
 
         Parameters
-        _______
+        ----------
         plot_kind : str
             The kind of plot we want to show. Can be "3D" or "ternary".
         dim : list
@@ -652,6 +653,8 @@ class Profile(DeleteCacheMixin):
             Contains the title of the plots.Should be the same length than list_candidates.
         row_size : int
             Number of subplots by row. Default is set to 5.
+        show : bool
+            If True, plot the figure at the end of the function.
 
         Examples
         --------

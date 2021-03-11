@@ -15,7 +15,7 @@ def normalize(x):
 
     Parameters
     ----------
-    x : np.ndarray
+    x : np.ndarray or list
 
     Return
     ------

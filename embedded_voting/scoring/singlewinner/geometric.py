@@ -7,22 +7,37 @@ This file is part of Embedded Voting.
 """
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
+from embedded_voting.profile.Profile import Profile
 
 
 class ZonotopeRule(ScoringRule):
     """
     Voting rule that rank candidates by the volume of the Zonotope described by
-    the embedding matrix using voters' scores for the candidate.
+    the candidate embedding matrix `M` such that `M[i] = score[i, candidate] * embeddings[i]`.
 
     Parameters
-    _______
+    ----------
     profile: Profile
         the profile of voter on which we run the election
+
+    Examples
+    --------
+    >>> my_profile = Profile(3, 2)
+    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]
+    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
+    >>> _ = my_profile.add_voters(embeddings, scores)
+    >>> election = ZonotopeRule(my_profile)
+    >>> election.scores_
+    [(2, 1.016102549694411), (2, 0.5477225575051661), (2, 0.9196152422706632)]
+    >>> election.ranking_
+    array([0, 2, 1], dtype=int64)
+    >>> election.winner_
+    0
 
     """
     def __init__(self, profile):
         super().__init__(profile)
-        self.score_components = 2
+        self._score_components = 2
 
     def score_(self, candidate):
         embeddings = self.profile_.scored_embeddings(candidate)
@@ -54,18 +69,32 @@ class ZonotopeRule(ScoringRule):
 
 class MaxCubeRule(ScoringRule):
     """
-    Voting rule that rank candidates by the volume of the maximum volume cube described by a subset
-    of dim (the number of dimensions) voters
+    Voting rule that rank candidates by the maximum volume of a cube described by :attr:`n_dim` rows of
+    the candidate embedding matrix `M` such that `M[i] = score[i, candidate] * embeddings[i]`.
 
     Parameters
-    _______
+    ----------
     profile: Profile
         the profile of voter on which we run the election
+
+    Examples
+    --------
+    >>> my_profile = Profile(3, 2)
+    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]
+    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
+    >>> _ = my_profile.add_voters(embeddings, scores)
+    >>> election = MaxCubeRule(my_profile)
+    >>> election.scores_
+    [(2, 0.41833001326703784), (2, 0.547722557505166), (2, 0.3999999999999999)]
+    >>> election.ranking_
+    array([1, 0, 2], dtype=int64)
+    >>> election.winner_
+    1
 
     """
     def __init__(self, profile):
         super().__init__(profile)
-        self.score_components = 2
+        self._score_components = 2
 
     def score_(self, candidate):
         embeddings = self.profile_.scored_embeddings(candidate)

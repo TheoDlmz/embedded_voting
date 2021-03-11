@@ -7,17 +7,39 @@ This file is part of Embedded Voting.
 """
 
 from embedded_voting.scoring.singlewinner.general import ScoringRule
+from embedded_voting.profile.Profile import Profile
+import numpy as np
 
 
 class SumScores(ScoringRule):
     """
-    Voting rule that rank candidates by the sum of their scores
+    Voting rule that rank candidates by the sum of their scores.
 
     Parameters
-    _______
+    ----------
     profile: Profile
         the profile of voter on which we run the election
 
+    Attributes
+    ----------
+    profile : Profile
+        The profile of voter on which we run the election
+
+    Examples
+    --------
+    >>> my_profile = Profile(3, 2)
+    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]
+    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
+    >>> _ = my_profile.add_voters(embeddings, scores)
+    >>> election = SumScores(my_profile)
+    >>> election.scores_
+    [1.4, 1.6, 1.3]
+    >>> election.ranking_
+    array([1, 0, 2], dtype=int64)
+    >>> election.winner_
+    1
+    >>> election.welfare_
+    array([0.33333333, 1.        , 0.        ])
     """
     def score_(self, candidate):
         return self.profile_.scores[::, candidate].sum()
@@ -25,18 +47,35 @@ class SumScores(ScoringRule):
 
 class ProductScores(ScoringRule):
     """
-    Voting rule that rank candidates by the products of their scores
+    Voting rule that rank candidates by the product of their scores.
 
     Parameters
-    _______
+    ----------
     profile: Profile
         the profile of voter on which we run the election
 
+    Attributes
+    ----------
+    profile : Profile
+        The profile of voter on which we run the election
 
+    Examples
+    --------
+    >>> my_profile = Profile(3, 2)
+    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]
+    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
+    >>> _ = my_profile.add_voters(embeddings, scores)
+    >>> election = ProductScores(my_profile)
+    >>> election.scores_
+    [(3, 0.06999999999999999), (2, 0.6), (3, 0.048)]
+    >>> election.ranking_
+    array([0, 2, 1], dtype=int64)
+    >>> election.winner_
+    0
     """
     def __init__(self, profile):
         super().__init__(profile)
-        self.score_components = 2
+        self._score_components = 2
 
     def score_(self, candidate):
         scores = self.profile_.scores[::, candidate]

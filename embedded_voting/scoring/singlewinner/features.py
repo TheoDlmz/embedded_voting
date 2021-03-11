@@ -9,13 +9,13 @@ import numpy as np
 from embedded_voting.utils.cached import cached_property
 from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.ParametricProfile import ParametricProfile
+from embedded_voting.profile.Profile import Profile
 import matplotlib.pyplot as plt
 
 
 class FeaturesRule(ScoringRule):
     """
-    Voting rule based on the norm of the feature vector of each candidate
+    Voting rule based on the norm of the feature vector of each candidate.
 
     Parameters
     ----------
@@ -23,11 +23,20 @@ class FeaturesRule(ScoringRule):
         the profile of voter on which we run the election
 
     Examples
-    ---------
-    >>> np.random.seed(42)
-    >>> profile = ParametricProfile(3, 3, 100, [[.8, .2, .2], [.5, .5, .5], [.9, .5, 0]], [.5, .3, .2])
-    >>> profile.set_parameters(.9, .9)  # DOCTEST: ELLIPSIS
-    <embedded_voting.profile.ParametricProfile.ParametricProfile object at ...>
+    --------
+    >>> my_profile = Profile(3, 2)
+    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
+    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
+    >>> _ = my_profile.add_voters(embeddings, scores)
+    >>> election = FeaturesRule(my_profile)
+    >>> election.scores_
+    [0.47463203435596457, 0.9271320343559648, 0.4335660171779823]
+    >>> election.ranking_
+    array([1, 0, 2], dtype=int64)
+    >>> election.winner_
+    1
+    >>> election.welfare_
+    array([0.08320268, 1.        , 0.        ])
     """
 
     @cached_property
