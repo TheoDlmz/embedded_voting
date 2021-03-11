@@ -78,13 +78,13 @@ class ScoringRule(DeleteCacheMixin):
             The ranking of the candidates
         """
         if self._score_components == 1:
-            return np.argsort(self.scores_)[::-1]
+            return list(np.argsort(self.scores_)[::-1])
         else:
             full_scores = []
             for i in range(self._score_components):
                 full_scores.append([s[i] for s in self.scores_])
             full_scores = full_scores[::-1]
-            return np.lexsort(full_scores)[::-1]
+            return list(np.lexsort(full_scores)[::-1])
 
     @cached_property
     def winner_(self):

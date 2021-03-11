@@ -32,7 +32,7 @@ class FeaturesRule(ScoringRule):
     >>> election.scores_
     [0.47463203435596457, 0.9271320343559648, 0.4335660171779823]
     >>> election.ranking_
-    array([1, 0, 2], dtype=int64)
+    [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_

@@ -30,7 +30,7 @@ class ZonotopeRule(ScoringRule):
     >>> election.scores_
     [(2, 1.016102549694411), (2, 0.5477225575051661), (2, 0.9196152422706632)]
     >>> election.ranking_
-    array([0, 2, 1], dtype=int64)
+    [0, 2, 1]
     >>> election.winner_
     0
 
@@ -87,7 +87,7 @@ class MaxCubeRule(ScoringRule):
     >>> election.scores_
     [(2, 0.41833001326703784), (2, 0.547722557505166), (2, 0.3999999999999999)]
     >>> election.ranking_
-    array([1, 0, 2], dtype=int64)
+    [1, 0, 2]
     >>> election.winner_
     1
 

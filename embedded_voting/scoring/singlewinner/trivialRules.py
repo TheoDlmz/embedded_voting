@@ -35,7 +35,7 @@ class SumScores(ScoringRule):
     >>> election.scores_
     [1.4, 1.6, 1.3]
     >>> election.ranking_
-    array([1, 0, 2], dtype=int64)
+    [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_
@@ -69,7 +69,7 @@ class ProductScores(ScoringRule):
     >>> election.scores_
     [(3, 0.06999999999999999), (2, 0.6), (3, 0.048)]
     >>> election.ranking_
-    array([0, 2, 1], dtype=int64)
+    [0, 2, 1]
     >>> election.winner_
     0
     """

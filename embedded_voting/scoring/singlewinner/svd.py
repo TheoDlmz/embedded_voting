@@ -54,7 +54,7 @@ class SVDRule(ScoringRule):
     >>> election.scores_
     [0.806225774829855, 0.547722557505166, 0.5567764362830023]
     >>> election.ranking_
-    array([0, 2, 1], dtype=int64)
+    [0, 2, 1]
     >>> election.winner_
     0
     >>> election.welfare_
@@ -106,11 +106,11 @@ class SVDRule(ScoringRule):
         >>> _ = my_profile.add_voters(embeddings, scores)
         >>> election = SVDRule(my_profile)
         >>> election.ranking_
-        array([0, 2, 1], dtype=int64)
+        [0, 2, 1]
         >>> election.set_rule(np.sum)
         <embedded_voting.scoring.singlewinner.svd.SVDRule object at ...>
         >>> election.ranking_
-        array([0, 1, 2], dtype=int64)
+        [0, 1, 2]
         """
         self.aggregation_rule = aggregation_rule
         self.delete_cache()
@@ -142,7 +142,7 @@ class SVDNash(SVDRule):
     >>> election.scores_
     [0.806225774829855, 0.547722557505166, 0.5567764362830023]
     >>> election.ranking_
-    array([0, 2, 1], dtype=int64)
+    [0, 2, 1]
     >>> election.winner_
     0
     >>> election.welfare_
@@ -178,7 +178,7 @@ class SVDSum(SVDRule):
     >>> election.scores_
     [1.8200141619393269, 1.6417810801109665, 1.5535613514007114]
     >>> election.ranking_
-    array([0, 1, 2], dtype=int64)
+    [0, 1, 2]
     >>> election.winner_
     0
     >>> election.welfare_
@@ -214,7 +214,7 @@ class SVDMin(SVDRule):
     >>> election.scores_
     [0.7620641440477796, 0.4657304054015261, 0.5608830567730065]
     >>> election.ranking_
-    array([0, 2, 1], dtype=int64)
+    [0, 2, 1]
     >>> election.winner_
     0
     >>> election.welfare_
@@ -250,7 +250,7 @@ class SVDMax(SVDRule):
     >>> election.scores_
     [1.0579500178915473, 1.1760506747094404, 0.9926782946277048]
     >>> election.ranking_
-    array([1, 0, 2], dtype=int64)
+    [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_
@@ -289,7 +289,7 @@ class SVDLog(SVDRule):
     >>> election.scores_
     [1.2881962813428856, 1.1598653051965206, 1.1347313336962574]
     >>> election.ranking_
-    array([0, 1, 2], dtype=int64)
+    [0, 1, 2]
     >>> election.winner_
     0
     >>> election.welfare_
