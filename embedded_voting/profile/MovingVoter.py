@@ -39,7 +39,7 @@ class MovingVoterProfile(Profile):
     --------
     >>> moving_profile = MovingVoterProfile()
     >>> moving_profile(SumScores())
-    <embedded_voting.profile.moving.MovingVoterProfile object at ...>
+    <embedded_voting.profile.MovingVoter.MovingVoterProfile object at ...>
     >>> moving_profile.moving_voter
     0
     >>> moving_profile.embeddings
@@ -86,7 +86,7 @@ class MovingVoterProfile(Profile):
         >>> moving_profile.moving_voter
         0
         >>> moving_profile.set_moving_voter(3)
-        <embedded_voting.profile.moving.MovingVoterProfile object at ...>
+        <embedded_voting.profile.MovingVoter.MovingVoterProfile object at ...>
         >>> moving_profile.moving_voter
         3
         """
