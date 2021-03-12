@@ -53,9 +53,12 @@ def test_ordinal():
     my_profile.add_voters(np.random.rand(10, 3), np.ones((10, 3)))
     with pytest.raises(ValueError):
         PositionalRuleExtension(my_profile, [3, 2, 1, 0], SVDNash())
-    election = BordaExtension(my_profile)
+    election = BordaExtension(my_profile, SVDNash())
     election(my_profile)
     election.plot_fake_profile(show=False)
+
+    election = InstantRunoffExtension(my_profile)
+    election(my_profile)
 
 
 def test_fake_svd():
@@ -63,4 +66,5 @@ def test_fake_svd():
     my_profile.add_voters(np.random.rand(10, 3), np.ones((10, 3)))
     election = FakeSVDRule(my_profile, np.dot, use_rank=True)
     election.set_rule(np.prod)
+    _ = election.scores_
 

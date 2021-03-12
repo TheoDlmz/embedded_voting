@@ -18,30 +18,52 @@ CLASSIC_QUOTA_MIN = 710
 
 class MultiwinnerRule(DeleteCacheMixin):
     """
-    A class for rules that elect a committee of candidates
+    A class for multiwinner rules that elect a committee of candidates of size :attr:`k_` given a
+    profile of voters with embeddings.
 
     Parameters
-    __________
+    ----------
     profile : Profile
-        the profile of voters
+        The profile of voters.
     k : int
-        the size of the committee
-    """
-    def __init__(self, profile=None, k=None):
-        self.profile_ = None
-        self.k_ = None
-        if (profile is not None) and (k is not None):
-            self(profile, k)
+        The size of the committee
 
-    def __call__(self, profile, k=1):
+    Attributes
+    ----------
+    profile_ : Profile
+        The profile of voters.
+    k_ : int
+        The size of the committee.
+    """
+
+    def __init__(self, profile=None, k=None):
         self.profile_ = profile
         self.k_ = k
+
+    def __call__(self, profile, k=None):
+        self.profile_ = profile
+        if k is not None:
+            self.k_ = k
         self.delete_cache()
         return self
 
     def set_k(self, k):
+        """
+        A function to update the size :attr:`k_` of the committee
+
+        Parameters
+        ----------
+        k : int
+            The new size of the committee
+
+        Return
+        ------
+        MultiwinnerRule
+            The object itself
+        """
         self.delete_cache()
         self.k_ = k
+        return self
 
     @cached_property
     def winners_(self):
@@ -50,17 +72,19 @@ class MultiwinnerRule(DeleteCacheMixin):
 
 class IterRules(MultiwinnerRule):
     """
-    A class for iteratives multi winner rules
+    A class for multi winner rules that are adaptations of STV to the
+    embeddings profile model.
 
     Parameters
-    __________
+    ----------
     profile : Profile
-        the profile of voters
+        The profile of voters.
     k : int
         the size of the committee
     quota : {DROOP_QUOTA, CLASSIC_QUOTA, DROOP_QUOTA_MIN, CLASSIC_QUOTA_MIN}
         the quota used for the re-weighing step
     """
+
     def __init__(self, profile=None, k=None, quota=CLASSIC_QUOTA):
         self.quota = quota
         self.weights = np.ones(0)
@@ -69,7 +93,7 @@ class IterRules(MultiwinnerRule):
     def winner_k(self):
         raise NotImplementedError
 
-    def satisfaction(self, cand, vec):
+    def satisfaction(self, candidate, vec):
         raise NotImplementedError
 
     def updateWeight(self, sat, j):
@@ -126,20 +150,20 @@ class IterRules(MultiwinnerRule):
 
     def plot_weights(self):
         _ = self.ruleResults_
-        n_cand = len(self.ls_weight)
-        n_rows = (n_cand - 1) // 6 + 1
+        n_candidates = len(self.ls_weight)
+        n_rows = (n_candidates - 1) // 6 + 1
         fig = plt.figure(figsize=(60, n_rows * 10))
-        intfig = [n_rows, 6, 1]
-        for i in range(n_cand):
+        position = [n_rows, 6, 1]
+        for i in range(n_candidates):
             _ = self.profile_._plot_scores_3D(self.ls_weight[i],
                                               title="Step %i" % i,
                                               fig=fig,
-                                              intfig=intfig,
+                                              position=position,
                                               show=False)
 
-            intfig[2] += 1
+            position[2] += 1
 
-        sum_w = [self.ls_weight[i].sum() / (n_cand - i - 1) for i in range(n_cand - 1)]
+        sum_w = [self.ls_weight[i].sum() / (n_candidates - i - 1) for i in range(n_candidates - 1)]
         print("Weight / remaining candidate : ", sum_w)
         plt.show()
 
@@ -159,7 +183,7 @@ class IterRules(MultiwinnerRule):
         for i, v in enumerate(vectors):
             v_temp = np.maximum(v, 0)
             v_temp = normalize(v_temp)
-            ax.scatter([v_temp**2], color="k", alpha=0.8)
+            ax.scatter([v_temp ** 2], color="k", alpha=0.8)
         plt.show()
 
     def plot_vectors(self):
@@ -168,15 +192,16 @@ class IterRules(MultiwinnerRule):
         fig = plt.figure(figsize=(30, n_rows * 5))
         intfig = [n_rows, 6, 1]
         _, vectors = self.winner_k()
-        for cand in range(n_cand):
-            ax = self.profile_._plot_scores_3D(self.profile_.scores[::, cand],
-                                               title="Candidate %i" % (cand + 1),
-                                               fig=fig,
-                                               intfig=intfig,
-                                               show=False)
+        for candidate in range(n_cand):
+            ax = self.profile_.plot_scores(self.profile_.scores[::, candidate],
+                                           plot_kind="3D",
+                                           title="Candidate %i" % (candidate + 1),
+                                           fig=fig,
+                                           intfig=intfig,
+                                           show=False)
 
-            ax.plot([0, vectors[cand][0]], [0, vectors[cand][1]], [0, vectors[cand][2]], color='k', linewidth=2)
-            ax.scatter([vectors[cand][0]], [vectors[cand][1]], [vectors[cand][2]], color='k', s=5)
+            ax.plot([0, vectors[candidate][0]], [0, vectors[candidate][1]], [0, vectors[candidate][2]], color='k', linewidth=2)
+            ax.scatter([vectors[candidate][0]], [vectors[candidate][1]], [vectors[candidate][2]], color='k', s=5)
             intfig[2] += 1
 
         plt.show()

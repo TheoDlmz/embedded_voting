@@ -473,7 +473,7 @@ class Profile(DeleteCacheMixin):
             raise ValueError("plot_kind should '3D' or 'ternary'")
         ax.set_title("Profile of voters (%i,%i,%i)" % (dim[0], dim[1], dim[2]), fontsize=24)
         if show:
-            plt.show()
+            plt.show()  # pragma: no cover
         return ax
 
     def _plot_scores_3D(self, sizes, fig, position, dim):
@@ -588,7 +588,7 @@ class Profile(DeleteCacheMixin):
 
         ax.set_title(title, fontsize=16)
         if show:
-            plt.show()
+            plt.show()  # pragma: no cover
 
         return ax
 
@@ -673,7 +673,7 @@ class Profile(DeleteCacheMixin):
             position[2] += 1
 
         if show:
-            plt.show()
+            plt.show()  # pragma: no cover
 
     def copy(self):
         """

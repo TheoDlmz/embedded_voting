@@ -65,7 +65,7 @@ class PositionalRuleExtension(ScoringRule):
         self.points = points
         self.base_rule = rule
         if rule is not None:
-            self._score_components = rule.score_components
+            self._score_components = rule._score_components
         self.fake_profile_ = self._create_fake_profile()
         self._rule = None
 

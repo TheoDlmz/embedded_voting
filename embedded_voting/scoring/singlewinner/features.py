@@ -106,4 +106,4 @@ class FeaturesRule(ScoringRule):
             position[2] += 1
 
         if show:
-            plt.show()
+            plt.show()  # pragma: no cover
