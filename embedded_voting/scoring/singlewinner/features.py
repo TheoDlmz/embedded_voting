@@ -101,8 +101,9 @@ class FeaturesRule(ScoringRule):
                 x3 = features[candidate, dim[1]]
                 feature_bis = [x1, x2, x3]
                 feature_bis = np.maximum(feature_bis, 0)
+                size_features = np.linalg.norm(feature_bis)
                 feature_bis = normalize(feature_bis)
-                ax.scatter([feature_bis ** 2], color='k', s=50)
+                ax.scatter([feature_bis ** 2], color='k', s=50*size_features+1)
             position[2] += 1
 
         if show:

@@ -10,9 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from embedded_voting.profile.Profile import Profile
 from embedded_voting.utils.miscellaneous import normalize
-from embedded_voting.utils.plots import create_3D_plot
-from embedded_voting.utils.cached import DeleteCacheMixin
+from embedded_voting.utils.plots import create_3D_plot, create_ternary_plot
 from embedded_voting.scoring.singlewinner.trivialRules import SumScores
+from embedded_voting.scoring.singlewinner.svd import SVDMax
 
 
 class MovingVoterProfile(Profile):
@@ -93,7 +93,7 @@ class MovingVoterProfile(Profile):
         self.moving_voter = voter
         return self
 
-    def plot_evolution(self, show=True):
+    def plot_scores_evolution(self, show=True):
         """
         This function plot the evolution of the scores of the candidates when the moving voters' embeddings
         are changing.
@@ -101,7 +101,7 @@ class MovingVoterProfile(Profile):
         Parameters
         ----------
         show : bool
-            If True, the figure is shown at the end of the function
+            If True, the figure is shown at the end of the function.
 
         """
         tab_x = np.linspace(0, 1, 20)
@@ -121,48 +121,52 @@ class MovingVoterProfile(Profile):
         plt.xlim(0, 1)
         plt.legend()
         if show:
-            plt.show()  # pragma : no cover
+            plt.show()  # pragma: no cover
 
+    def plot_features_evolution(self, show=True):
+        """
+        This function plot the evolution of the features of the candidates when the moving voters' embeddings
+        are changing. Only works for SVDMax and FeaturesRule.
 
-class MovingVoterFeatures(DeleteCacheMixin):
-    """
-    A class to see what happen to the featyres when a voter moves from a group to another
+        Parameters
+        ----------
+        show : bool
+            If True, the figure is shown at the end of the function.
 
-    Parameters
-    ________
-    r : ScoringFunction
-        the rule we are using
-    """
-    def __init__(self, r=None):
-        self.rule_ = None
-        self.profile_ = Profile(4, 3)
-        self.profile_.add_group(1, [0, 0, 1], [0, 0, 1, 0.5], 0, 0)
-        self.profile_.add_group(1, [0, 1, 0], [0, 1, 0, 0.5], 0, 0)
-        self.profile_.add_group(1, [1, 0, 0], [1, 0, 0, 0.5], 0, 0)
-        self.profile_.add_group(1, [1, 0, 0], [0.75, 0.75, 0.75, 0.75], 0, 0)
-        if r is not None:
-            self(r)
-
-    def __call__(self, r):
-        self.rule_ = r
-        return self
-
-    def plot_evol(self):
+        Examples
+        --------
+        >>> p = MovingVoterProfile(SVDMax())
+        >>> p.plot_features_evolution(show=False)
+        """
         tab_x = np.linspace(0, 1, 20)
         tab_y = []
         for x in tab_x:
-            self.profile_.embs[3] = normalize([1 - x, x, 0])
-            _, vectors = self.rule_(self.profile_).winner_k()
-            tab_y.append(vectors)
+            self.embeddings[self.moving_voter] = normalize([1-x, x, 0])
+            tab_y.append(self.rule_(self).features_)
         tab_y = np.array(tab_y)
 
-        fig = plt.figure(figsize=(10, 10))
-        ax = create_3D_plot(fig)
-        colors = ["blue", "orange", "green", "red"]
-        name = ["Start", "End", "Orth", "Consensus"]
-        for i in range(4):
-            ax.plot(tab_y[::, i, 0], tab_y[::, i, 1], tab_y[::, i, 2], color=colors[i], alpha=0.5, label=name[i])
+        fig = plt.figure(figsize=(10, 5))
+
+        ax = create_3D_plot(fig, position=[1, 2, 1])
+        name = ["Start", "End", "Orthogonal", "Consensus"]
+        for i in range(self.n_candidates):
+            ax.plot(tab_y[::, i, 0], tab_y[::, i, 1], tab_y[::, i, 2], color='k', alpha=0.5, label=name[i])
             for j, v in enumerate(tab_y[::, i]):
-                ax.plot([0, v[0]], [0, v[1]], [0, v[2]], color=colors[i], alpha=j/60)
+                vec_normalized = normalize(v)
+                ax.plot([0, v[0]], [0, v[1]], [0, v[2]],
+                        color=(vec_normalized[0] * 0.8, vec_normalized[1] * 0.8, vec_normalized[2] * 0.8),
+                        alpha=j / 60)
+        ax.set_title("Evolution of the features")
         plt.legend()
-        plt.show()
+
+        tax = create_ternary_plot(fig, position=[1, 2, 2])
+        for i in range(self.n_candidates):
+            points = [normalize(x[[0, 2, 1]])**2 for x in tab_y[::, i]]
+            vec_init = normalize(tab_y[0, i, [0, 2, 1]])**2
+            tax.plot(points, color=(vec_init[0] * 0.8, vec_init[2] * 0.8, vec_init[1] * 0.8), alpha=0.8)
+            tax.scatter([vec_init],
+                        color=(vec_init[0] * 0.8, vec_init[2] * 0.8, vec_init[1] * 0.8),
+                        alpha=0.7, s=50)
+
+        if show:
+            plt.show()  # pragma: no cover

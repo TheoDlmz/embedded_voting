@@ -21,6 +21,9 @@ def test_plot():
         election.plot_features("toto", show=False)
     with pytest.raises(ValueError):
         election.plot_features("3D", dim=[1, 2, 3, 4], show=False)
+    election = SVDMax(my_profile)
+    election.plot_features("3D", show=False)
+    election.plot_features("ternary", show=False)
 
 
 def test_special_cases():
@@ -67,4 +70,3 @@ def test_fake_svd():
     election = FakeSVDRule(my_profile, np.dot, use_rank=True)
     election.set_rule(np.prod)
     _ = election.scores_
-

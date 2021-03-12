@@ -1,6 +1,6 @@
 from embedded_voting.profile.Profile import Profile
 from embedded_voting.profile.ParametricProfile import ParametricProfile
-from embedded_voting.profile.moving import MovingVoterProfile
+from embedded_voting.profile.MovingVoter import MovingVoterProfile
 from embedded_voting.scoring.singlewinner.svd import *
 import pytest
 import numpy as np
@@ -15,7 +15,7 @@ def test_plot():
     my_profile.plot_candidates("ternary", show=False)
 
     my_profile = MovingVoterProfile(SVDNash())
-    my_profile.plot_evolution(show=False)
+    my_profile.plot_scores_evolution(show=False)
 
 
 def test_error():

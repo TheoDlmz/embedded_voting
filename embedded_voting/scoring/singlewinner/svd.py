@@ -8,6 +8,9 @@ This file is part of Embedded Voting.
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
 from embedded_voting.profile.Profile import Profile
+from embedded_voting.utils.cached import cached_property
+import matplotlib.pyplot as plt
+from embedded_voting.utils.miscellaneous import normalize
 
 
 class SVDRule(ScoringRule):
@@ -264,6 +267,107 @@ class SVDMax(SVDRule):
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
         super().__init__(profile=profile, aggregation_rule=np.max, square_root=square_root, use_rank=use_rank)
+
+    def _feature(self, candidate):
+        """
+        A function to get the feature vector of the candidate passed as parameter. The feature vector is
+        defined as the singular vector associated to the maximal singular value.
+
+        Parameters
+        ----------
+        candidate : int
+            The index of the candidate for which we want the feature vector.
+
+        Return
+        ------
+        np.ndarray
+            The feature vector of the candidate of length :attr:`n_dim`.
+        """
+        embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
+        _, vp, vec = np.linalg.svd(embeddings)
+        vec = vec[0]
+        if vec.sum() < 0:
+            return - vec * np.sqrt(vp[0])
+        else:
+            return vec * np.sqrt(vp[0])
+
+    @cached_property
+    def features_(self):
+        """
+        A function to get the feature vectors of the candidates. The feature vector is
+        defined as the singular vector associated to the maximal singular value.
+
+        Return
+        ------
+        np.ndarray
+            The feature vector of the candidates of shape :attr:`n_candidates`, :attr:`n_dim`.
+
+        Examples
+        --------
+        >>> my_profile = Profile(3, 2)
+        >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
+        >>> embeddings = [[1, 1], [1, 0], [0, 1]]
+        >>> _ = my_profile.add_voters(embeddings, scores)
+        >>> election = SVDMax(my_profile)
+        >>> election.features_
+        array([[0.8517226 , 0.57664428],
+               [0.28947845, 1.04510904],
+               [0.22891028, 0.96967952]])
+        """
+        return np.array([self._feature(candidate) for candidate in range(self.profile_.n_candidates)])
+
+    def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):
+        """
+        This function plot the features for every candidate in the given dimensions.
+
+        Parameters
+        ----------
+        plot_kind : str
+            The kind of plot we want to show. Can be "3D" or "ternary".
+        dim : list
+            The 3 dimensions we are using for our plot.
+        row_size : int
+            Number of subplots by row. Default is set to 5.
+        show : bool
+            If True, plot the figure at the end of the function.
+        """
+        if dim is None:
+            dim = [0, 1, 2]
+        else:
+            if len(dim) != 3:
+                raise ValueError("The number of dimensions should be 3")
+
+        n_candidate = self.profile_.n_candidates
+        n_rows = (n_candidate - 1) // row_size + 1
+        fig = plt.figure(figsize=(row_size * 5, n_rows * 5))
+        position = [n_rows, row_size, 1]
+        features = self.features_
+        for candidate in range(n_candidate):
+            ax = self.profile_.plot_candidate(candidate,
+                                              plot_kind=plot_kind,
+                                              dim=dim,
+                                              fig=fig,
+                                              position=position,
+                                              show=False)
+            if plot_kind == "3D":
+                x1 = features[candidate, dim[0]]
+                x2 = features[candidate, dim[1]]
+                x3 = features[candidate, dim[2]]
+                ax.plot([0, x1], [0, x2], [0, x3], color='k', linewidth=2)
+                ax.scatter([x1], [x2], [x3], color='k', s=5)
+            elif plot_kind == "ternary":
+                x1 = features[candidate, dim[0]]
+                x2 = features[candidate, dim[2]]
+                x3 = features[candidate, dim[1]]
+                feature_bis = [x1, x2, x3]
+                feature_bis = np.maximum(feature_bis, 0)
+                size_features = np.linalg.norm(feature_bis)
+                feature_bis = normalize(feature_bis)
+                ax.scatter([feature_bis ** 2], color='k', s=50*size_features+1)
+            position[2] += 1
+
+        if show:
+            plt.show()  # pragma: no cover
 
 
 class SVDLog(SVDRule):
