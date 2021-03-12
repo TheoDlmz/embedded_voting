@@ -58,7 +58,7 @@ class SVDRule(ScoringRule):
     >>> election.winner_
     0
     >>> election.welfare_
-    array([1.        , 0.        , 0.03502424])
+    [1.0, 0.0, 0.03502424020689993]
 
     """
     def __init__(self, profile=None, aggregation_rule=np.prod, square_root=True, use_rank=False):
@@ -151,7 +151,7 @@ class SVDNash(SVDRule):
     >>> election.winner_
     0
     >>> election.welfare_
-    array([1.        , 0.        , 0.03502424])
+    [1.0, 0.0, 0.03502424020689993]
 
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
@@ -187,7 +187,7 @@ class SVDSum(SVDRule):
     >>> election.winner_
     0
     >>> election.welfare_
-    array([1.       , 0.3310895, 0.       ])
+    [1.0, 0.3310895033605581, 0.0]
 
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
@@ -223,7 +223,7 @@ class SVDMin(SVDRule):
     >>> election.winner_
     0
     >>> election.welfare_
-    array([1.        , 0.        , 0.32109962])
+    [1.0, 0.0, 0.32109962168387557]
 
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
@@ -259,7 +259,7 @@ class SVDMax(SVDRule):
     >>> election.winner_
     1
     >>> election.welfare_
-    array([0.35595177, 1.        , 0.        ])
+    [0.3559517700252816, 1.0, 0.0]
 
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
@@ -298,7 +298,7 @@ class SVDLog(SVDRule):
     >>> election.winner_
     0
     >>> election.welfare_
-    array([1.        , 0.16377663, 0.        ])
+    [1.0, 0.1637766270779778, 0.0]
 
     """
     def __init__(self, profile=None, const=1, square_root=True, use_rank=False):

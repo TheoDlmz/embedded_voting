@@ -8,7 +8,6 @@ This file is part of Embedded Voting.
 
 from embedded_voting.scoring.singlewinner.general import ScoringRule
 from embedded_voting.profile.Profile import Profile
-import numpy as np
 
 
 class SumScores(ScoringRule):
@@ -39,7 +38,7 @@ class SumScores(ScoringRule):
     >>> election.winner_
     1
     >>> election.welfare_
-    array([0.33333333, 1.        , 0.        ])
+    [0.3333333333333328, 1.0, 0.0]
     """
     def score_(self, candidate):
         return self.profile_.scores[::, candidate].sum()
@@ -72,6 +71,8 @@ class ProductScores(ScoringRule):
     [0, 2, 1]
     >>> election.winner_
     0
+    >>> election.welfare_
+    [1.0, 0, 0.6857142857142858]
     """
     def __init__(self, profile):
         super().__init__(profile)

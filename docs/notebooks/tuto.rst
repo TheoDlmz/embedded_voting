@@ -5,4 +5,4 @@ Tutorials
 .. toctree::
 
     profile
-    voting_1
+    election

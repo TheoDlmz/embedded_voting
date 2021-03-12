@@ -33,6 +33,8 @@ class ZonotopeRule(ScoringRule):
     [0, 2, 1]
     >>> election.winner_
     0
+    >>> election.welfare_
+    [1.0, 0.0, 0.7939978029958997]
 
     """
     def __init__(self, profile):
@@ -90,6 +92,8 @@ class MaxCubeRule(ScoringRule):
     [1, 0, 2]
     >>> election.winner_
     1
+    >>> election.welfare_
+    [0.12408405037529154, 1.0, 0.0]
 
     """
     def __init__(self, profile):

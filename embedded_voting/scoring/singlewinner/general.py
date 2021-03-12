@@ -107,7 +107,7 @@ class ScoringRule(DeleteCacheMixin):
         ------
         float list
             Return the welfare of every candidate, where the welfare is defined as
-            `(score - score_min)/(score_max - score_min)`. Not defined if :attr:`_score_components` > 1.
+            `(score - score_min)/(score_max - score_min)`.
 
         """
         if self._score_components == 1:
@@ -116,9 +116,24 @@ class ScoringRule(DeleteCacheMixin):
             min_score = np.min(scores)
             if max_score == min_score:
                 return np.ones(self.profile_.n_candidates)
-            return (scores - min_score) / (max_score - min_score)
+            return list((scores - min_score) / (max_score - min_score))
         else:
-            raise NotImplementedError
+            scores = self.scores_
+            max_comp = max(scores)
+            min_comp = min(scores)
+            score_min = min_comp[-1]
+            score_max = max_comp[-1]
+            if min_comp[:-1] != max_comp[:-1]:
+                score_min = 0
+            welfare = []
+            for s in scores:
+                s1 = s[:-1]
+                s2 = s[-1]
+                if s1 == max_comp[:-1]:
+                    welfare.append((s2 - score_min)/(score_max - score_min))
+                else:
+                    welfare.append(0)
+            return welfare
 
     def plot_winner(self, plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """

@@ -36,7 +36,7 @@ class FeaturesRule(ScoringRule):
     >>> election.winner_
     1
     >>> election.welfare_
-    array([0.08320268, 1.        , 0.        ])
+    [0.08320268363041217, 1.0, 0.0]
     """
 
     @cached_property
