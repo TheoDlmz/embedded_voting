@@ -68,6 +68,31 @@ class ScoringRule(DeleteCacheMixin):
         return [self.score_(candidate) for candidate in range(self.profile_.n_candidates)]
 
     @cached_property
+    def scores_zip(self):
+        """
+        Return the scores of all candidates in the election, but there is only one component for each candidate.
+
+        Return
+        ------
+        list
+            The score of every candidates. The score of each candidate is a float.
+        """
+        if self._score_components == 1:
+            return self.scores_
+        else:
+            scores = self.scores_
+            max_comp = max(scores)
+            scores_bis = []
+            for s in scores:
+                s1 = s[:-1]
+                s2 = s[-1]
+                if s1 == max_comp[:-1]:
+                    scores_bis.append(s2)
+                else:
+                    scores_bis.append(0)
+            return scores_bis
+
+    @cached_property
     def ranking_(self):
         """
         Return the ranking of the candidates depending on there scores.
@@ -110,30 +135,12 @@ class ScoringRule(DeleteCacheMixin):
             `(score - score_min)/(score_max - score_min)`.
 
         """
-        if self._score_components == 1:
-            scores = self.scores_
-            max_score = np.max(scores)
-            min_score = np.min(scores)
-            if max_score == min_score:
-                return np.ones(self.profile_.n_candidates)
-            return list((scores - min_score) / (max_score - min_score))
-        else:
-            scores = self.scores_
-            max_comp = max(scores)
-            min_comp = min(scores)
-            score_min = min_comp[-1]
-            score_max = max_comp[-1]
-            if min_comp[:-1] != max_comp[:-1]:
-                score_min = 0
-            welfare = []
-            for s in scores:
-                s1 = s[:-1]
-                s2 = s[-1]
-                if s1 == max_comp[:-1]:
-                    welfare.append((s2 - score_min)/(score_max - score_min))
-                else:
-                    welfare.append(0)
-            return welfare
+        scores = self.scores_zip
+        max_score = np.max(scores)
+        min_score = np.min(scores)
+        if max_score == min_score:
+            return np.ones(self.profile_.n_candidates)
+        return list((scores - min_score) / (max_score - min_score))
 
     def plot_winner(self, plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """

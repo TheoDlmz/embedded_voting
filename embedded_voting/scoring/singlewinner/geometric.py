@@ -37,7 +37,7 @@ class ZonotopeRule(ScoringRule):
     [1.0, 0.0, 0.7939978029958997]
 
     """
-    def __init__(self, profile):
+    def __init__(self, profile=None):
         super().__init__(profile)
         self._score_components = 2
 
@@ -96,7 +96,7 @@ class MaxCubeRule(ScoringRule):
     [0.12408405037529154, 1.0, 0.0]
 
     """
-    def __init__(self, profile):
+    def __init__(self, profile=None):
         super().__init__(profile)
         self._score_components = 2
 

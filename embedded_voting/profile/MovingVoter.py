@@ -20,8 +20,8 @@ class MovingVoterProfile(Profile):
     A class to see what happen to the scores of the different candidates when a voter moves from a group to another.
     There is 4 candidates and 3 groups: Each group strongly support one of the candidate and dislike the other
     candidates, except the last candidate which is okay for everyone. The moving voter is a voter that do not have any
-    preference between the candidates (she gives a score to 0.75 to every candidate) but her embeddings move from
-    one position to another
+    preference between the candidates (she gives a score to 0.8 to every candidate, except 0.5 to the last one)
+    but her embeddings move from one position to another
 
     Parameters
     ----------
@@ -48,18 +48,18 @@ class MovingVoterProfile(Profile):
            [0., 1., 0.],
            [1., 0., 0.]])
     >>> moving_profile.scores
-    array([[0.5, 0.5, 0.5, 0.5],
-           [0.1, 0.1, 0.9, 0.5],
-           [0.1, 0.9, 0.1, 0.5],
-           [0.9, 0.1, 0.1, 0.5]])
+    array([[0.8, 0.8, 0.8, 0.5],
+           [0.1, 0.1, 1. , 0.5],
+           [0.1, 1. , 0.1, 0.5],
+           [1. , 0.1, 0.1, 0.5]])
     """
     def __init__(self, rule=None):
         super().__init__(4, 3)
         self.rule_ = rule
-        self.add_voter([1, 0, 0], [.5, .5, .5, .5])
-        self.add_voter([0, 0, 1], [.1, .1, .9, .5])
-        self.add_voter([0, 1, 0], [.1, .9, .1, .5])
-        self.add_voter([1, 0, 0], [.9, .1, .1, .5])
+        self.add_voter([1, 0, 0], [.8, .8, .8, .5])
+        self.add_voter([0, 0, 1], [.1, .1, 1, .5])
+        self.add_voter([0, 1, 0], [.1, 1, .1, .5])
+        self.add_voter([1, 0, 0], [1, .1, .1, .5])
         self.moving_voter = 0
 
     def __call__(self, r):
@@ -108,7 +108,7 @@ class MovingVoterProfile(Profile):
         tab_y = []
         for x in tab_x:
             self.embeddings[self.moving_voter] = normalize([1-x, x, 0])
-            tab_y.append(self.rule_(self).scores_)
+            tab_y.append(self.rule_(self).scores_zip)
 
         tab_y = np.array(tab_y).T
         name = ["Start", "End", "Orthogonal", "Consensus"]
@@ -150,7 +150,10 @@ class MovingVoterProfile(Profile):
         ax = create_3D_plot(fig, position=[1, 2, 1])
         name = ["Start", "End", "Orthogonal", "Consensus"]
         for i in range(self.n_candidates):
-            ax.plot(tab_y[::, i, 0], tab_y[::, i, 1], tab_y[::, i, 2], color='k', alpha=0.5, label=name[i])
+            vec_init = normalize(tab_y[0, i])**2
+            ax.plot(tab_y[::, i, 0], tab_y[::, i, 1], tab_y[::, i, 2],
+                    color=(vec_init[0] * 0.8, vec_init[1] * 0.8, vec_init[2] * 0.8),
+                    alpha=0.5, label=name[i])
             for j, v in enumerate(tab_y[::, i]):
                 vec_normalized = normalize(v)
                 ax.plot([0, v[0]], [0, v[1]], [0, v[2]],

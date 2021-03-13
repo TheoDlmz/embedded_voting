@@ -6,3 +6,4 @@ Tutorials
 
     profile
     election
+    moving

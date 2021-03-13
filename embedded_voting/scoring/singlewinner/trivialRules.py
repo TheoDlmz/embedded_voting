@@ -72,9 +72,9 @@ class ProductScores(ScoringRule):
     >>> election.winner_
     0
     >>> election.welfare_
-    [1.0, 0, 0.6857142857142858]
+    [1.0, 0.0, 0.6857142857142858]
     """
-    def __init__(self, profile):
+    def __init__(self, profile=None):
         super().__init__(profile)
         self._score_components = 2
 

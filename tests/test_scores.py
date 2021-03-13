@@ -24,6 +24,8 @@ def test_plot():
     election = SVDMax(my_profile)
     election.plot_features("3D", show=False)
     election.plot_features("ternary", show=False)
+    with pytest.raises(ValueError):
+        election.plot_features("3D", dim=[1, 2, 3, 4], show=False)
 
 
 def test_special_cases():

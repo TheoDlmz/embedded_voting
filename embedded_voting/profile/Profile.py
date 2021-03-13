@@ -701,3 +701,39 @@ class Profile(DeleteCacheMixin):
         p.n_voters = self.n_voters
         p.scores = self.scores
         return p
+
+    def reset_profile(self, profile=None):
+        """
+        Reset the profile. The profile becomes a copy of the one passed as parameters if there is one.
+
+        Parameters
+        ----------
+        profile : Profile
+            A profile if we want to copy of it.
+
+        Return
+        ------
+        Profile
+            The object itself.
+
+        Examples
+        --------
+        >>> my_profile = Profile(3, 3)
+        >>> my_profile.uniform_distribution(100).n_voters
+        100
+        >>> my_profile.reset_profile().n_voters
+        0
+        """
+        if profile is None:
+            self.embeddings = np.zeros((0, self.n_dim))
+            self.scores = np.zeros((0, self.n_candidates))
+            self.n_voters = 0
+        else:
+            if self.n_dim != profile.n_dim:
+                raise ValueError("The two profiles should have the same number of dimensions")
+            if self.n_candidates != profile.n_candidates:
+                raise ValueError("The two profiles should have the same number of candidates")
+            self.embeddings = profile.embeddings
+            self.scores = profile.scores
+            self.n_voters = profile.n_voters
+        return self
