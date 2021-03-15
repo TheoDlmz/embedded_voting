@@ -97,6 +97,8 @@ class IterRule(MultiwinnerRule):
         self.quota = quota
         self.take_min = take_min
         self.weights = np.ones(0)
+        if quota not in ["classic", "droop"]:
+            raise ValueError("Quota should be either 'classic' (n/k) or 'droop' (n/(k+1) + 1)")
         super().__init__(profile=profile, k=k)
 
     def _winner_k(self, winners):
@@ -167,6 +169,26 @@ class IterRule(MultiwinnerRule):
 
         pond_weights = np.array(temp) * quota_val / total_sat
         self.weights = np.maximum(0, self.weights - pond_weights)
+        return self
+
+    def set_quota(self, quota):
+        """
+        A function to update the :attr:`quota` of the rule
+
+        Parameters
+        ----------
+        quota : str
+            The new quota, should be either "droop" or "classic"
+
+        Return
+        ------
+        MultiwinnerRule
+            The object itself
+        """
+        if quota not in ["classic", "droop"]:
+            raise ValueError("Quota should be either 'classic' (n/k) or 'droop' (n/(k+1) + 1)")
+        self.delete_cache()
+        self.quota = quota
         return self
 
     @cached_property
