@@ -8,8 +8,8 @@ def test_plots():
     scores = [[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 0], [0, 0, 0, 0, 0, 1]]
     probability = [2 / 4, 1 / 4, 1/4]
     my_profile = ParametricProfile(6, 3, 100, scores, probability).set_parameters(1, 1)
-    election = IterSVD(my_profile, 4, quota="droop", take_min=True)
-    election(my_profile)
+    election = IterSVD(my_profile, 3, quota="droop", take_min=True)
+    election(my_profile, 4)
     assert election.winners_ == [0, 3, 5, 1]
     election.plot_winners("ternary", show=False)
     election.plot_winners("3D", show=False)
