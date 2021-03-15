@@ -1,43 +1,68 @@
 
-from embedded_voting.scoring.multiwinner.general import IterRules, CLASSIC_QUOTA
-from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
+from embedded_voting.scoring.multiwinner.general import IterRules
+from embedded_voting.profile.ParametricProfile import ParametricProfile
 import numpy as np
 
 
 class IterFeatures(IterRules):
     """
-    Iterative multiwinner rule based on SVD
+    Iterative multiwinner rule based on Features vector.
 
-    Parameters
-    __________
-    profile : Profile
-        the profile of voters
-    k : int
-        the size of the committee
-    quota : {DROOP_QUOTA, CLASSIC_QUOTA, DROOP_QUOTA_MIN, CLASSIC_QUOTA_MIN}
-        the quota used for the re-weighing step
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> scores = [[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]]
+    >>> probability = [3/4, 1/4]
+    >>> my_profile = ParametricProfile(6, 2, 100, scores, probability).set_parameters(1, 1)
+    >>> election = IterFeatures(my_profile, 3)
+    >>> election.winners_
+    [0, 3, 1]
+    >>> election = IterFeatures(my_profile, 4)
+    >>> election.winners_
+    [0, 3, 1, 2]
+    >>> election.plot_weights(dim=[0, 0, 0], show=False)
+    Weight / remaining candidate :  [25.0, 24.999999999999996, 25.000000000000004, 24.999999999999996]
+    >>> election.features_vectors
+    [array([1., 0.]), array([0., 1.]), array([0.65753425, 0.        ]), array([0.31506849, 0.        ])]
     """
 
-    @cached_property
-    def features_(self):
-        X = self.profile_.embs
-        S = self.profile_.scores
-        return np.dot(np.dot(np.linalg.inv(np.dot(X.T, X)), X.T), S).T
-
     @staticmethod
-    def compute_features(X, S):
-        return np.dot(np.dot(np.linalg.inv(np.dot(X.T, X)), X.T), S).T
+    def compute_features(embeddings, scores):
+        """
+        A function to compute features for some embeddings and scores
 
-    def winner_k(self):
+        Parameters
+        ----------
+        embeddings : np.ndarray
+            The embeddings of the voters. Should be of shape :attr:`n_voters`, :attr:`n_dim`.
+        scores : np.ndarray
+            The scores given by the voters to the candidates.
+            Should be of shape :attr:`n_voters`, :attr:`n_candidates`.
+
+        Return
+        ------
+        np.ndarray
+            The features of every candidates. Of shape :attr:`n_candidates`, :attr:`n_dim`.
+        """
+        return np.dot(np.dot(np.linalg.inv(np.dot(embeddings.T, embeddings)), embeddings.T), scores).T
+
+    def winner_k(self, winners):
         if len(self.weights) == 0:
-            self.weights = np.ones(self.profile_.n)
+            self.weights = np.ones(self.profile_.n_voters)
 
-        features = self.compute_features(self.profile_.embs,
+        features = self.compute_features(self.profile_.embeddings,
                                          np.dot(np.diag(self.weights), self.profile_.scores))
         scores = np.sum(features ** 2, axis=1)
-        return scores, features
+
+        scores = np.array(scores)
+        scores[winners] = 0
+
+        winner_j = np.argmax(scores)
+        vec = features[winner_j]
+
+        return winner_j, vec
 
     def satisfaction(self, winner_j, vec):
-        temp = [np.dot(self.profile_.embs[i], vec) for i in range(self.profile_.n)]
-        temp = [self.profile_.scores[i, winner_j] * temp[i] for i in range(self.profile_.n)]
+        temp = [np.dot(self.profile_.embeddings[i], vec) for i in range(self.profile_.n_voters)]
+        temp = [self.profile_.scores[i, winner_j] * temp[i] for i in range(self.profile_.n_voters)]
         return temp

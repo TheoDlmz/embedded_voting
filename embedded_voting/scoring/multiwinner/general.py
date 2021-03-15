@@ -67,6 +67,14 @@ class MultiwinnerRule(DeleteCacheMixin):
 
     @cached_property
     def winners_(self):
+        """
+        A function that returns the winners, i.e. the members of the elected committee.
+
+        Return
+        ------
+        int list
+            The indexes of the elected candidates
+        """
         raise NotImplementedError
 
 
@@ -80,128 +88,232 @@ class IterRules(MultiwinnerRule):
     profile : Profile
         The profile of voters.
     k : int
-        the size of the committee
-    quota : {DROOP_QUOTA, CLASSIC_QUOTA, DROOP_QUOTA_MIN, CLASSIC_QUOTA_MIN}
-        the quota used for the re-weighing step
+        The size of the committee
+    quota : str
+        The quota used for the re-weighing step. Either "droop" quota (n/(k+1) +1) or
+        "classic" quota (n/k).
+    take_min : bool
+        If True, when the total satisfaction is less than the quota,
+        we replace the quota by the total satisfaction. By default, it is set to false.
+
     """
 
-    def __init__(self, profile=None, k=None, quota=CLASSIC_QUOTA):
+    def __init__(self, profile=None, k=None, quota="classic", take_min=False):
         self.quota = quota
+        self.take_min = take_min
         self.weights = np.ones(0)
         super().__init__(profile=profile, k=k)
 
-    def winner_k(self):
+    def winner_k(self, winners):
+        """
+        This function determines the winner of the kth iteration.
+
+        Parameters
+        ----------
+        winners : int list
+            The list of the k-1 first winner of the committee.
+
+        Return
+        ------
+        int
+            The kth winner.
+         np.ndarray
+            The feature vector associated to this candidate.
+            The vector should be of length :attr:`n_dim`.
+        """
         raise NotImplementedError
 
-    def satisfaction(self, candidate, vec):
+    def satisfaction(self, candidate, features_vector):
+        """
+        This function computes the satisfaction of every voter given the candidate winner and
+        its features vector.
+
+        Parameters
+        ----------
+        candidate : int
+            The winner candidate
+        features_vector : np.ndarray
+            The feature vector of the candidate winner.
+
+        Return
+        ------
+        float list
+            The list of the voters' satisfaction with this candidate. Should be of length :attr:`n_voters`.
+
+        """
         raise NotImplementedError
 
-    def updateWeight(self, sat, j):
-        if self.quota in [CLASSIC_QUOTA, CLASSIC_QUOTA_MIN]:
-            quota_val = self.profile_.n / self.k_
-        elif self.quota in [DROOP_QUOTA, DROOP_QUOTA_MIN]:
-            quota_val = self.profile_.n / (self.k_ + 1) + 1
+    def updateWeight(self, satisfactions):
+        """
+        This function updates voters' weights depending on their satisfaction with the recently elected candidate.
+
+        Parameters
+        ----------
+        satisfactions : float list
+            The list of the voters' satisfaction with this candidate. Should be of length :attr:`n_voters`.
+
+        Return
+        ------
+        IterRules
+            The object itself
+        """
+        if self.quota == "classic":
+            quota_val = self.profile_.n_voters / self.k_
+        elif self.quota in "droop":
+            quota_val = self.profile_.n_voters / (self.k_ + 1) + 1
         else:
-            raise ValueError("Quota Not Existing")
+            raise ValueError("Quota should be either 'classic' (n/k) or 'droop' (n/(k+1) + 1)")
 
-        temp = [sat[i] * self.weights[i] for i in range(self.profile_.n)]
+        temp = [satisfactions[i] * self.weights[i] for i in range(self.profile_.n_voters)]
         total_sat = np.sum(temp)
 
-        if self.quota in [CLASSIC_QUOTA_MIN, DROOP_QUOTA_MIN]:
+        if self.take_min:
             quota_val = min(quota_val, total_sat)
 
         pond_weights = np.array(temp) * quota_val / total_sat
         self.weights = np.maximum(0, self.weights - pond_weights)
+        return self
 
     @cached_property
-    def ruleResults_(self):
-        n_voters = self.profile_.n
+    def _ruleResults(self):
+        """
+        This function execute the rule and compute the winner, their features vectors, and the weights associated
+        to them.
 
-        frac = n_voters // self.k_
+        Return
+        ------
+        dict
+            A dictionary with 4 elements :
+            1) "winners" contains the list of winners.
+            2) "vectors" contains the list of candidates features vectors.
+            3) "weights_list" contains the list of voters' weight at each step.
+        """
+        n_voters = self.profile_.n_voters
 
         winners = []
-        voters_list = []
-        voters = np.arange(n_voters)
         vectors = []
         self.weights = np.ones(n_voters)
         ls_weights = [self.weights]
 
-        for j in range(self.k_):
-            scores, vectors_scores = self.winner_k()
-            scores = np.array(scores)
-            scores[winners] = 0
-
-            winner_j = np.argmax(scores)
-            vec = vectors_scores[winner_j]
+        for _ in range(self.k_):
+            winner_j, vec = self.winner_k(winners)
             vectors.append(vec)
             winners.append(winner_j)
 
             satisfactions = self.satisfaction(winner_j, vec)
 
-            self.updateWeight(satisfactions, j)
+            self.updateWeight(satisfactions)
             ls_weights.append(self.weights)
 
-            sorted_sat = np.argsort(satisfactions)[::-1]
-            voters_list.append(voters[sorted_sat[:frac:]])
-
-        self.ls_weight = ls_weights
-
-        return winners, voters_list, vectors
-
-    def plot_weights(self):
-        _ = self.ruleResults_
-        n_candidates = len(self.ls_weight)
-        n_rows = (n_candidates - 1) // 6 + 1
-        fig = plt.figure(figsize=(60, n_rows * 10))
-        position = [n_rows, 6, 1]
-        for i in range(n_candidates):
-            _ = self.profile_._plot_scores_3D(self.ls_weight[i],
-                                              title="Step %i" % i,
-                                              fig=fig,
-                                              position=position,
-                                              show=False)
-
-            position[2] += 1
-
-        sum_w = [self.ls_weight[i].sum() / (n_candidates - i - 1) for i in range(n_candidates - 1)]
-        print("Weight / remaining candidate : ", sum_w)
-        plt.show()
+        return {"winners": winners,
+                "vectors": vectors,
+                "weights_list": ls_weights}
 
     @cached_property
     def winners_(self):
-        return self.ruleResults_[0]
+        """
+        This function return the winning committee.
 
-    def plot_winners(self):
+        Return
+        ------
+        int list
+            The winning committee.
+        """
+        return self._ruleResults["winners"]
+
+    @cached_property
+    def features_vectors(self):
+        """
+        This function return the features vectors winning committee.
+
+        Return
+        ------
+        list
+            The list of the features vectors of each candidate. Each vector is of length :attr:`n_dim`.
+
+        """
+        return self._ruleResults["vectors"]
+
+    def plot_weights(self, plot_kind="3D", dim=None, row_size=5, verbose=True, show=True):
+        """
+        This function plot the evolution of the voters' weights after each step of the rule.
+
+        Parameters
+        ----------
+        plot_kind : str
+            The kind of plot we want to show. Can be "3D" or "ternary".
+        dim : list
+            The 3 dimensions we are using for our plot.
+        row_size : int
+            Number of subplots by row. Default is set to 5.
+        verbose : bool
+            If True, print the total weight by remaining candidate at the end of each step.
+        show : bool
+            If True, display the figure at the end of the function.
+
+        """
+        ls_weight = self._ruleResults["weights_list"]
+        vectors = self._ruleResults["vectors"]
+        n_candidates = len(ls_weight)
+        n_rows = (n_candidates - 1) // row_size + 1
+        fig = plt.figure(figsize=(5 * row_size, n_rows * 5))
+        position = [n_rows, row_size, 1]
+        if dim is None:
+            dim = [0, 1, 2]
+        for i in range(n_candidates):
+            ax = self.profile_.plot_scores(ls_weight[i],
+                                           plot_kind=plot_kind,
+                                           title="Step %i" % i,
+                                           dim=dim,
+                                           fig=fig,
+                                           position=position,
+                                           show=False)
+
+            if i > 0:
+                x1 = vectors[i-1][dim[0]]
+                x2 = vectors[i-1][dim[1]]
+                x3 = vectors[i-1][dim[2]]
+                if plot_kind == "3D":
+                    ax.plot([0, x1], [0, x2], [0, x3], color='k', linewidth=2)
+                    ax.scatter([x1], [x2], [x3], color='k', s=5)
+                elif plot_kind == "ternary":
+                    feature_bis = [x1, x3, x2]
+                    feature_bis = np.maximum(feature_bis, 0)
+                    size_features = np.linalg.norm(feature_bis)
+                    feature_bis = normalize(feature_bis)
+                    ax.scatter([feature_bis ** 2], color='k', s=50*size_features+1)
+
+            position[2] += 1
+
+        if verbose:
+            sum_w = [ls_weight[i].sum() / (n_candidates - i - 1) for i in range(n_candidates - 1)]
+            print("Weight / remaining candidate : ", sum_w)
+
+        if show:
+            plt.show()
+
+    def plot_winners(self, plot_kind="3D", dim=None, row_size=5, show=True):
+        """
+        This function plot the winners of the election.
+
+        Parameters
+        ----------
+        plot_kind : str
+            The kind of plot we want to show. Can be "3D" or "ternary".
+        dim : list
+            The 3 dimensions we are using for our plot.
+        row_size : int
+            Number of subplots by row. Default is set to 5.
+        show : bool
+            If True, plot the figure at the end of the function.
+
+        """
         winners = self.winners_
         titles = ["Winner n°%i" % (i + 1) for i in range(self.k_)]
 
-        self.profile_.plot_cands_3D(winners, titles)
-
-    def plot_winners_2D(self):
-        winners, voters_list, vectors = self.ruleResults_
-        ax = self.profile_.plot_profile_2D(show=False)
-        for i, v in enumerate(vectors):
-            v_temp = np.maximum(v, 0)
-            v_temp = normalize(v_temp)
-            ax.scatter([v_temp ** 2], color="k", alpha=0.8)
-        plt.show()
-
-    def plot_vectors(self):
-        n_cand = self.profile_.m
-        n_rows = (n_cand - 1) // 6 + 1
-        fig = plt.figure(figsize=(30, n_rows * 5))
-        intfig = [n_rows, 6, 1]
-        _, vectors = self.winner_k()
-        for candidate in range(n_cand):
-            ax = self.profile_.plot_scores(self.profile_.scores[::, candidate],
-                                           plot_kind="3D",
-                                           title="Candidate %i" % (candidate + 1),
-                                           fig=fig,
-                                           intfig=intfig,
-                                           show=False)
-
-            ax.plot([0, vectors[candidate][0]], [0, vectors[candidate][1]], [0, vectors[candidate][2]], color='k', linewidth=2)
-            ax.scatter([vectors[candidate][0]], [vectors[candidate][1]], [vectors[candidate][2]], color='k', s=5)
-            intfig[2] += 1
-
-        plt.show()
+        self.profile_.plot_candidates(plot_kind=plot_kind,
+                                      dim=dim,
+                                      list_candidates=winners,
+                                      list_titles=titles,
+                                      row_size=row_size,
+                                      show=show)
