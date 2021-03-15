@@ -1,10 +1,10 @@
 
-from embedded_voting.scoring.multiwinner.general import IterRules
+from embedded_voting.scoring.multiwinner.general import IterRule
 from embedded_voting.profile.ParametricProfile import ParametricProfile
 import numpy as np
 
 
-class IterFeatures(IterRules):
+class IterFeatures(IterRule):
     """
     Iterative multiwinner rule based on Features vector.
 
@@ -17,7 +17,7 @@ class IterFeatures(IterRules):
     >>> election = IterFeatures(my_profile, 3)
     >>> election.winners_
     [0, 3, 1]
-    >>> election = IterFeatures(my_profile, 4)
+    >>> _ = election.set_k(4)
     >>> election.winners_
     [0, 3, 1, 2]
     >>> election.plot_weights(dim=[0, 0, 0], show=False)
@@ -46,9 +46,7 @@ class IterFeatures(IterRules):
         """
         return np.dot(np.dot(np.linalg.inv(np.dot(embeddings.T, embeddings)), embeddings.T), scores).T
 
-    def winner_k(self, winners):
-        if len(self.weights) == 0:
-            self.weights = np.ones(self.profile_.n_voters)
+    def _winner_k(self, winners):
 
         features = self.compute_features(self.profile_.embeddings,
                                          np.dot(np.diag(self.weights), self.profile_.scores))
@@ -62,7 +60,7 @@ class IterFeatures(IterRules):
 
         return winner_j, vec
 
-    def satisfaction(self, winner_j, vec):
+    def _satisfaction(self, winner_j, vec):
         temp = [np.dot(self.profile_.embeddings[i], vec) for i in range(self.profile_.n_voters)]
         temp = [self.profile_.scores[i, winner_j] * temp[i] for i in range(self.profile_.n_voters)]
         return temp

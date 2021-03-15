@@ -1,9 +1,9 @@
-from embedded_voting.scoring.multiwinner.general import IterRules
+from embedded_voting.scoring.multiwinner.general import IterRule
 import numpy as np
 from embedded_voting.profile.ParametricProfile import ParametricProfile
 
 
-class IterSVD(IterRules):
+class IterSVD(IterRule):
     """
     Iterative multiwinner rule based on a SVD aggregation rule.
 
@@ -34,7 +34,7 @@ class IterSVD(IterRules):
     >>> election = IterSVD(my_profile, 3)
     >>> election.winners_
     [0, 3, 1]
-    >>> election = IterSVD(my_profile, 4)
+    >>> _ = election.set_k(4)
     >>> election.winners_
     [0, 1, 3, 2]
     >>> election.plot_weights(dim=[0, 0, 0], show=False)
@@ -49,11 +49,9 @@ class IterSVD(IterRules):
         self.square_root = square_root
         super().__init__(profile=profile, k=k, quota=quota, take_min=take_min)
 
-    def winner_k(self, winners):
+    def _winner_k(self, winners):
         vectors = []
         scores = []
-        if len(self.weights) == 0:
-            self.weights = np.ones(self.profile_.n_voters)
 
         for candidate in range(self.profile_.n_candidates):
             if candidate in winners:
@@ -77,6 +75,6 @@ class IterSVD(IterRules):
 
         return winner_j, vec
 
-    def satisfaction(self, candidate, vec):
+    def _satisfaction(self, candidate, vec):
         return [self.profile_.scores[i, candidate] * np.dot(self.profile_.embeddings[i], vec)
                 for i in range(self.profile_.n_voters)]

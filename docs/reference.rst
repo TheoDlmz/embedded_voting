@@ -8,4 +8,5 @@ Reference
    :caption: Contents:
 
    profile/index
-   singlewinner
+   singlewinner/index
+   multiwinner/index

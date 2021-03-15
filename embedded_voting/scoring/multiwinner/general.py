@@ -10,11 +10,6 @@ from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.utils.miscellaneous import normalize
 import matplotlib.pyplot as plt
 
-DROOP_QUOTA = 701
-CLASSIC_QUOTA = 700
-DROOP_QUOTA_MIN = 711
-CLASSIC_QUOTA_MIN = 710
-
 
 class MultiwinnerRule(DeleteCacheMixin):
     """
@@ -78,7 +73,7 @@ class MultiwinnerRule(DeleteCacheMixin):
         raise NotImplementedError
 
 
-class IterRules(MultiwinnerRule):
+class IterRule(MultiwinnerRule):
     """
     A class for multi winner rules that are adaptations of STV to the
     embeddings profile model.
@@ -104,7 +99,7 @@ class IterRules(MultiwinnerRule):
         self.weights = np.ones(0)
         super().__init__(profile=profile, k=k)
 
-    def winner_k(self, winners):
+    def _winner_k(self, winners):
         """
         This function determines the winner of the kth iteration.
 
@@ -117,13 +112,13 @@ class IterRules(MultiwinnerRule):
         ------
         int
             The kth winner.
-         np.ndarray
+        np.ndarray
             The feature vector associated to this candidate.
             The vector should be of length :attr:`n_dim`.
         """
         raise NotImplementedError
 
-    def satisfaction(self, candidate, features_vector):
+    def _satisfaction(self, candidate, features_vector):
         """
         This function computes the satisfaction of every voter given the candidate winner and
         its features vector.
@@ -143,7 +138,7 @@ class IterRules(MultiwinnerRule):
         """
         raise NotImplementedError
 
-    def updateWeight(self, satisfactions):
+    def _updateWeight(self, satisfactions):
         """
         This function updates voters' weights depending on their satisfaction with the recently elected candidate.
 
@@ -154,7 +149,7 @@ class IterRules(MultiwinnerRule):
 
         Return
         ------
-        IterRules
+        IterRule
             The object itself
         """
         if self.quota == "classic":
@@ -196,13 +191,13 @@ class IterRules(MultiwinnerRule):
         ls_weights = [self.weights]
 
         for _ in range(self.k_):
-            winner_j, vec = self.winner_k(winners)
+            winner_j, vec = self._winner_k(winners)
             vectors.append(vec)
             winners.append(winner_j)
 
-            satisfactions = self.satisfaction(winner_j, vec)
+            satisfactions = self._satisfaction(winner_j, vec)
 
-            self.updateWeight(satisfactions)
+            self._updateWeight(satisfactions)
             ls_weights.append(self.weights)
 
         return {"winners": winners,
@@ -269,10 +264,10 @@ class IterRules(MultiwinnerRule):
                                            position=position,
                                            show=False)
 
-            if i > 0:
-                x1 = vectors[i-1][dim[0]]
-                x2 = vectors[i-1][dim[1]]
-                x3 = vectors[i-1][dim[2]]
+            if i < n_candidates - 1:
+                x1 = vectors[i][dim[0]]
+                x2 = vectors[i][dim[1]]
+                x3 = vectors[i][dim[2]]
                 if plot_kind == "3D":
                     ax.plot([0, x1], [0, x2], [0, x3], color='k', linewidth=2)
                     ax.scatter([x1], [x2], [x3], color='k', s=5)
@@ -290,7 +285,7 @@ class IterRules(MultiwinnerRule):
             print("Weight / remaining candidate : ", sum_w)
 
         if show:
-            plt.show()
+            plt.show() # pragma: no cover
 
     def plot_winners(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
