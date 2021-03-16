@@ -138,7 +138,9 @@ class IterRule(MultiwinnerRule):
             The list of the voters' satisfaction with this candidate. Should be of length :attr:`n_voters`.
 
         """
-        raise NotImplementedError
+        temp = [np.dot(self.profile_.embeddings[i], features_vector) for i in range(self.profile_.n_voters)]
+        temp = [self.profile_.scores[i, candidate] * temp[i] for i in range(self.profile_.n_voters)]
+        return temp
 
     def _updateWeight(self, satisfactions):
         """

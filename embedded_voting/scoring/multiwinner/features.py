@@ -59,8 +59,3 @@ class IterFeatures(IterRule):
         vec = features[winner_j]
 
         return winner_j, vec
-
-    def _satisfaction(self, winner_j, vec):
-        temp = [np.dot(self.profile_.embeddings[i], vec) for i in range(self.profile_.n_voters)]
-        temp = [self.profile_.scores[i, winner_j] * temp[i] for i in range(self.profile_.n_voters)]
-        return temp

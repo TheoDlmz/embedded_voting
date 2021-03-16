@@ -7,3 +7,4 @@ Tutorials
     profile
     election
     moving
+    multiwinner

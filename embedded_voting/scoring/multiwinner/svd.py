@@ -33,7 +33,7 @@ class IterSVD(IterRule):
     >>> my_profile = ParametricProfile(6, 2, 100, scores, probability).set_parameters(1, 1)
     >>> election = IterSVD(my_profile, 3)
     >>> election.winners_
-    [0, 3, 1]
+    [0, 1, 3]
     >>> _ = election.set_k(4)
     >>> election.winners_
     [0, 1, 3, 2]
@@ -59,7 +59,12 @@ class IterSVD(IterRule):
                 vectors.append(np.zeros(self.profile_.n_dim))
                 continue
             embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
-            embeddings = np.dot(np.diag(self.weights), embeddings)
+            weights = self.weights
+
+            if self.square_root:
+                weights = np.sqrt(weights)
+            embeddings = np.dot(np.diag(weights), embeddings)
+
             _, s_values, s_vectors = np.linalg.svd(embeddings, full_matrices=False)
             scores.append(self.aggregation_rule(s_values))
             vec = s_vectors[0]
@@ -74,7 +79,3 @@ class IterSVD(IterRule):
         vec = vectors[winner_j]
 
         return winner_j, vec
-
-    def _satisfaction(self, candidate, vec):
-        return [self.profile_.scores[i, candidate] * np.dot(self.profile_.embeddings[i], vec)
-                for i in range(self.profile_.n_voters)]

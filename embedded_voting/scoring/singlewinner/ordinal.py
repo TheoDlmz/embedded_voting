@@ -6,7 +6,6 @@ theo.delemazure@ens.fr
 This file is part of Embedded Voting.
 """
 import numpy as np
-from embedded_voting.utils.cached import cached_property
 from embedded_voting.scoring.singlewinner.general import ScoringRule
 from embedded_voting.profile.Profile import Profile
 from embedded_voting.scoring.singlewinner.svd import *
@@ -122,7 +121,8 @@ class PositionalRuleExtension(ScoringRule):
     def score_(self, candidate):
         return self._rule.scores_[candidate]
 
-    def plot_fake_profile(self, plot_kind="3D", dim=None, list_candidates=None, list_titles=None, row_size=5, show=True):
+    def plot_fake_profile(self, plot_kind="3D", dim=None, list_candidates=None,
+                          list_titles=None, row_size=5, show=True):
         """
         This function plot the candidate in the fake profile, using the scoring vector :attr:`points`.
 
