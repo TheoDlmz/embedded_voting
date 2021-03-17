@@ -3,8 +3,10 @@ from embedded_voting.manipulation.voter.general import SingleVoterManipulation, 
 from embedded_voting.manipulation.coalition.general import ManipulationCoalition
 from embedded_voting.manipulation.coalition.ordinal import ManipulationCoalitionExtension
 from embedded_voting.manipulation.voter.kapproval import SingleVoterManipulationKApp
+from embedded_voting.manipulation.voter.irv import SingleVoterManipulationIRV
+from embedded_voting.profile.ParametricProfile import ParametricProfile
 from embedded_voting.scoring.singlewinner.ordinal import BordaExtension
-from embedded_voting.scoring.singlewinner.svd import SVDSum
+from embedded_voting.scoring.singlewinner.svd import SVDSum, SVDNash
 import numpy as np
 from embedded_voting.profile.Profile import Profile
 
@@ -26,6 +28,12 @@ def test_single_voter():
     my_profile.add_voters([[1, 0]]*3 + [[0, 1]], [[1, .9, .1]]*3 + [[.9, 1, .1]])
     manipulation = SingleVoterManipulationKApp(my_profile, 2)
     manipulation(SVDSum())
+    assert manipulation.is_manipulable_ is True
+
+    np.random.seed(45533)
+    my_profile = ParametricProfile(10, 2, 10).set_parameters(.8, 0)
+    manipulation = SingleVoterManipulationIRV(my_profile)
+    manipulation(SVDNash())
     assert manipulation.is_manipulable_ is True
 
 
