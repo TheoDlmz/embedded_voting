@@ -3,7 +3,7 @@ import numpy as np
 from embedded_voting.manipulation.coalition.general import ManipulationCoalition
 from embedded_voting.profile.ParametricProfile import ParametricProfile
 from embedded_voting.scoring.singlewinner.svd import SVDNash
-from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension
+from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension, BordaExtension, KApprovalExtension
 
 
 class ManipulationCoalitionExtension(ManipulationCoalition):
@@ -94,3 +94,93 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
             print("Winner is %i" % new_winner)
 
         return new_winner == candidate
+
+
+class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
+    """
+    This class do the coalition manipulation analysis for the Borda extension.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile of voter on which we do the analysis
+    rule : ScoringRule
+        The rule we are analysing
+
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+    >>> manipulation = ManipulationCoalitionBorda(my_profile, rule=SVDNash())
+    >>> manipulation.winner_
+    1
+    >>> manipulation.is_manipulable_
+    True
+    >>> manipulation.worst_welfare_
+    0.0
+    """
+
+    def __init__(self, profile, rule=None):
+        super().__init__(profile, extension=BordaExtension(profile), rule=rule)
+
+
+class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
+    """
+    This class do the coalition manipulation analysis for the k-Approval extension.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile of voter on which we do the analysis
+    k : int
+        The parameter of the k-approval rule
+    rule : ScoringRule
+        The rule we are analysing
+
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+    >>> manipulation = ManipulationCoalitionKApp(my_profile, k=2, rule=SVDNash())
+    >>> manipulation.winner_
+    1
+    >>> manipulation.is_manipulable_
+    True
+    >>> manipulation.worst_welfare_
+    0.0
+    """
+
+    def __init__(self, profile, k=2, rule=None):
+        super().__init__(profile, extension=KApprovalExtension(profile, k=k), rule=rule)
+
+
+class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
+    """
+    This class do the coalition manipulation analysis for the instant runoff extension.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile of voter on which we do the analysis
+    rule : ScoringRule
+        The rule we are analysing
+
+
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+    >>> manipulation = ManipulationCoalitionIRV(my_profile, SVDNash())
+    >>> manipulation.winner_
+    1
+    >>> manipulation.is_manipulable_
+    False
+    >>> manipulation.worst_welfare_
+    1.0
+    """
+
+    def __init__(self, profile, rule=None):
+        super().__init__(profile, extension=InstantRunoffExtension(profile), rule=rule)

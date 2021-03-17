@@ -67,6 +67,7 @@ class PositionalRuleExtension(ScoringRule):
             self._score_components = rule._score_components
         self.fake_profile_ = self._create_fake_profile()
         self._rule = None
+        self(profile)
 
     def __call__(self, profile):
         self.profile_ = profile
