@@ -10,3 +10,4 @@ Reference
    profile/index
    singlewinner/index
    multiwinner/index
+   manipulation/index
