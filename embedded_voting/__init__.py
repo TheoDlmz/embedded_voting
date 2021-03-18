@@ -10,3 +10,5 @@ from embedded_voting.profile.ParametricProfile import *
 from embedded_voting.profile.MovingVoter import *
 from embedded_voting.scoring import *
 from embedded_voting.manipulation import *
+from embedded_voting.utils.plots import *
+

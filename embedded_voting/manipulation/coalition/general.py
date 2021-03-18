@@ -4,6 +4,7 @@ from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.profile.ParametricProfile import ParametricProfile
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 import matplotlib.pyplot as plt
+from embedded_voting.utils.plots import create_map_plot
 
 
 class ManipulationCoalition(DeleteCacheMixin):
@@ -182,15 +183,12 @@ class ManipulationCoalition(DeleteCacheMixin):
                 worst_welfare = min(worst_welfare, self.welfare_[i])
         return worst_welfare
 
-    def manipulation_map(self, parametric_profile, map_size=20, scores_matrix=None, show=True):
+    def manipulation_map(self, map_size=20, scores_matrix=None, show=True):
         """
         A function to plot the manipulability of the profile when the polarisation and the coherence vary.
 
         Parameters
         ----------
-        parametric_profile : ParametricProfile
-            The profile on which we do the manipulation. The only needed information are : :attr:`n_voters`,
-            :attr:`n_candidates`, :attr:`n_dim` and :attr:`prob`.
         map_size : int
             The number of different coherence and polarisation parameters tested.
             The total number of test is :attr:`map_size`^2.
@@ -206,35 +204,38 @@ class ManipulationCoalition(DeleteCacheMixin):
         ------
         dict
             The manipulation maps : `manipulator` for the proportion of manipulator, `worst_welfare` and `avg_welfare`
-            for the welfare. `fig` contains the matplotlib figure with the plots.
+            for the welfare.
 
         Examples
         --------
         >>> np.random.seed(42)
         >>> profile = ParametricProfile(5, 3, 100)
         >>> manipulation = ManipulationCoalition(profile, rule=SVDNash())
-        >>> maps = manipulation.manipulation_map(profile, map_size=5, show=False)
+        >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['worst_welfare']
-        array([[0.        , 0.        , 0.        , 0.        , 0.08832411],
-               [0.        , 0.        , 0.42649307, 0.18374426, 0.73451954],
-               [0.        , 0.        , 0.27448321, 0.34256585, 0.        ],
-               [0.        , 0.        , 0.        , 1.        , 0.1774594 ],
-               [0.        , 0.        , 0.36950023, 0.69474578, 0.42774779]])
+        array([[0.        , 0.        , 0.        , 0.15165069, 0.97727603],
+               [0.        , 0.        , 0.        , 0.28446627, 0.40463717],
+               [0.        , 0.        , 0.        , 0.        , 0.95109702],
+               [0.        , 0.        , 0.66435128, 0.32073955, 0.60274981],
+               [0.        , 0.        , 0.        , 0.42815235, 0.        ]])
         """
 
         manipulator_map = np.zeros((map_size, map_size))
         worst_welfare_map = np.zeros((map_size, map_size))
 
+        n_candidates = self.profile_.n_candidates
+        n_voters = self.profile_.n_voters
+        n_dim = self.profile_.n_dim
+
+        parametric_profile = ParametricProfile(n_candidates, n_dim, n_voters)
+
         if scores_matrix is not None:
             parametric_profile.set_scores(scores_matrix)
 
-        n_candidates = parametric_profile.n_candidates
-        n_dim = parametric_profile.n_dim
         for i in range(map_size):
             for j in range(map_size):
                 if scores_matrix is None:
-                    new_scores = np.random.rand(n_dim, n_candidates)
-                    parametric_profile.set_scores(new_scores)
+                    parametric_profile.set_scores()
                 parametric_profile.set_parameters(i / (map_size-1), j / (map_size-1))
                 self.set_profile(parametric_profile)
 
@@ -250,27 +251,13 @@ class ManipulationCoalition(DeleteCacheMixin):
                 manipulator_map[i, j] = is_manipulable
                 worst_welfare_map[i, j] = worst_welfare
 
-        fig = plt.figure(figsize=(10, 5))
-
-        ax = fig.add_subplot(2, 1, 1)
-        ax.imshow(manipulator_map[::-1, ::], vmin=0, vmax=1)
-        ax.set_xlabel('Correlation')
-        ax.set_ylabel('Orthogonality')
-        ax.set_title("Proportion of manipulators")
-        ax.set_xticks([0, map_size-1], [0, 1])
-        ax.set_yticks([0, map_size-1], [1, 0])
-
-        ax = fig.add_subplot(2, 1, 2)
-        ax.imshow(worst_welfare_map[::-1, ::], vmin=0, vmax=1)
-        ax.set_xlabel('Correlation')
-        ax.set_ylabel('Orthogonality')
-        ax.set_title("Worst welfare")
-        ax.set_xticks([0, map_size-1], [0, 1])
-        ax.set_yticks([0, map_size-1], [1, 0])
-
         if show:
+            fig = plt.figure(figsize=(10, 5))
+
+            create_map_plot(fig, manipulator_map, [1, 2, 1], "Proportion of manipulators")
+            create_map_plot(fig, worst_welfare_map, [1, 2, 2], "Worst welfare")
+
             plt.show()  # pragma: no cover
 
         return {"manipulator": manipulator_map,
-                "worst_welfare": worst_welfare_map,
-                "fig": fig}
+                "worst_welfare": worst_welfare_map}

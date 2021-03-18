@@ -8,3 +8,4 @@ Tutorials
     election
     moving
     multiwinner
+    manipulation

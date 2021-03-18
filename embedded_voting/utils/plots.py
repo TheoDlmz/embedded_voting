@@ -71,3 +71,37 @@ def create_ternary_plot(fig, position=None):
     tax.right_axis_label("$y$", fontsize=14)
     tax.bottom_axis_label("$z$", fontsize=14)
     return tax
+
+
+def create_map_plot(fig, image, position, title=""):
+    """
+    Create the background for a map plot.
+
+    Parameters
+    ----------
+    fig : matplotlib figure
+        The matplotlib figure on which we are drawing.
+    image : np.ndarray
+        The image to plot. Should be of size `map_size`, `map_size`.
+    position : list
+        The position of the subplot on which we are drawing
+    title : str
+        Title of the plot
+
+    Return
+    ------
+    matplotlib ax
+
+    """
+    map_size = len(image)
+    ax = fig.add_subplot(position[0], position[1], position[2])
+    ax.imshow(image[::-1, ::], vmin=0, vmax=1)
+    ax.set_xlabel('Correlation')
+    ax.set_ylabel('Orthogonality')
+    ax.set_title(title)
+    ax.set_xticks([0, map_size - 1])
+    ax.set_yticks([0, map_size - 1])
+    ax.set_xticklabels([0, 1])
+    ax.set_yticklabels([1, 0])
+
+    return ax
