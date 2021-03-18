@@ -299,6 +299,8 @@ class SingleVoterManipulation(DeleteCacheMixin):
             create_map_plot(fig, avg_welfare, [1, 3, 2], "Average welfare")
             create_map_plot(fig, worst_welfare, [1, 3, 3], "Worst welfare")
 
+            plt.show()
+
         return {"manipulator": manipulator,
                 "worst_welfare": worst_welfare,
                 "avg_welfare": avg_welfare}

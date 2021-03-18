@@ -49,3 +49,13 @@ def test_coalition():
     manipulation = ManipulationCoalitionExtension(my_profile, BordaExtension(my_profile))
     manipulation(SVDSum())
     manipulation.trivial_manipulation(2, verbose=True)
+
+
+def test_plots():
+    my_profile = Profile(4, 3)
+    my_profile.add_voters(np.random.rand(5, 3), [[1, 0.5, 0.2, 0.1]]*5)
+    manipulation = SingleVoterManipulation(my_profile, rule=SVDNash())
+    manipulation.manipulation_map(map_size=5, scores_matrix=np.random.rand(3, 4))
+    manipulation = ManipulationCoalition(my_profile, rule=SVDNash())
+    manipulation.manipulation_map(map_size=5, scores_matrix=np.random.rand(3, 4))
+

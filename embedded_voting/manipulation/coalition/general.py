@@ -257,7 +257,7 @@ class ManipulationCoalition(DeleteCacheMixin):
             create_map_plot(fig, manipulator_map, [1, 2, 1], "Proportion of manipulators")
             create_map_plot(fig, worst_welfare_map, [1, 2, 2], "Worst welfare")
 
-            plt.show()  # pragma: no cover
+            plt.show()
 
         return {"manipulator": manipulator_map,
                 "worst_welfare": worst_welfare_map}
