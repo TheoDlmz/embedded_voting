@@ -42,13 +42,16 @@ class ParametricProfile(Profile):
         The number of dimensions for the voters' embeddings.
     n_voters : int
         The number of voters in the profile.
-    orthogonal_profile : np.ndarray
+    _orthogonal_profile : np.ndarray
         matrix of shape :attr:`n_voters`, :attr:`n_dim` containing the "orthogonal" profile.
-    random_profile : np.ndarray
+    _random_profile : np.ndarray
         matrix of shape :attr:`n_voters`, :attr:`n_dim` containing the "random" profile.
-    thetas : list
+    _thetas : list
         list of length :attr:`n_voters` containing angular distance between the embeddings of the two
         profiles for each voter.
+    prob : list
+        `prob[i]` is the probability for a voter to be on the group represented by the dimension i.
+        Should be of length :attr:`n_dim`.
 
     Examples
     --------
@@ -59,38 +62,84 @@ class ParametricProfile(Profile):
     3
     >>> my_profile.n_candidates
     4
-    >>> len(my_profile.thetas)
+    >>> len(my_profile._thetas)
     100
 
     """
 
     def __init__(self, n_candidates, n_dim, n_voters, scores_matrix=None, prob=None):
         super().__init__(n_candidates, n_dim)
-
         if prob is None:
-            prob = np.ones(self.n_dim)
-
+            prob = np.ones(self.n_dim)/self.n_dim
+        self.prob = list(prob)
         if scores_matrix is None:
             scores_matrix = np.random.rand(self.n_dim, self.n_candidates)
-
+        self.n_dim = n_dim
+        self.n_candidates = n_candidates
+        self.n_voters = n_voters
         self.score_matrix = np.array(scores_matrix).T
-        self.orthogonal_profile = np.zeros((n_voters, self.n_dim))
-        self.random_profile = np.zeros((n_voters, self.n_dim))
-        self.thetas = np.zeros(n_voters)
+        self._orthogonal_profile = np.zeros((n_voters, self.n_dim))
+        self._random_profile = np.zeros((n_voters, self.n_dim))
+        self._thetas = np.zeros(n_voters)
 
-        for i in range(n_voters):
+        self._build_profiles()
+
+    def _build_profiles(self, set_parameters=True):
+        """
+        This function build the two profiles of the parametric profile (uniform and orthogonal).
+
+        Parameters
+        ----------
+        set_parameters:
+            If True, set parameters to 0 at the end of the function.
+
+        Return
+        ------
+        ParametricProfile
+            The object itself.
+        """
+
+        for i in range(self.n_voters):
             new_vec = np.abs(np.random.randn(self.n_dim))
-            r = np.argmax(new_vec * prob)
+            r = np.argmax(new_vec * self.prob)
             new_vec = normalize(new_vec)
-            self.orthogonal_profile[i, r] = 1
-            self.random_profile[i] = new_vec
+            self._orthogonal_profile[i, r] = 1
+            self._random_profile[i] = new_vec
 
-            theta = np.arccos(np.dot(self.random_profile[i], self.orthogonal_profile[i]))
-            self.thetas[i] = theta
+            theta = np.arccos(np.dot(self._random_profile[i], self._orthogonal_profile[i]))
+            self._thetas[i] = theta
 
-        self.set_parameters()
+        if set_parameters:
+            self.set_parameters()
+        return self
 
-    def set_parameters(self, polarisation=0, coherence=0):
+    def set_scores(self, scores_matrix=None):
+        """
+        Set the scores of the parametric profile.
+
+        Parameters
+        ----------
+        scores_matrix : np.ndarray
+            Matrix of shape :attr:`n_dim`, :attr:`n_candidates` containing the scores given by
+            each group. More precisely, `scores_matrix[i,j]` is the score given by the group
+            represented by the dimension i to the candidate j.
+            By default, it is set at random with a uniform distribution.
+
+        Return
+        ------
+        ParametricProfile
+            The object itself
+        """
+        if scores_matrix is None:
+            scores_matrix = np.random.rand(self.n_dim, self.n_candidates)
+        self.score_matrix = np.array(scores_matrix).T
+        self._orthogonal_profile = np.zeros((self.n_voters, self.n_dim))
+        self._random_profile = np.zeros((self.n_voters, self.n_dim))
+        self._thetas = np.zeros(self.n_voters)
+
+        self._build_profiles(False)
+
+    def set_parameters(self, polarisation=0.0, coherence=0.0):
         """
         Set the parameters of the parametric profile to create a real profile.
 
@@ -120,14 +169,14 @@ class ParametricProfile(Profile):
         if polarisation > 1 or coherence > 1:
             raise ValueError("Parameters should be between 0 and 1")
 
-        n = len(self.thetas)
+        n = len(self._thetas)
         profile = np.zeros((n, self.n_dim))
         for i in range(n):
-            p_1 = np.dot(self.orthogonal_profile[i], self.random_profile[i]) * self.orthogonal_profile[i]
-            p_2 = self.random_profile[i] - p_1
+            p_1 = np.dot(self._orthogonal_profile[i], self._random_profile[i]) * self._orthogonal_profile[i]
+            p_2 = self._random_profile[i] - p_1
             e_2 = normalize(p_2)
-            profile[i] = self.orthogonal_profile[i] * np.cos(self.thetas[i] * (1 - polarisation)) + e_2 * np.sin(
-                self.thetas[i] * (1 - polarisation))
+            profile[i] = self._orthogonal_profile[i] * np.cos(self._thetas[i] * (1 - polarisation)) + e_2 * np.sin(
+                self._thetas[i] * (1 - polarisation))
 
         self.embeddings = profile
         self.n_voters = n

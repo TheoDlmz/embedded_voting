@@ -4,6 +4,7 @@ from embedded_voting.scoring.singlewinner.svd import SVDNash
 from embedded_voting.scoring.singlewinner.ordinal import BordaExtension
 import numpy as np
 import itertools
+import matplotlib.pyplot as plt
 
 
 class SingleVoterManipulation(DeleteCacheMixin):
@@ -59,6 +60,15 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
     def __call__(self, rule):
         self.rule_ = rule
+        global_rule = self.rule_(self.profile_)
+        self.winner_ = global_rule.winner_
+        self.scores_ = global_rule.scores_
+        self.welfare_ = global_rule.welfare_
+        self.delete_cache()
+        return self
+
+    def set_profile(self, profile):
+        self.profile_ = profile
         global_rule = self.rule_(self.profile_)
         self.winner_ = global_rule.winner_
         self.scores_ = global_rule.scores_
@@ -220,6 +230,99 @@ class SingleVoterManipulation(DeleteCacheMixin):
             if self.manipulation_voter(i) != self.winner_:
                 return True
         return False
+
+    def manipulation_map(self, parametric_profile, map_size=20, scores_matrix=None, show=True):
+        """
+        A function to plot the manipulability of the profile when the polarisation and the coherence vary.
+
+        Parameters
+        ----------
+        parametric_profile : ParametricProfile
+            The profile on which we do the manipulation. The only needed information are : :attr:`n_voters`,
+            :attr:`n_candidates`, :attr:`n_dim` and :attr:`prob`.
+        map_size : int
+            The number of different coherence and polarisation parameters tested.
+            The total number of test is :attr:`map_size`^2.
+        scores_matrix : np.ndarray
+            Matrix of shape :attr:`n_dim`, :attr:`n_candidates` containing the scores given by
+            each group. More precisely, `scores_matrix[i,j]` is the score given by the group
+            represented by the dimension i to the candidate j.
+            If None specified, a new matrix is generated for each test.
+        show : bool
+            If True, display the manipulation maps at the end of the function
+
+        Return
+        ------
+        dict
+            The manipulation maps : `manipulator` for the proportion of manipulator, `worst_welfare` and `avg_welfare`
+            for the welfare. `fig` contains the matplotlib figure with the plots.
+
+        Examples
+        --------
+        >>> np.random.seed(42)
+        >>> profile = ParametricProfile(5, 3, 100)
+        >>> manipulation = SingleVoterManipulation(profile, rule=SVDNash())
+        >>> maps = manipulation.manipulation_map(profile, map_size=5, show=False)
+        >>> maps['manipulator']
+        array([[0.  , 0.  , 0.  , 0.13, 0.  ],
+               [0.  , 0.  , 0.  , 0.  , 0.  ],
+               [0.25, 0.  , 0.  , 0.43, 0.  ],
+               [0.  , 0.53, 0.5 , 0.  , 0.  ],
+               [0.  , 0.14, 0.  , 0.  , 0.38]])
+        """
+
+        manipulator = np.zeros((map_size, map_size))
+        worst_welfare = np.zeros((map_size, map_size))
+        avg_welfare = np.zeros((map_size, map_size))
+        if scores_matrix is not None:
+            parametric_profile.set_scores(scores_matrix)
+
+        n_candidates = parametric_profile.n_candidates
+        n_dim = parametric_profile.n_dim
+        for i in range(map_size):
+            for j in range(map_size):
+                if scores_matrix is None:
+                    new_scores = np.random.rand(n_dim, n_candidates)
+                    parametric_profile.set_scores(new_scores)
+                parametric_profile.set_parameters(i / (map_size-1), j / (map_size-1))
+                self.set_profile(parametric_profile)
+                manipulator[i, j] = self.prop_manipulator_
+                worst_welfare[i, j] = self.worst_welfare_
+                avg_welfare[i, j] = self.avg_welfare_
+
+        fig = plt.figure(figsize=(15, 5))
+
+        ax = fig.add_subplot(3, 1, 1)
+        ax.imshow(manipulator[::-1, ::], vmin=0, vmax=1)
+        ax.set_xlabel('Correlation')
+        ax.set_ylabel('Orthogonality')
+        ax.set_title("Proportion of manipulators")
+        ax.set_xticks([0, map_size-1], [0, 1])
+        ax.set_yticks([0, map_size-1], [1, 0])
+
+        ax = fig.add_subplot(3, 1, 2)
+        ax.imshow(avg_welfare[::-1, ::], vmin=0, vmax=1)
+        ax.set_xlabel('Correlation')
+        ax.set_ylabel('Orthogonality')
+        ax.set_title("Average welfare")
+        ax.set_xticks([0, map_size-1], [0, 1])
+        ax.set_yticks([0, map_size-1], [1, 0])
+
+        ax = fig.add_subplot(3, 1, 3)
+        ax.imshow(worst_welfare[::-1, ::], vmin=0, vmax=1)
+        ax.set_xlabel('Correlation')
+        ax.set_ylabel('Orthogonality')
+        ax.set_title("Worst welfare")
+        ax.set_xticks([0, map_size-1], [0, 1])
+        ax.set_yticks([0, map_size-1], [1, 0])
+
+        if show:
+            plt.show()  # pragma: no cover
+
+        return {"manipulator": manipulator,
+                "worst_welfare": worst_welfare,
+                "avg_welfare": avg_welfare,
+                "fig": fig}
 
 
 class SingleVoterManipulationExtension(SingleVoterManipulation):
