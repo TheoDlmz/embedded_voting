@@ -13,31 +13,49 @@ from embedded_voting.scoring.singlewinner.svd import *
 
 class PositionalRuleExtension(ScoringRule):
     """
-    Class to extend a voting rule to ordinal input with a positional scoring rule.
+    This class enables to extend a
+    voting rule to an ordinal input
+    with a positional scoring rule.
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on
+        which we run the election.
     points : list
         The vector of the positional scoring rule.
+        Should be of the same length than the number
+        of candidates. In each ranking, candidate ranked
+        at position `i` get `points[i]` points.
     rule : ScoringFunction
-        The aggregation rule used to determine the scores of the candidates.
+        The :class:`ScoringRule` used to
+        determine the aggregated scores
+        of the candidates.
 
     Attributes
     ----------
     profile_ : Profile
-        The profile of voter.
-    fake_profile_ : Profile
-        The modified profile of voter (with ordinal scores) on which we run the election.
+        The profile of voters.
+    fake_profile : Profile
+        The modified profile of voters (with ordinal scores)
+        on which we run the election.
     points : np.ndarray
         The vector of the positional scoring rule.
+        Should be of the same length than the number
+        of candidates. In each ranking, candidate ranked
+        at position `i` get `points[i]` points.
     base_rule : ScoringFunction
-        The aggregation rule used to determine the scores of the candidates.
+        The :class:`ScoringRule` used to
+        determine the aggregated scores
+        of the candidates.
     _rule : ScoringRule
-        The aggregation rule with the fake profile.
+        The aggregation rule instantiated
+        with the :attr:`fake profile`.
     _score_components :
-        The number of components in the score of every candidate. If > 1, we do a lexical sort.
+        The number of components in the score
+        of every candidate. If `> 1`,
+        we perform a lexical sort to obtain
+        the ranking.
 
     Examples
     --------
@@ -49,7 +67,7 @@ class PositionalRuleExtension(ScoringRule):
     >>> election.ranking_
     [3, 0, 1, 2]
     >>> election_bis = PositionalRuleExtension(my_profile, [2, 1, 1, 0])
-    >>> election_bis.fake_profile_.scores
+    >>> election_bis.fake_profile.scores
     array([[0. , 0.5, 0.5, 1. ],
            [0.5, 1. , 0.5, 0. ],
            [1. , 0.5, 0. , 0.5]])
@@ -65,21 +83,21 @@ class PositionalRuleExtension(ScoringRule):
         self.base_rule = rule
         if rule is not None:
             self._score_components = rule._score_components
-        self.fake_profile_ = self._create_fake_profile()
+        self.fake_profile = self._create_fake_profile()
         self._rule = None
         self(profile)
 
     def __call__(self, profile):
         self.profile_ = profile
-        self.fake_profile_ = self._create_fake_profile()
+        self.fake_profile = self._create_fake_profile()
         if self.base_rule is not None:
-            self._rule = self.base_rule(self.fake_profile_)
+            self._rule = self.base_rule(self.fake_profile)
         self.delete_cache()
         return self
 
     def set_rule(self, rule):
         """
-        This function updates the aggregation rule used for the election.
+        This function updates the :attr:`base_rule` used for the election.
 
         Parameters
         ----------
@@ -89,23 +107,25 @@ class PositionalRuleExtension(ScoringRule):
         Return
         ------
         PositionalRuleExtension
-            The object itself
+            The object itself.
         """
         self.base_rule = rule
-        self.fake_profile_ = self._create_fake_profile()
-        self._rule = self.base_rule(self.fake_profile_)
+        self.fake_profile = self._create_fake_profile()
+        self._rule = self.base_rule(self.fake_profile)
         self._score_components = rule._score_components
         self.delete_cache()
         return self
 
     def _create_fake_profile(self):
         """
-        This function creates the fake profile for the election (using the points vector).
+        This function creates the
+        fake profile for the election
+        (using the :attr:`points` vector).
 
         Return
         ------
         Profile
-            The fake profile
+            The fake profile.
         """
         points = np.array(self.points)/np.max(self.points)
         fake_profile = np.zeros((self.profile_.n_voters, self.profile_.n_candidates))
@@ -125,43 +145,57 @@ class PositionalRuleExtension(ScoringRule):
     def plot_fake_profile(self, plot_kind="3D", dim=None, list_candidates=None,
                           list_titles=None, row_size=5, show=True):
         """
-        This function plot the candidate in the fake profile, using the scoring vector :attr:`points`.
+        This function plot the candidates
+        in the fake profile, obtained using the
+        scoring vector :attr:`points`.
 
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         list_candidates : int list
-            The list of candidates we want to plot. Should contains integer lower than
-            :attr:`n_candidates`. Default is range(:attr:`n_candidates`).
+            The list of candidates we want to plot.
+            Should contains integers lower than
+            :attr:`n_candidates`. By default, we
+            plot all candidates.
         list_titles : str list
-            Contains the title of the plots.Should be the same length than list_candidates.
+            Contains the title of the plots.
+            Should be the same length than `list_candidates`.
         row_size : int
-            Number of subplots by row. Default is set to 5.
+            Number of subplots by row.
+            By default, it is set to 5 plots by rows.
         show : bool
-            If True, plot the figure at the end of the function.
+            If True, displays the figure
+            at the end of the function.
 
         Return
         ------
         Profile
-            The fake profile
+            The fake profile.
         """
-        self.fake_profile_.plot_candidates(plot_kind=plot_kind, dim=dim, list_candidates=list_candidates,
-                                           list_titles=list_titles, row_size=row_size, show=show)
+        self.fake_profile.plot_candidates(plot_kind=plot_kind, dim=dim, list_candidates=list_candidates,
+                                          list_titles=list_titles, row_size=row_size, show=show)
 
 
 class PluralityExtension(PositionalRuleExtension):
     """
-    Class to extend a voting rule to ordinal input with Plurality (vector `[1, 0, ..., 0]`)
+    This class enables to extend a
+    voting rule to an ordinal input
+    with Plurality rule (vector ``[1, 0, ..., 0]``).
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on
+        which we run the election.
     rule : ScoringFunction
-        The aggregation rule used to determine the scores of the candidates.
+        The :class:`ScoringRule` used to
+        determine the aggregated scores
+        of the candidates.
 
     Examples
     --------
@@ -170,7 +204,7 @@ class PluralityExtension(PositionalRuleExtension):
     >>> embeddings = [[1, 0], [1, 1], [0, 1]]
     >>> _ = my_profile.add_voters(embeddings, scores)
     >>> election = PluralityExtension(my_profile)
-    >>> election.fake_profile_.scores
+    >>> election.fake_profile.scores
     array([[0., 0., 0., 1.],
            [0., 1., 0., 0.],
            [1., 0., 0., 0.]])
@@ -186,17 +220,24 @@ class PluralityExtension(PositionalRuleExtension):
 
 class KApprovalExtension(PositionalRuleExtension):
     """
-    Class to extend a voting rule to ordinal input with k-Approval (vector `[1, 1, 0,..., 0]`) with `k`
-    1 at the beginning of the vector.
+    This class enables to extend a
+    voting rule to an ordinal input
+    with k-Approval rule (vector ``[1, 1, ..., 0]``
+    with `k` ones).
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on
+        which we run the election.
     k : int
-        The k parameter of the k-approval. By default, it is set to 2.
+        The k parameter of the k-approval.
+        By default, it is set to 2.
     rule : ScoringFunction
-        The aggregation rule used to determine the scores of the candidates.
+        The :class:`ScoringRule` used to
+        determine the aggregated scores
+        of the candidates.
+
 
     Examples
     --------
@@ -205,7 +246,7 @@ class KApprovalExtension(PositionalRuleExtension):
     >>> embeddings = [[1, 0], [1, 1], [0, 1]]
     >>> _ = my_profile.add_voters(embeddings, scores)
     >>> election = KApprovalExtension(my_profile)
-    >>> election.fake_profile_.scores
+    >>> election.fake_profile.scores
     array([[0., 0., 1., 1.],
            [0., 1., 1., 0.],
            [1., 1., 0., 0.]])
@@ -221,14 +262,19 @@ class KApprovalExtension(PositionalRuleExtension):
 
 class VetoExtension(PositionalRuleExtension):
     """
-    Class to extend a voting rule to ordinal input with Veto (vector `[1, 1,..., 1, 0]`)
+    This class enables to extend a
+    voting rule to an ordinal input
+    with Veto rule (vector ``[1, ..., 1, 0]``).
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on
+        which we run the election.
     rule : ScoringFunction
-        The aggregation rule used to determine the scores of the candidates.
+        The :class:`ScoringRule` used to
+        determine the aggregated scores
+        of the candidates.
 
     Examples
     --------
@@ -237,7 +283,7 @@ class VetoExtension(PositionalRuleExtension):
     >>> embeddings = [[1, 0], [1, 1], [0, 1]]
     >>> _ = my_profile.add_voters(embeddings, scores)
     >>> election = VetoExtension(my_profile)
-    >>> election.fake_profile_.scores
+    >>> election.fake_profile.scores
     array([[0., 1., 1., 1.],
            [1., 1., 1., 0.],
            [1., 1., 0., 1.]])
@@ -252,15 +298,19 @@ class VetoExtension(PositionalRuleExtension):
 
 class BordaExtension(PositionalRuleExtension):
     """
-    Class to extend a voting rule to ordinal input with Borda (vector `[m-1, m-2..., 1, 0]`) where `m`
-    is defined as :attr:`n_candidates`.
+    This class enables to extend a
+    voting rule to an ordinal input
+    with Borda rule (vector ``[m-1, m-2, ..., 1, 0]``).
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on
+        which we run the election.
     rule : ScoringFunction
-        The aggregation rule used to determine the scores of the candidates.
+        The :class:`ScoringRule` used to
+        determine the aggregated scores
+        of the candidates.
 
     Examples
     --------
@@ -269,7 +319,7 @@ class BordaExtension(PositionalRuleExtension):
     >>> embeddings = [[1, 0], [1, 1], [0, 1]]
     >>> _ = my_profile.add_voters(embeddings, scores)
     >>> election = BordaExtension(my_profile)
-    >>> election.fake_profile_.scores
+    >>> election.fake_profile.scores
     array([[0.        , 0.33333333, 0.66666667, 1.        ],
            [0.33333333, 1.        , 0.66666667, 0.        ],
            [1.        , 0.66666667, 0.        , 0.33333333]])
@@ -284,15 +334,21 @@ class BordaExtension(PositionalRuleExtension):
 
 class InstantRunoffExtension(ScoringRule):
     """
-    Class to extend a voting rule to ordinal input with Instant Runoff Voting (IRV).
-    You cannot get the scores or the welfare of the candidates, because IRV only return a ranking.
+    This class enables to extend a
+    voting rule to an ordinal input
+    with Instant Runoff ranking. You cannot access
+    to the :attr:`scores` because IRV only
+    compute the ranking of the candidates.
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on
+        which we run the election.
     rule : ScoringFunction
-        The aggregation rule used to determine the scores of the candidates.
+        The :class:`ScoringRule` used to
+        determine the aggregated scores
+        of the candidates.
 
     Examples
     --------
@@ -338,12 +394,14 @@ class InstantRunoffExtension(ScoringRule):
 
     def _create_fake_profile(self, eliminated):
         """
-        This function creates the fake profile for the election (using the points vector).
+        This function creates a fake profile for the election, based
+        on the candidates already eliminated during the previous
+        steps.
 
         Return
         ------
         Profile
-            The fake profile
+            The fake profile.
         """
         fake_profile = np.zeros((self.profile_.n_voters, self.profile_.n_candidates))
         points = np.zeros(self.profile_.n_candidates)

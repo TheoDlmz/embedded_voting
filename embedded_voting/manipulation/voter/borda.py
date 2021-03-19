@@ -36,7 +36,7 @@ class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
         super().__init__(profile, BordaExtension(profile), rule)
 
     def manipulation_voter(self, i):
-        fake_scores_i = self.extended_rule.fake_profile_.scores[i].copy()
+        fake_scores_i = self.extended_rule.fake_profile.scores[i].copy()
         score_i = self.profile_.scores[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
 
@@ -47,11 +47,11 @@ class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
 
         all_scores = []
         for e in range(m):
-            self.extended_rule.fake_profile_.scores[i] = np.ones(self.profile_.n_candidates)*(e/(m-1))
-            altered_scores = self.extended_rule.base_rule(self.extended_rule.fake_profile_).scores_
+            self.extended_rule.fake_profile.scores[i] = np.ones(self.profile_.n_candidates) * (e / (m - 1))
+            altered_scores = self.extended_rule.base_rule(self.extended_rule.fake_profile).scores_
             all_scores += [(s, j, e) for j, s in enumerate(altered_scores)]
 
-        self.extended_rule.fake_profile_.scores[i] = fake_scores_i
+        self.extended_rule.fake_profile.scores[i] = fake_scores_i
         all_scores.sort()
         all_scores = all_scores[::-1]
 

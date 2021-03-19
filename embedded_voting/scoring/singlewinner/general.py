@@ -55,7 +55,7 @@ class ScoringRule(DeleteCacheMixin):
         Return
         ------
         float or tuple
-            if :attr:`_score_components` = 1, return a float,
+            if :attr:`embedded_voting.ScoringRule._score_components` = 1, return a float,
             otherwise a tuple of length :attr:`_score_components`.
         """
         raise NotImplementedError

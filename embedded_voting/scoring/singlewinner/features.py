@@ -15,12 +15,14 @@ import matplotlib.pyplot as plt
 
 class FeaturesRule(ScoringRule):
     """
-    Voting rule based on the norm of the feature vector of each candidate.
+    Voting rule in which the aggregated score of
+    a candidate is the norm of the feature
+    vector of this candidate.
 
     Parameters
     ----------
     profile : Profile
-        the profile of voter on which we run the election
+        The profile of voters on which we run the election.
 
     Examples
     --------
@@ -42,12 +44,14 @@ class FeaturesRule(ScoringRule):
     @cached_property
     def features_(self):
         """
-        This function return the feature vector of every candidate
+        This function return the
+        feature vector of all candidates.
 
         Return
         ------
         np.ndarray
-            The matrix of features. Its shape is :attr:`n_candidates`, :attr:`n_dim`
+            The matrix of features.
+            Its shape is :attr:`profile.n_candidates`, :attr:`profile.n_dim`
         """
         embeddings = self.profile_.embeddings
         scores = self.profile_.scores
@@ -58,18 +62,23 @@ class FeaturesRule(ScoringRule):
 
     def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
-        This function plot the features for every candidate in the given dimensions.
+        This function plot the features vector of
+        all candidates in the given dimensions.
 
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         row_size : int
-            Number of subplots by row. Default is set to 5.
+            The number of subplots by row.
+            By default, it is set to 5 plots by row.
         show : bool
-            If True, plot the figure at the end of the function.
+            If True, plot the figure
+            at the end of the function.
         """
         if dim is None:
             dim = [0, 1, 2]

@@ -11,3 +11,5 @@ Single-Winner voting rules
    geometric
    svd
    features
+   fake_svd
+   ordinal

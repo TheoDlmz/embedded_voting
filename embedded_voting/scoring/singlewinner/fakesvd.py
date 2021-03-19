@@ -12,21 +12,22 @@ from embedded_voting.profile.Profile import Profile
 
 class FakeSVDRule(ScoringRule):
     """
-    Voting rule that apply the SVD method on another matrix than the embeddings matrix.
+    Voting rule that apply the SVD method
+    on another matrix than the embeddings matrix.
 
     Parameters
     ----------
     profile: Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     similarity : callable
-        A similarity function that associate a pair of vector of
-        length :attr:`n_dim` to a similarity value (a float)
+        A similarity function that associate a pair
+        of feature vectors to a similarity value (a float).
         Input : np.ndarray, np.ndarray.
         Output : float.
     aggregation_rule: callable
         The aggregation rule for the singular values.
-        Input : float list. Output : float.
         By default, it is the product of the singular values.
+        Input : float list. Output : float.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -37,11 +38,11 @@ class FakeSVDRule(ScoringRule):
     Attributes
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     aggregation_rule : callable
         The aggregation rule for the singular values.
-        Input : float list. Output : float.
         By default, it is the product of the singular values.
+        Input : float list. Output : float.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -49,8 +50,8 @@ class FakeSVDRule(ScoringRule):
         If True, consider the rank of the matrix when doing the ranking.
         By default, it is False.
     similarity : callable
-        A similarity function that associate a pair of vector of
-        length :attr:`n_dim` to a similarity value (a float)
+        A similarity function that associate a pair
+        of features vector to a similarity value (a float)
         Input : np.ndarray, np.ndarray.
         Output : float.
 
@@ -77,7 +78,8 @@ class FakeSVDRule(ScoringRule):
 
     def set_rule(self, aggregation_rule):
         """
-        A function to update the aggregation rule used for the singular values.
+        A function to update the aggregation rule used
+        for the aggregation of the singular values.
 
         Parameters
         ----------
@@ -88,7 +90,7 @@ class FakeSVDRule(ScoringRule):
         Return
         ------
         FakeSVDRule
-            The object itself
+            The object itself.
         """
 
         self.aggregation_rule = aggregation_rule

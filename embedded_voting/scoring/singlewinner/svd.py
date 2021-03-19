@@ -325,7 +325,7 @@ class SVDMax(SVDRule):
         ------
         np.ndarray
             The feature vectors of all the candidates,
-             of shape :attr:`n_candidates`, :attr:`n_dim`.
+             of shape :attr:`profile.n_candidates`, :attr:`profile.n_dim`.
 
         Examples
         --------
