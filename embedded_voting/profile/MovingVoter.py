@@ -12,28 +12,38 @@ from embedded_voting.profile.Profile import Profile
 from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.utils.plots import create_3D_plot, create_ternary_plot
 from embedded_voting.scoring.singlewinner.trivialRules import SumScores
-from embedded_voting.scoring.singlewinner.svd import SVDMax
+from embedded_voting.scoring.singlewinner.svd import SVDMax, SVDNash
 
 
 class MovingVoterProfile(Profile):
     """
-    A class to see what happen to the scores of the different candidates when a voter moves from a group to another.
-    There is 4 candidates and 3 groups: Each group strongly support one of the candidate and dislike the other
-    candidates, except the last candidate which is okay for everyone. The moving voter is a voter that do not have any
-    preference between the candidates (she gives a score to 0.8 to every candidate, except 0.5 to the last one)
-    but her embeddings move from one position to another
+    This subclass of `Profile` can be used to see
+    what happen to the scores of the different candidates
+    when a voter moves from a group to another.
+
+    There is 4 candidates and 3 groups:
+    Each group strongly support one of
+    the candidate and dislike the other
+    candidates, except the last candidate
+    which is fine for every group.
+
+    The moving voter is a voter that do not have any
+    preference between the candidates
+    (she gives a score of `0.8` to every candidate,
+    except `0.5` for the last one), but her embeddings
+    move from one position to another.
 
     Parameters
     ----------
     rule : ScoringFunction
-        The rule we are using in this election
+        The rule we are using in the election.
 
     Attributes
     ----------
     rule_ : ScoringFunction
-        The rule we are using in this election
+        The rule we are using in the election.
     moving_voter : int
-        The index of the voter which is moving
+        The index of the voter that is moving.
 
     Examples
     --------
@@ -68,17 +78,18 @@ class MovingVoterProfile(Profile):
 
     def set_moving_voter(self, voter):
         """
-        This function change the attribute :attr:`moving_voter`
+        This function update the
+        index of the moving voter :attr:`moving_voter`.
 
         Parameters
         ----------
         voter : int
-            The index of the new moving voter
+            The index of the new moving voter.
 
         Return
         ------
         MovingVoterProfile
-            The object itself
+            The object itself.
 
         Examples
         --------
@@ -95,15 +106,23 @@ class MovingVoterProfile(Profile):
 
     def plot_scores_evolution(self, show=True):
         """
-        This function plot the evolution of the scores of the candidates when the moving voters' embeddings
+        This function plot the evolution
+        of the scores of the candidates
+        when the moving voters' embeddings
         are changing.
 
         Parameters
         ----------
         show : bool
-            If True, the figure is shown at the end of the function.
+            If True, displays the figure
+            at the end of the function.
 
+        Examples
+        --------
+        >>> p = MovingVoterProfile(SVDNash())
+        >>> p.plot_scores_evolution(show=False)
         """
+
         tab_x = np.linspace(0, 1, 20)
         tab_y = []
         for x in tab_x:
@@ -125,13 +144,16 @@ class MovingVoterProfile(Profile):
 
     def plot_features_evolution(self, show=True):
         """
-        This function plot the evolution of the features of the candidates when the moving voters' embeddings
-        are changing. Only works for SVDMax and FeaturesRule.
+        This function plot the evolution
+        of the features of the candidates
+        when the moving voters' embeddings
+        are changing. Only works for :class:`SVDMax` and :class:`FeaturesRule`.
 
         Parameters
         ----------
         show : bool
-            If True, the figure is shown at the end of the function.
+            If True, displays the figure
+            at the end of the function.
 
         Examples
         --------

@@ -15,12 +15,15 @@ from embedded_voting.utils.miscellaneous import normalize
 
 class SVDRule(ScoringRule):
     """
-    Voting rule based on singular values of the embedding matrix.
+    Voting rule in which the aggregated score of
+    a candidate is based on singular values
+    of his embedding matrix
+    (cf :meth:`profile.embedding_matrix()`).
 
     Parameters
     ----------
     profile: Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     aggregation_rule: callable
         The aggregation rule for the singular values.
         Input : float list. Output : float.
@@ -35,7 +38,7 @@ class SVDRule(ScoringRule):
     Attributes
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     aggregation_rule : callable
         The aggregation rule for the singular values.
         Input : float list. Output : float.
@@ -93,7 +96,9 @@ class SVDRule(ScoringRule):
 
     def set_rule(self, aggregation_rule):
         """
-        A function to update the aggregation rule used for the singular values.
+        A function to update the aggregation rule
+        :attr:`aggregation_rule`
+        used for the singular values.
 
         Parameters
         ----------
@@ -104,7 +109,7 @@ class SVDRule(ScoringRule):
         Return
         ------
         SVDRule
-            The object itself
+            The object itself.
 
         Examples
         --------
@@ -127,12 +132,15 @@ class SVDRule(ScoringRule):
 
 class SVDNash(SVDRule):
     """
-    Voting rule based on the product of the singular values of the embedding matrix.
+    Voting rule in which the aggregated score of
+    a candidate is the product of the singular values
+    of his embedding matrix
+    (cf :meth:`profile.embedding_matrix()`).
 
     Parameters
     ----------
     profile: Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -163,12 +171,15 @@ class SVDNash(SVDRule):
 
 class SVDSum(SVDRule):
     """
-    Voting rule based on the sum of the singular values of the embedding matrix.
+    Voting rule in which the aggregated score of
+    a candidate is the sum of the singular values
+    of his embedding matrix
+    (cf :meth:`profile.embedding_matrix()`).
 
     Parameters
     ----------
     profile: Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -199,12 +210,15 @@ class SVDSum(SVDRule):
 
 class SVDMin(SVDRule):
     """
-    Voting rule based on the minimum of the singular values of the embedding matrix.
+    Voting rule in which the aggregated score of
+    a candidate is the minimum singular value
+    of his embedding matrix
+    (cf :meth:`profile.embedding_matrix()`).
 
     Parameters
     ----------
     profile: Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -235,12 +249,15 @@ class SVDMin(SVDRule):
 
 class SVDMax(SVDRule):
     """
-    Voting rule based on the maximum of the singular values of the embedding matrix.
+    Voting rule in which the aggregated score of
+    a candidate is the maximum singular value
+    of his embedding matrix
+    (cf :meth:`profile.embedding_matrix()`).
 
     Parameters
     ----------
     profile: Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -270,18 +287,23 @@ class SVDMax(SVDRule):
 
     def _feature(self, candidate):
         """
-        A function to get the feature vector of the candidate passed as parameter. The feature vector is
-        defined as the singular vector associated to the maximal singular value.
+        A function to get the feature vector
+        of the candidate passed as parameter.
+        The feature vector is defined as the
+        singular vector associated to the
+        maximal singular value.
 
         Parameters
         ----------
         candidate : int
-            The index of the candidate for which we want the feature vector.
+            The index of the candidate for
+            which we want the feature vector.
 
         Return
         ------
         np.ndarray
-            The feature vector of the candidate of length :attr:`n_dim`.
+            The feature vector of the
+            candidate, of length :attr:`profile.n_dim`.
         """
         embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
         _, vp, vec = np.linalg.svd(embeddings)
@@ -294,13 +316,16 @@ class SVDMax(SVDRule):
     @cached_property
     def features_(self):
         """
-        A function to get the feature vectors of the candidates. The feature vector is
-        defined as the singular vector associated to the maximal singular value.
+        A function to get the feature vectors
+        of all the candidates. The feature vector is
+        defined as the singular vector associated
+        to the maximal singular value.
 
         Return
         ------
         np.ndarray
-            The feature vector of the candidates of shape :attr:`n_candidates`, :attr:`n_dim`.
+            The feature vectors of all the candidates,
+             of shape :attr:`n_candidates`, :attr:`n_dim`.
 
         Examples
         --------
@@ -318,18 +343,23 @@ class SVDMax(SVDRule):
 
     def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
-        This function plot the features for every candidate in the given dimensions.
+        This function plot the features vector of
+        every candidates in the given dimensions.
 
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``'[0, 1, 2]'``.
         row_size : int
-            Number of subplots by row. Default is set to 5.
+            Number of subplots by row.
+            By default, it is set to 5 by rows.
         show : bool
-            If True, plot the figure at the end of the function.
+            If True, displays the figure
+            at the end of the function.
         """
         if dim is None:
             dim = [0, 1, 2]
@@ -372,15 +402,18 @@ class SVDMax(SVDRule):
 
 class SVDLog(SVDRule):
     """
-    Voting rule based on the sum of `log(1 + sigma/C)` where sigma are the singular values of the embedding matrix
-    and C is a constant.
+    Voting rule in which the aggregated score of
+    a candidate is the sum of `log(1 + sigma/C)`
+    where sigma are the singular values
+    of his embedding matrix and C is a constant.
 
     Parameters
     ----------
     profile: Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     const : float
-        The constant by which we divide the singular values in the log.
+        The constant by which we divide
+        the singular values in the log.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.

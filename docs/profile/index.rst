@@ -8,3 +8,4 @@ Profile classes
 
    profile
    paramprofile
+   moving

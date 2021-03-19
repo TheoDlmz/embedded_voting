@@ -14,28 +14,28 @@ from embedded_voting.utils.plots import create_ternary_plot, create_3D_plot
 
 class Profile(DeleteCacheMixin):
     """
-    A profile of voter
+    A profile of voter with embeddings.
 
     Parameters
     ----------
     n_candidates : int
-        The number of candidate for this profile
+        The number of candidates in the profile.
     n_dim : int
-        The number of dimensions for the voters' embeddings
+        The number of dimensions of the voters' embeddings.
 
     Attributes
     ----------
     n_voters : int
-        The number of voter of the profile
+        The number of voters in the profile.
     n_candidates : int
-        The number of candidate for this profile
+        The number of candidates in this profile.
     n_dim : int
-        The number of dimensions for the voters' embeddings
-    embeddings :np.ndarray
-        The embeddings of the voters. Its dimensions are :attr:`n_voters`, :attr:`n_dim`
+        The number of dimensions of the voters' embeddings.
+    embeddings : np.ndarray
+        The embeddings of the voters. Its dimensions are :attr:`n_voters`, :attr:`n_dim`.
     scores : np.ndarray
         The scores given by the voters to the candidates.
-        Its dimensions are :attr:`n_voters`, :attr:`n_candidates`
+        Its dimensions are :attr:`n_voters`, :attr:`n_candidates`.
 
     Examples
     --------
@@ -72,17 +72,17 @@ class Profile(DeleteCacheMixin):
         ----------
         embeddings : np.ndarray or list
             The embedding vector of the voter.
-            Should be of size :attr:`n_dim`
+            Should be of size :attr:`n_dim`.
         scores : np.ndarray or list
             The scores given by the voter to the candidates.
-            Should be of size :attr:`n_candidates`
+            Should be of size :attr:`n_candidates`.
         normalize_embs : bool
-            If True, then normalize the embeddings in parameter.
+            If True, then normalize the embeddings passed in parameter.
 
         Return
         ------
         Profile
-            The profile itself
+            The profile itself.
 
         Examples
         ________
@@ -105,23 +105,23 @@ class Profile(DeleteCacheMixin):
 
     def add_voters(self, embeddings, scores, normalize_embs=True):
         """
-        Add a group of n voters to the profile
+        Add a group of voters to the profile.
 
         Parameters
         ----------
         embeddings : np.ndarray or list
-            The embeddings vectors of the new voters.
-            Should be of size `n_new_voters`, :attr:`n_dim`
+            The embedding vectors of the new voters.
+            Should be of size ``n_new_voters``, :attr:`n_dim`.
         scores : np.ndarray or list
             The scores given by the new voters.
-            Should be of size `n_new_voters`, :attr:`n_candidates`
+            Should be of size ``n_new_voters``, :attr:`n_candidates`.
         normalize_embs : bool
-            If True, then normalize the embeddings in parameter.
+            If True, then normalize the embeddings passed in parameter.
 
         Return
         ------
         Profile
-            The profile itself
+            The profile itself.
 
         Examples
         ________
@@ -145,18 +145,19 @@ class Profile(DeleteCacheMixin):
     def uniform_distribution(self, n_voters):
         """
         Add `n_voters` voters to the profile.
-        The embeddings of these voters are uniformly distributed on the positive ortan and there score
+        The embeddings of these voters are uniformly distributed
+        on the positive ortan and there scores
         are uniformly distributed between 0 and 1.
 
         Parameters
         ----------
         n_voters : int
-            Number of new voters to add in the profile
+            Number of voters to add in the profile.
 
         Return
         ------
         Profile
-            The profile itself
+            The profile itself.
 
         Examples
         ________
@@ -186,13 +187,14 @@ class Profile(DeleteCacheMixin):
 
     def dilate_profile(self):
         """
-        Dilate the embeddings of the voters so that the
-        embeddings take all the space possible in the positive ortan.
+        Dilate the embeddings of the
+        voters so that they take all
+        the space possible in the positive ortan.
 
         Return
         ------
         Profile
-            The profile itself
+            The profile itself.
 
         Examples
         --------
@@ -244,17 +246,20 @@ class Profile(DeleteCacheMixin):
 
     def standardize(self, cut_one=True):
         """
-        Standardize the score between the different voters.
+        Standardize the scores
+        between the different voters.
 
         Parameters
         ----------
         cut_one : bool
-            if True, then the maximum score is one. The minimum score is always 0
+            if True, then the maximum score is `1`.
+            Every scores above `1` will be set to `1`.
+            The minimum score is always 0.
 
         Return
         ------
         Profile
-            The profile itself
+            The profile itself.
 
         Examples
         --------
@@ -282,21 +287,24 @@ class Profile(DeleteCacheMixin):
 
     def scored_embeddings(self, candidate, square_root=True):
         """
-        Return the embeddings matrix with each voter's embedding multiplied by the score it gives
-        to the given candidate.
+        Return the embeddings matrix, but
+        each voter's embedding is multiplied
+        by the score it gives to the candidate
+        passed as parameter.
 
         Parameters
         ----------
         candidate : int
-            the candidate of who we use the scores.
+            The candidate of whom we use the scores.
         square_root : bool
-            if True, we multiply by the square root of the score given to the candidate
-            instead of the score itself.
+            If True, we multiply by the square root
+            of the scores given to the candidate
+            instead of the scores themself.
 
         Return
         ------
         np.ndarray
-            The embedding matrix, of shape :attr:`n_voters`, :attr:`n_dim`
+            The embedding matrix, of shape :attr:`n_voters`, :attr:`n_dim`.
 
         Examples
         --------
@@ -325,25 +333,30 @@ class Profile(DeleteCacheMixin):
 
     def fake_covariance_matrix(self, candidate, f, square_root=True):
         """
-        This function return a matrix `M` such that for all voters `i`  and `j`,
+        This function return a matrix `M`
+        such that for all voters `i`  and `j`,
         `M[i,j] = scores[i, candidate] * scores[j, candidate]
-        * f(embeddings[i], embeddings[j])` (cf :attr:`scores`, :attr:`embeddings`)
+        * f(embeddings[i], embeddings[j])`
+        (cf :attr:`scores`, :attr:`embeddings`).
 
         Parameters
         ----------
         candidate : int
-            Candidate for which we want the matrix
+            The candidate for whom we want the matrix.
         f : callable
-            Similarity function between two embeddings vector of length :attr:`n_dim`.
+            Similarity function between
+            two embeddings vector of length :attr:`n_dim`.
             Input : (np.ndarray, np.ndarray).
             Output : float.
         square_root : bool
-            If True, use the square root of the score instead of the scores itself
+            If True, we multiply by the square root
+            of the scores given to the candidate
+            instead of the scores themself.
 
         Return
         ------
         np.ndarray
-            Matrix of shape :attr:`n_voters`, :attr:`n_voters`
+            Matrix of shape :attr:`n_voters`, :attr:`n_voters`.
 
         Examples
         --------
@@ -368,22 +381,27 @@ class Profile(DeleteCacheMixin):
 
     def _plot_profile_3D(self, fig, dim, position=None):
         """
-        Plot a figure of the profile on a 3D space
+        Plot a figure of the profile
+        on a 3D space using matplotlib.
 
         Parameters
         ----------
         fig : matplotlib.figure
-            The figure on which we add the plot.
+            The figure on which we do the plot.
         dim : list
             The 3 dimensions we are using for our plot.
         position : list
-            The position of the plot on the figure. Should be of the form
-            `[n_rows, n_columns, position]`.
+            The position of the plot on the figure.
+            Should be of the form
+             ``[n_rows, n_columns, position]``.
 
         Return
         ------
         matplotlib.ax
-            The matplotlib ax with the figure, if you want to add something to it.
+            The matplotlib ax
+            with the figure, if
+            you want to add
+            something to it.
 
         """
         ax = create_3D_plot(fig, position)
@@ -397,7 +415,8 @@ class Profile(DeleteCacheMixin):
 
     def _plot_profile_ternary(self, fig, dim, position=None):
         """
-        Plot a figure of the profile on a 2D space representing the surface of the unit sphere
+        Plot a figure of the profile on a 2D space
+        representing the surface of the unit sphere
         on the positive ortan.
 
         Parameters
@@ -407,13 +426,15 @@ class Profile(DeleteCacheMixin):
         dim : list
             The 3 dimensions we are using for our plot.
         position : list
-            The position of the plot on the figure. Should be of the form
-            `[n_rows, n_columns, position]`.
+            The position of the plot on the figure.
+            Should be of the form
+            ``[n_rows, n_columns, position]``.
 
         Return
         ------
         matplotlib ax
-            The matplotlib ax with the figure, if you want to add something to it.
+            The matplotlib ax with the figure,
+            if you want to add something to it.
 
         """
         tax = create_ternary_plot(fig, position)
@@ -428,31 +449,39 @@ class Profile(DeleteCacheMixin):
 
     def plot_profile(self, plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """
-        Plot the profile of the voters, either on a 3D plot, or on a ternary plot. Only
-        three dimensions are represented.
+        Plot the profile of the voters,
+        either on a 3D plot, or on a ternary plot.
+        Only three dimensions can be represented.
 
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         dim : list
-            A list of length 3 containing the three dimensions of the embeddings we want to plot.
-            All elements of this list should be lower than :attr:`n_dim`. By default, it is
-            set are `[0, 1, 2]`.
+            A list of length 3 containing
+            the three dimensions of the
+            embeddings we want to plot.
+            All elements of this list should
+            be lower than :attr:`n_dim`.
+            By default, it is set to ``[0, 1, 2]``.
         fig : matplotlib figure
             The figure on which we add the plot.
-            if None, the default figure is a `10 x 10` matplotlib figure.
+            The default figure is a
+            `10 x 10` matplotlib figure.
         position : list
-            List of length 3 containing the matplotlib position `[a, b, c]` of the figure, where
-            `a` is the number of rows, `b` is the number of columns and `c` is the position of the figure
-            (from top to bottom, left to right). By default, it is set to `[1, 1, 1]`
+            List of length 3 containing the
+            matplotlib position ``[n_rows, n_columns, position]``.
+            By default, it is set to ``[1, 1, 1]``.
         show : bool
-            if True, show the figure at the end of the function.
+            If True, display the figure at
+            the end of the function.
 
         Return
         ------
         matplotlib ax
-            The matplotlib ax with the figure, if you want to add something to it.
+            The matplotlib ax with the figure,
+            if you want to add something to it.
 
         """
 
@@ -478,25 +507,29 @@ class Profile(DeleteCacheMixin):
 
     def _plot_scores_3D(self, sizes, fig, position, dim):
         """
-        Plot a figure of the profile on a 3D space with the embeddings vector having the sizes passed
-        as parameters.
+        Plot a figure of the profile on a
+        3D space with the embeddings vector
+        having the sizes passed as parameters.
 
         Parameters
         ----------
         sizes : np.ndarray
-            The norm of the vectors. Should be of length :attr:`n_voters`.
+            The norm of the vectors.
+            Should be of length :attr:`n_voters`.
         fig : matplotlib figure
             The figure on which we add the plot.
         position : list
-            The position of the plot on the figure. Should be of the form
-            `[n_rows, n_columns, position]`.
+            The position of the plot on the figure.
+            Should be of the form
+            ``[n_rows, n_columns, position]``.
         dim : list
             The 3 dimensions we are using for our plot.
 
         Return
         ------
         matplotlib ax
-            The matplotlib ax with the figure, if you want to add something to it.
+            The matplotlib ax with the figure,
+            if you want to add something to it.
 
         """
         ax = create_3D_plot(fig, position)
@@ -510,25 +543,29 @@ class Profile(DeleteCacheMixin):
 
     def _plot_scores_ternary(self, sizes, fig, position, dim):
         """
-        Plot a figure of the profile on a 2D space with the voters dots having the sizes passed
+        Plot a figure of the profile on a 2D space
+        representing the sphere in the positive ortan,
+        with the voters dots having the sizes passed
         as parameters.
 
         Parameters
         ----------
         sizes : np.ndarray
-            The size of the dots. Should be of length :attr:`n_voters`.
+            The size of the dots.
+            Should be of length :attr:`n_voters`.
         fig : matplotlib figure
             The figure on which we add the plot.
         position : list
             The position of the plot on the figure. Should be of the form
-            `[n_rows, n_columns, position]`.
+            ``[n_rows, n_columns, position]``.
         dim : list
             The 3 dimensions we are using for our plot.
 
         Return
         ------
         matplotlib ax
-            The matplotlib ax with the figure, if you want to add something to it.
+            The matplotlib ax with the figure,
+            if you want to add something to it.
 
         """
         tax = create_ternary_plot(fig, position)
@@ -543,31 +580,38 @@ class Profile(DeleteCacheMixin):
 
     def plot_scores(self, sizes, title="", plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """
-        Plot a figure of the profile on a 2D space with the voters dots having the sizes passed
+        Plot a figure of the profile on a 3D or 2D space
+        with the voters having the `sizes` passed
         as parameters.
 
         Parameters
         ----------
         sizes : np.ndarray
-            The score given by each voter. Should be of length :attr:`n_voters`.
+            The score given by each voter.
+            Should be of length :attr:`n_voters`.
         title : str
-            Title of the figure
+            Title of the figure.
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         fig : matplotlib figure
             The figure on which we add the plot.
         position : list
-            The position of the plot on the figure. Should be of the form
-            `[n_rows, n_columns, position]`.
+            The position of the plot on the figure.
+            Should be of the form
+            ``[n_rows, n_columns, position]``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         show : bool
-            If True, show the figure at the end of the function
+            If True, display the figure at
+            the end of the function.
 
         Return
         ------
         matplotlib ax
-            The matplotlib ax with the figure, if you want to add something to it.
+            The matplotlib ax with the figure,
+            if you want to add something to it.
 
         """
         if dim is None:
@@ -594,33 +638,42 @@ class Profile(DeleteCacheMixin):
 
     def plot_candidate(self, candidate, plot_kind="3D", dim=None, fig=None, position=None, show=True):
         """
-        Plot a figure of the profile on a 2D space with the voters dots having the scores they give to the
-        candidate passed as a parameter.
+        Plot a figure of the profile
+        with the voters having the scores they give
+        to the `candidate` passed as parameters
+        as size.
 
         Parameters
         ----------
         candidate : int
-            The candidate for which we want to show the profile. Should be < :attr:`n_candidates`.
+            The candidate for which we
+            want to show the profile.
+            Should be lower than :attr:`n_candidates`.
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         fig : matplotlib figure
             The figure on which we add the plot.
         position : list
-            The position of the plot on the figure. Should be of the form
-            `[n_rows, n_columns, position]`.
+            The position of the plot on the figure.
+            Should be of the form
+            ``[n_rows, n_columns, position]``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         show : bool
-            If True, show the figure at the end of the function
+            If True, display the figure
+            at the end of the function.
 
         Return
         ------
         matplotlib ax
-            The matplotlib ax with the figure, if you want to add something to it.
+            The matplotlib ax with the figure,
+            if you want to add something to it.
 
         """
         return self.plot_scores(self.scores[::, candidate],
-                                title="Candidate #%i" % (candidate + 1),
+                                title="Candidate %i" % (candidate + 1),
                                 plot_kind=plot_kind,
                                 dim=dim,
                                 fig=fig,
@@ -629,32 +682,42 @@ class Profile(DeleteCacheMixin):
 
     def plot_candidates(self, plot_kind="3D", dim=None, list_candidates=None, list_titles=None, row_size=5, show=True):
         """
-        Plot the profile of the voters for every candidates or a list of candidate,
-        using the scores given by the voters. The plot is either on a 3D plot, or on a ternary plot.
-        Only three dimensions are represented.
+        Plot the profile of the voters
+        for every candidate or a list of candidates,
+        using the scores given by the voters as size for
+        the voters. The plot is either on a 3D plot,
+        or on a ternary plot.
+        Only three dimensions can be represented.
 
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         list_candidates : int list
-            The list of candidates we want to plot. Should contains integer lower than
-            :attr:`n_candidates`. Default is range(:attr:`n_candidates`).
+            The list of candidates we want to plot.
+            Should contains integer lower than
+            :attr:`n_candidates`.
+            By default, we plot every candidates.
         list_titles : str list
-            Contains the title of the plots.Should be the same length than list_candidates.
+            Contains the title of the plots.
+            Should be the same length than `list_candidates`.
         row_size : int
-            Number of subplots by row. Default is set to 5.
+            Number of subplots by row.
+            By default, it is set to 5 plots by rows.
         show : bool
-            If True, plot the figure at the end of the function.
+            If True, display the figure
+            at the end of the function.
 
         """
 
         if list_candidates is None:
             list_candidates = range(self.n_candidates)
         if list_titles is None:
-            list_titles = ["Candidate #%i" % c for c in list_candidates]
+            list_titles = ["Candidate %i" % c for c in list_candidates]
         else:
             list_titles = ["%s " % t for t in list_titles]
 
@@ -677,12 +740,12 @@ class Profile(DeleteCacheMixin):
 
     def copy(self):
         """
-        Return a copy of the profile
+        Return a copy of the profile.
 
         Return
         ------
         Profile
-            A copy of this profile
+            A copy of the profile.
 
         Examples
         --------
@@ -704,12 +767,14 @@ class Profile(DeleteCacheMixin):
 
     def reset_profile(self, profile=None):
         """
-        Reset the profile. The profile becomes a copy of the one passed as parameters if there is one.
+        Reset the profile if no parameters is passed.
+        If a parameter is passed, the profile becomes
+        a copy of the one passed as parameter.
 
         Parameters
         ----------
         profile : Profile
-            A profile if we want to copy of it.
+            A profile that we want to copy.
 
         Return
         ------

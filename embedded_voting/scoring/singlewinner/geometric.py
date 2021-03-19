@@ -12,13 +12,15 @@ from embedded_voting.profile.Profile import Profile
 
 class ZonotopeRule(ScoringRule):
     """
-    Voting rule that rank candidates by the volume of the Zonotope described by
-    the candidate embedding matrix `M` such that `M[i] = score[i, candidate] * embeddings[i]`.
+    Voting rule in which the aggregated score of
+    a candidate is the volume of the Zonotope described by
+    his embedding matrix `M` such that `M[i] = score[i, candidate] * embeddings[i]`.
+    (cf :meth:`profile.embedding_matrix`).
 
     Parameters
     ----------
     profile: Profile
-        the profile of voter on which we run the election
+        The profile of voters on which we run the election.
 
     Examples
     --------
@@ -71,13 +73,17 @@ class ZonotopeRule(ScoringRule):
 
 class MaxCubeRule(ScoringRule):
     """
-    Voting rule that rank candidates by the maximum volume of a cube described by :attr:`n_dim` rows of
-    the candidate embedding matrix `M` such that `M[i] = score[i, candidate] * embeddings[i]`.
+    Voting rule in which the aggregated score of
+    a candidate is the volume of a cube
+    described by :attr:`profile.n_dim` rows of
+    the candidate embedding matrix `M` such
+    that `M[i] = score[i, candidate] * embeddings[i]`.
+    (cf :meth:`profile.embedding_matrix`).
 
     Parameters
     ----------
     profile: Profile
-        the profile of voter on which we run the election
+        The profile of voters on which we run the election.
 
     Examples
     --------

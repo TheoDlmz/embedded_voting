@@ -12,17 +12,19 @@ from embedded_voting.profile.Profile import Profile
 
 class SumScores(ScoringRule):
     """
-    Voting rule that rank candidates by the sum of their scores.
+    Voting rule in which the aggregated score of
+    a candidate is the sum of the scores given by
+    the voters.
 
     Parameters
     ----------
     profile: Profile
-        the profile of voter on which we run the election
+        The profile of voters on which we run the election.
 
     Attributes
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
 
     Examples
     --------
@@ -46,17 +48,19 @@ class SumScores(ScoringRule):
 
 class ProductScores(ScoringRule):
     """
-    Voting rule that rank candidates by the product of their scores.
+    Voting rule in which the aggregated score of
+    a candidate is the product of the scores given by
+    the voters.
 
     Parameters
     ----------
     profile: Profile
-        the profile of voter on which we run the election
+        The profile of voters on which we run the election.
 
     Attributes
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
 
     Examples
     --------

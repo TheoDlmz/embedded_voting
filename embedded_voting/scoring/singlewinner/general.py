@@ -12,20 +12,23 @@ from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 
 class ScoringRule(DeleteCacheMixin):
     """
-    The general class of functions for scoring rules. These rules aggregate the scores of every voter to create
-    a ranking of the candidate and select a winner.
+    The general class of functions for scoring rules.
+    These rules aggregate the scores of every voter to create
+    a ranking of the candidates and select a winner.
 
     Parameters
     ----------
     profile : Profile
-        the profile of voter on which we run the election
+        The profile of voters on which we run the election.
 
     Attributes
     ----------
     profile : Profile
-        The profile of voter on which we run the election
+        The profile of voters on which we run the election.
     _score_components : int
-        The number of components in the score of every candidate. If > 1, we do a lexical sort.
+        The number of components in the aggregated
+        score of every candidate. If `> 1`, we
+        perform a lexical sort to obtain the ranking.
 
     """
 
@@ -40,42 +43,52 @@ class ScoringRule(DeleteCacheMixin):
 
     def score_(self, candidate):
         """
-        Return the score of a given candidate. Need to be implemented for each scoring rule.
+        Return the aggregated score
+        of a given candidate. This should be
+        implemented for each scoring rule.
 
         Parameters
         ----------
         candidate : int
-            Index of the candidate for which we want the score
+            Index of the candidate for whom we want the score.
 
         Return
         ------
         float or tuple
-            if :attr:`_score_component` = 1, return a float, otherwise a tuple of length :attr:`_score_component`
+            if :attr:`_score_components` = 1, return a float,
+            otherwise a tuple of length :attr:`_score_components`.
         """
         raise NotImplementedError
 
     @cached_property
     def scores_(self):
         """
-        Return the scores of all candidates in the election.
+        Return the aggregated scores of all candidates.
 
         Return
         ------
         list
-            The score of every candidates. The score of each candidate is a float if :attr:`_score_component` = 1
-            and a tuple of length :attr:`_score_component` otherwise
+            The scores of all candidates. The score of each
+            candidate is a float if :attr:`_score_components` = 1
+            and a tuple of length :attr:`_score_components` otherwise.
         """
         return [self.score_(candidate) for candidate in range(self.profile_.n_candidates)]
 
     @cached_property
     def scores_zip(self):
         """
-        Return the scores of all candidates in the election, but there is only one component for each candidate.
+        Return the scores of all candidates,
+        but there is only one component for each candidate.
+
+        When :attr:`_score_components` `> 1`,
+        we simply take the last components
+        if all other components are maximum,
+        and `0` otherwise.
 
         Return
         ------
-        list
-            The score of every candidates. The score of each candidate is a float.
+        float list
+            The scores of every candidates.
         """
         if self._score_components == 1:
             return self.scores_
@@ -95,13 +108,15 @@ class ScoringRule(DeleteCacheMixin):
     @cached_property
     def ranking_(self):
         """
-        Return the ranking of the candidates depending on there scores.
+        Return the ranking of the candidates
+        based on their aggregated scores.
 
         Return
         ------
         int list
-            The ranking of the candidates
+            The ranking of the candidates.
         """
+
         if self._score_components == 1:
             return list(np.argsort(self.scores_)[::-1])
         else:
@@ -119,20 +134,22 @@ class ScoringRule(DeleteCacheMixin):
         Return
         ------
         int
-            The index of the winner of the election
+            The index of the winner of the election.
         """
+
         return self.ranking_[0]
 
     @cached_property
     def welfare_(self):
         """
-        Return the welfare of all candidates.
+        Return the welfare of all candidates,
+        where the welfare is defined as
+        `(score - score_min)/(score_max - score_min)`.
 
         Return
         ------
         float list
-            Return the welfare of every candidate, where the welfare is defined as
-            `(score - score_min)/(score_max - score_min)`.
+            Return the welfare of all candidates.
 
         """
         scores = self.scores_zip
@@ -149,21 +166,25 @@ class ScoringRule(DeleteCacheMixin):
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         fig : matplotlib figure
             The figure on which we add the plot.
         position : list
-            The position of the plot on the figure. Should be of the form
-            `[n_rows, n_columns, position]`.
+            The position of the plot on the figure.
+            Should be of the form
+            ``[n_rows, n_columns, position]``.
         show : bool
-            If True, show the figure at the end of the function
+            If True, displays the figure
+            at the end of the function.
 
         Return
         ------
         matplotlib ax
-            The ax with the plot
+            The ax with the plot.
 
         """
         winner = self.winner_
@@ -172,18 +193,22 @@ class ScoringRule(DeleteCacheMixin):
 
     def plot_ranking(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
-        Plot the candidates in the order of the ranking.
+        Plot the candidates in the same order than the ranking.
 
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         row_size : int
-            Number of subplots by row. Default is set to 5.
+            Number of subplots by row.
+            By default, it is set to 5 by rows.
         show : bool
-            If True, plot the figure at the end of the function.
+            If True, displays the figure
+            at the end of the function.
         """
         ranking = self.ranking_
         titles = ["#%i. Candidate %i" % (i+1, c) for i, c in enumerate(ranking)]
