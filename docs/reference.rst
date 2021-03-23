@@ -11,3 +11,4 @@ Reference
    singlewinner/index
    multiwinner/index
    manipulation/index
+   algorithm_aggregation/index

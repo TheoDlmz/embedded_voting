@@ -15,7 +15,7 @@ class ZonotopeRule(ScoringRule):
     Voting rule in which the aggregated score of
     a candidate is the volume of the Zonotope described by
     his embedding matrix `M` such that `M[i] = score[i, candidate] * embeddings[i]`.
-    (cf :meth:`profile.embedding_matrix`).
+    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
 
     Parameters
     ----------
@@ -75,10 +75,10 @@ class MaxCubeRule(ScoringRule):
     """
     Voting rule in which the aggregated score of
     a candidate is the volume of a cube
-    described by :attr:`profile.n_dim` rows of
+    described by :attr:`~embedded_voting.Profile.n_dim` rows of
     the candidate embedding matrix `M` such
     that `M[i] = score[i, candidate] * embeddings[i]`.
-    (cf :meth:`profile.embedding_matrix`).
+    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
 
     Parameters
     ----------

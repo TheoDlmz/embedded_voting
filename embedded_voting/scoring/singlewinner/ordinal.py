@@ -27,8 +27,8 @@ class PositionalRuleExtension(ScoringRule):
         Should be of the same length than the number
         of candidates. In each ranking, candidate ranked
         at position `i` get `points[i]` points.
-    rule : ScoringFunction
-        The :class:`ScoringRule` used to
+    rule : ScoringRule
+        The aggregation rule used to
         determine the aggregated scores
         of the candidates.
 
@@ -44,13 +44,13 @@ class PositionalRuleExtension(ScoringRule):
         Should be of the same length than the number
         of candidates. In each ranking, candidate ranked
         at position `i` get `points[i]` points.
-    base_rule : ScoringFunction
-        The :class:`ScoringRule` used to
+    base_rule : ScoringRule
+        The aggregation rule used to
         determine the aggregated scores
         of the candidates.
     _rule : ScoringRule
         The aggregation rule instantiated
-        with the :attr:`fake profile`.
+        with the :attr:`fake_profile`.
     _score_components :
         The number of components in the score
         of every candidate. If `> 1`,
@@ -160,7 +160,7 @@ class PositionalRuleExtension(ScoringRule):
         list_candidates : int list
             The list of candidates we want to plot.
             Should contains integers lower than
-            :attr:`n_candidates`. By default, we
+            :attr:`~embedded_voting.Profile.n_candidates`. By default, we
             plot all candidates.
         list_titles : str list
             Contains the title of the plots.
@@ -192,8 +192,8 @@ class PluralityExtension(PositionalRuleExtension):
     profile : Profile
         The profile of voters on
         which we run the election.
-    rule : ScoringFunction
-        The :class:`ScoringRule` used to
+    rule : ScoringRule
+        The aggregation rule used to
         determine the aggregated scores
         of the candidates.
 
@@ -233,8 +233,8 @@ class KApprovalExtension(PositionalRuleExtension):
     k : int
         The k parameter of the k-approval.
         By default, it is set to 2.
-    rule : ScoringFunction
-        The :class:`ScoringRule` used to
+    rule : ScoringRule
+        The aggregation rule used to
         determine the aggregated scores
         of the candidates.
 
@@ -271,8 +271,8 @@ class VetoExtension(PositionalRuleExtension):
     profile : Profile
         The profile of voters on
         which we run the election.
-    rule : ScoringFunction
-        The :class:`ScoringRule` used to
+    rule : ScoringRule
+        The aggregation rule used to
         determine the aggregated scores
         of the candidates.
 
@@ -307,8 +307,8 @@ class BordaExtension(PositionalRuleExtension):
     profile : Profile
         The profile of voters on
         which we run the election.
-    rule : ScoringFunction
-        The :class:`ScoringRule` used to
+    rule : ScoringRule
+        The aggregation rule used to
         determine the aggregated scores
         of the candidates.
 
@@ -337,7 +337,7 @@ class InstantRunoffExtension(ScoringRule):
     This class enables to extend a
     voting rule to an ordinal input
     with Instant Runoff ranking. You cannot access
-    to the :attr:`scores` because IRV only
+    to the :attr:`~embedded_voting.ScoringRule.scores_` because IRV only
     compute the ranking of the candidates.
 
     Parameters
@@ -345,8 +345,8 @@ class InstantRunoffExtension(ScoringRule):
     profile : Profile
         The profile of voters on
         which we run the election.
-    rule : ScoringFunction
-        The :class:`ScoringRule` used to
+    rule : ScoringRule
+        The aggregation rule used to
         determine the aggregated scores
         of the candidates.
 

@@ -7,31 +7,36 @@ import itertools
 import matplotlib.pyplot as plt
 from embedded_voting.utils.plots import create_map_plot
 
+
 class SingleVoterManipulation(DeleteCacheMixin):
     """
-    This general class is used for the analysis of the manipulability of the rule by a single voter.
-    For instance, what proportion of voter can change the result of the rule (to their advantage)
-    by giving fake preferences ?
+    This general class is used for the
+    analysis of the manipulability of some :class:`ScoringRule`
+    by a single voter.
+
+    For instance, what proportion of voters can
+    change the result of the rule (to their advantage)
+    by giving false preferences ?
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we do the analysis
+        The profile of voters on which we do the analysis.
     rule : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
 
     Attributes
     ----------
     profile_ : Profile
-        The profile of voter on which we do the analysis
+        The profile of voters on which we do the analysis.
     rule_ : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
     winner_ : int
-        The index of the winner of the election without manipulation
+        The index of the winner of the election without manipulation.
     scores_ : float list
-        The scores of the candidates without manipulation
+        The scores of the candidates without manipulation.
     welfare_ : float list
-        The welfare of the candidates without manipulation
+        The welfares of the candidates without manipulation.
 
     Examples
     --------
@@ -68,6 +73,20 @@ class SingleVoterManipulation(DeleteCacheMixin):
         return self
 
     def set_profile(self, profile):
+        """
+        This function update the profile of voters
+        on which we do the analysis.
+
+        Parameters
+        ----------
+        profile : Profile
+            The new profile.
+
+        Return
+        ------
+        SingleVoterManipulation
+            The object itself.
+        """
         self.profile_ = profile
         global_rule = self.rule_(self.profile_)
         self.winner_ = global_rule.winner_
@@ -78,8 +97,9 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
     def manipulation_voter(self, i):
         """
-        This function return, for each voter, its favorite candidate that he can turn to a winner by
-        manipulating the election.
+        This function return, for the `i^th` voter,
+        its favorite candidate that he can turn to
+        a winner by manipulating the election.
 
         Parameters
         ----------
@@ -89,7 +109,8 @@ class SingleVoterManipulation(DeleteCacheMixin):
         Return
         ------
         int
-            The index of the candidate that can be elected by manipulation.
+            The index of the best candidate
+            that can be elected by manipulation.
         """
         score_i = self.profile_.scores[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
@@ -126,12 +147,14 @@ class SingleVoterManipulation(DeleteCacheMixin):
     @cached_property
     def manipulation_global_(self):
         """
-        This function apply the function manipulation_voter to every voter
+        This function applies the function
+        :meth:`manipulation_voter` to every voter.
 
         Return
         ------
         int list
-            The list of the best candidates that can be turned into the winner for each voter.
+            The list of the best candidates that can be
+            turned into the winner for each voter.
 
         Examples
         --------
@@ -147,12 +170,14 @@ class SingleVoterManipulation(DeleteCacheMixin):
     @cached_property
     def prop_manipulator_(self):
         """
-        This function compute the proportion of voters that can manipulate in the population.
+        This function computes the proportion
+        of voters that can manipulate the election.
 
         Return
         ------
         float
-            The proportion of voters that can manipulate in the population.
+            The proportion of voters
+            that can manipulate the election.
 
         Examples
         --------
@@ -168,7 +193,8 @@ class SingleVoterManipulation(DeleteCacheMixin):
     @cached_property
     def avg_welfare_(self):
         """
-        The function compute the average welfare of the candidate selected by each voter.
+        The function computes the average welfare
+        of the winning candidate after a voter manipulation.
 
         Return
         ------
@@ -189,7 +215,8 @@ class SingleVoterManipulation(DeleteCacheMixin):
     @cached_property
     def worst_welfare_(self):
         """
-        This function compute the worst possible welfare achievable by manipulation.
+        This function computes the worst possible welfare
+        achievable by single voter manipulation.
 
         Return
         ------
@@ -210,12 +237,14 @@ class SingleVoterManipulation(DeleteCacheMixin):
     @cached_property
     def is_manipulable_(self):
         """
-        This function quickly compute if the profile is manipulable or not.
+        This function quickly computes
+        if the profile is manipulable or not.
 
         Return
         ------
         bool
-            If True, the profile is manipulable by a single voter.
+            If True, the profile is
+            manipulable by a single voter.
 
         Examples
         --------
@@ -233,27 +262,36 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
     def manipulation_map(self, map_size=20, scores_matrix=None, show=True):
         """
-        A function to plot the manipulability of the profile when the polarisation and the coherence vary.
-        The number of voters, dimensions, and candidates are those of the :attr:`profile_`.
+        A function to plot the manipulability
+        of the profile when the ``polarisation`` and the ``coherence``
+        of the :class:`ParametricProfile` vary.
+        The number of voters, dimensions, and candidates
+        are those of the :attr:`profile_`.
 
         Parameters
         ----------
         map_size : int
-            The number of different coherence and polarisation parameters tested.
-            The total number of test is :attr:`map_size`^2.
+            The number of different ``coherence``
+            and ``polarisation`` parameters tested.
+            The total number of test is `map_size` `^2`.
         scores_matrix : np.ndarray
-            Matrix of shape :attr:`n_dim`, :attr:`n_candidates` containing the scores given by
-            each group. More precisely, `scores_matrix[i,j]` is the score given by the group
-            represented by the dimension i to the candidate j.
+            Matrix of shape :attr:`~embedded_voting.Profile.n_dim`,
+            :attr:`~embedded_voting.Profile.n_candidates` containing
+            the scores given by each group.
+            More precisely, `scores_matrix[i,j]` is the score given by the group
+            represented by the dimension `i` to the candidate `j`.
             If None specified, a new matrix is generated for each test.
         show : bool
-            If True, display the manipulation maps at the end of the function
+            If True, display the manipulation maps
+            at the end of the function.
 
         Return
         ------
         dict
-            The manipulation maps : `manipulator` for the proportion of manipulator, `worst_welfare` and `avg_welfare`
-            for the welfare.
+            The manipulation maps :
+            ``manipulator`` for the proportion of manipulator,
+            ``worst_welfare`` and ``avg_welfare``
+            for the welfare maps.
 
         Examples
         --------
@@ -308,29 +346,30 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
 class SingleVoterManipulationExtension(SingleVoterManipulation):
     """
-    This class extends the SingleVoterManipulation class to ordinal extension (irv, borda, plurality, etc.).
+    This class extends the :class:`SingleVoterManipulation`
+    class to ordinal extension (irv, borda, plurality, etc.).
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we do the analysis.
+        The profile of voters on which we do the analysis.
     extension : PositionalRuleExtension
-        The extension used.
+        The ordinal extension used.
     rule : ScoringRule
-        The rule we are analysing.
+        The aggregation rule we want to analysis.
 
     Attributes
     ----------
     rule_ : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
+    winner_ : int
+        The index of the winner of the election without manipulation.
+    welfare_ : float list
+        The welfares of the candidates without manipulation.
     extended_rule : ScoringRule
         The rule we are analysing
     extension : PositionalRuleExtension
         The extension used.
-    winner_ : int
-        The index of the winner of the election without manipulation
-    welfare_ : float list
-        The welfare of the candidates without manipulation
 
     Examples
     --------

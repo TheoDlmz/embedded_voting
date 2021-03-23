@@ -7,5 +7,6 @@ Tutorials
     profile
     election
     moving
-    multiwinner
+    ordinal
     manipulation
+    multiwinner

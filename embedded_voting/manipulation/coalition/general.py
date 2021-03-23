@@ -9,30 +9,37 @@ from embedded_voting.utils.plots import create_map_plot
 
 class ManipulationCoalition(DeleteCacheMixin):
     """
-    This general class is used for the analysis of the manipulability of the rule by a coalition of voter.
-    It only look if there is a trivial manipulation by a coalition of voter. That means, for some candidate c
-    different than the current winner w, gather every voter who prefers c to w, and ask them to put c first and
-    w last. If c is the new winner, then the profile can be manipulated.
+    This general class is used for the analysis of
+    the manipulability of the rule by a coalition of voter.
+
+    It only look if there is a trivial
+    manipulation by a coalition of voter.
+    That means, for some candidate `c`
+    different than the current winner `w`,
+    gather every voter who prefers `c` to `w`,
+    and ask them to put `c` first and `w` last.
+    If `c` is the new winner, then
+    the profile can be manipulated.
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we do the analysis
+        The profile of voters on which we do the analysis.
     rule : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
 
     Attributes
     ----------
     profile_ : Profile
-        The profile of voter on which we do the analysis
+        The profile of voter on which we do the analysis.
     rule_ : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
     winner_ : int
-        The index of the winner of the election without manipulation
+        The index of the winner of the election without manipulation.
     scores_ : float list
-        The scores of the candidates without manipulation
+        The scores of the candidates without manipulation.
     welfare_ : float list
-        The welfare of the candidates without manipulation
+        The welfare of the candidates without manipulation.
 
     Examples
     --------
@@ -79,20 +86,25 @@ class ManipulationCoalition(DeleteCacheMixin):
 
     def trivial_manipulation(self, candidate, verbose=False):
         """
-        This function compute if a trivial manipulation is possible for the candidate
+        This function computes if
+        a trivial manipulation is
+        possible for the candidate
         passed as parameter.
 
         Parameters
         ----------
         candidate : int
-            The index of the candidate for which we manipulate.
+            The index of the candidate
+            for which we manipulate.
         verbose : bool
-            Verbose mode. By default, is set to False.
+            Verbose mode.
+            By default, is set to False.
 
         Return
         ------
         bool
-            If True, the profile is manipulable for this candidate.
+            If True, the profile is manipulable
+            for this candidate.
 
         Examples
         --------
@@ -132,12 +144,14 @@ class ManipulationCoalition(DeleteCacheMixin):
     @cached_property
     def is_manipulable_(self):
         """
-        A function that quickly compute if the profile is manipulable
+        A function that quickly computes
+        if the profile is manipulable.
 
         Return
         ------
         bool
-            If True, the profile is manipulable for some candidate.
+            If True, the profile is
+            manipulable for some candidate.
 
         Examples
         --------
@@ -159,7 +173,8 @@ class ManipulationCoalition(DeleteCacheMixin):
     @cached_property
     def worst_welfare_(self):
         """
-        A function that compute the worst welfare attainable by coalition manipulation.
+        A function that compute the worst
+        welfare attainable by coalition manipulation.
 
         Return
         ------
@@ -185,26 +200,35 @@ class ManipulationCoalition(DeleteCacheMixin):
 
     def manipulation_map(self, map_size=20, scores_matrix=None, show=True):
         """
-        A function to plot the manipulability of the profile when the polarisation and the coherence vary.
+        A function to plot the manipulability
+        of the profile when the
+        ``polarisation`` and the ``coherence`` vary.
 
         Parameters
         ----------
         map_size : int
             The number of different coherence and polarisation parameters tested.
-            The total number of test is :attr:`map_size`^2.
+            The total number of test is `map_size` ^2.
         scores_matrix : np.ndarray
-            Matrix of shape :attr:`n_dim`, :attr:`n_candidates` containing the scores given by
-            each group. More precisely, `scores_matrix[i,j]` is the score given by the group
-            represented by the dimension i to the candidate j.
-            If None specified, a new matrix is generated for each test.
+            Matrix of shape :attr:`~embedded_voting.Profile.n_dim`,
+            :attr:`~embedded_voting.Profile.n_candidates`
+            containing the scores given by each group.
+            More precisely, `scores_matrix[i,j]` is the
+            score given by the group represented by
+            the dimension `i` to the candidate `j`.
+            If not specified, a new matrix is
+            generated for each test.
         show : bool
-            If True, display the manipulation maps at the end of the function
+            If True, displays the manipulation
+            maps at the end of the function.
 
         Return
         ------
         dict
-            The manipulation maps : `manipulator` for the proportion of manipulator, `worst_welfare` and `avg_welfare`
-            for the welfare.
+            The manipulation maps :
+            ``manipulator`` for the proportion of manipulator,
+            ``worst_welfare`` and ``avg_welfare``
+            for the welfare maps.
 
         Examples
         --------

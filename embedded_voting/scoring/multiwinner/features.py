@@ -6,7 +6,9 @@ import numpy as np
 
 class IterFeatures(IterRule):
     """
-    Iterative multiwinner rule based on Features vector.
+    Iterative multiwinner rule
+    based on the :class:`FeaturesRule`
+    aggregation rule.
 
     Examples
     --------
@@ -29,20 +31,26 @@ class IterFeatures(IterRule):
     @staticmethod
     def compute_features(embeddings, scores):
         """
-        A function to compute features for some embeddings and scores
+        A function to compute features
+        for some embeddings and scores.
 
         Parameters
         ----------
         embeddings : np.ndarray
-            The embeddings of the voters. Should be of shape :attr:`n_voters`, :attr:`n_dim`.
+            The embeddings of the voters.
+            Should be of shape :attr:`~embedded_voting.Profile.n_voters`,
+            :attr:`~embedded_voting.Profile.n_dim`.
         scores : np.ndarray
             The scores given by the voters to the candidates.
-            Should be of shape :attr:`n_voters`, :attr:`n_candidates`.
+            Should be of shape :attr:`~embedded_voting.Profile.n_voters`,
+            :attr:`~embedded_voting.Profile.n_candidates`.
 
         Return
         ------
         np.ndarray
-            The features of every candidates. Of shape :attr:`n_candidates`, :attr:`n_dim`.
+            The features of every candidates.
+            Of shape :attr:`~embedded_voting.Profile.n_candidates`,
+            :attr:`~embedded_voting.Profile.n_dim`.
         """
         return np.dot(np.dot(np.linalg.inv(np.dot(embeddings.T, embeddings)), embeddings.T), scores).T
 

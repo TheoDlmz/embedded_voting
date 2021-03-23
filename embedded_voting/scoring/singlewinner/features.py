@@ -51,7 +51,7 @@ class FeaturesRule(ScoringRule):
         ------
         np.ndarray
             The matrix of features.
-            Its shape is :attr:`profile.n_candidates`, :attr:`profile.n_dim`
+            Its shape is :attr:`~embedded_voting.Profile.n_candidates`, :attr:`~embedded_voting.Profile.n_dim`
         """
         embeddings = self.profile_.embeddings
         scores = self.profile_.scores

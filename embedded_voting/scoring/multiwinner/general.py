@@ -13,7 +13,9 @@ import matplotlib.pyplot as plt
 
 class MultiwinnerRule(DeleteCacheMixin):
     """
-    A class for multiwinner rules that elect a committee of candidates of size :attr:`k_` given a
+    A class for multiwinner rules, in other words
+    aggregation rules that elect a committee of
+    candidates of size :attr:`k_`, given a
     profile of voters with embeddings.
 
     Parameters
@@ -21,7 +23,7 @@ class MultiwinnerRule(DeleteCacheMixin):
     profile : Profile
         The profile of voters.
     k : int
-        The size of the committee
+        The size of the committee.
 
     Attributes
     ----------
@@ -44,17 +46,18 @@ class MultiwinnerRule(DeleteCacheMixin):
 
     def set_k(self, k):
         """
-        A function to update the size :attr:`k_` of the committee
+        A function to update the
+        size :attr:`k_` of the winning committee
 
         Parameters
         ----------
         k : int
-            The new size of the committee
+            The new size of the committee.
 
         Return
         ------
         MultiwinnerRule
-            The object itself
+            The object itself.
         """
         self.delete_cache()
         self.k_ = k
@@ -63,19 +66,21 @@ class MultiwinnerRule(DeleteCacheMixin):
     @cached_property
     def winners_(self):
         """
-        A function that returns the winners, i.e. the members of the elected committee.
+        A function that returns the winners,
+        i.e. the members of the elected committee.
 
         Return
         ------
         int list
-            The indexes of the elected candidates
+            The indexes of the elected candidates.
         """
         raise NotImplementedError
 
 
 class IterRule(MultiwinnerRule):
     """
-    A class for multi winner rules that are adaptations of STV to the
+    A class for multi-winner rules
+    that are adaptations of STV to the
     embeddings profile model.
 
     Parameters
@@ -83,14 +88,28 @@ class IterRule(MultiwinnerRule):
     profile : Profile
         The profile of voters.
     k : int
-        The size of the committee
+        The size of the committee.
     quota : str
-        The quota used for the re-weighing step. Either "droop" quota (n/(k+1) +1) or
-        "classic" quota (n/k).
+        The quota used for the re-weighing step.
+        Either ``'droop'`` quota `(n/(k+1) +1)` or
+        ``'classic'`` quota `(n/k)`.
     take_min : bool
-        If True, when the total satisfaction is less than the quota,
-        we replace the quota by the total satisfaction. By default, it is set to false.
+        If True, when the total
+        satisfaction is less than the :attr:`quota`,
+        we replace the quota by the total
+        satisfaction. By default, it is set to False.
 
+    Attributes
+    ----------
+    quota : str
+        The quota used for the re-weighing step.
+        Either ``'droop'`` quota `(n/(k+1) +1)` or
+        ``'classic'`` quota `(n/k)`.
+    take_min : bool
+        If True, when the total
+        satisfaction is less than the :attr:`quota`,
+        we replace the quota by the total
+        satisfaction. By default, it is set to False.
     """
 
     def __init__(self, profile=None, k=None, quota="classic", take_min=False):
@@ -103,39 +122,43 @@ class IterRule(MultiwinnerRule):
 
     def _winner_k(self, winners):
         """
-        This function determines the winner of the kth iteration.
+        This function determines
+        the winner of the k^th iteration.
 
         Parameters
         ----------
         winners : int list
-            The list of the k-1 first winner of the committee.
+            The list of the `k-1` first winners in the committee.
 
         Return
         ------
         int
-            The kth winner.
+            The `k^th` winner.
         np.ndarray
             The feature vector associated to this candidate.
-            The vector should be of length :attr:`n_dim`.
+            The vector should be of length :attr:`~embedded_voting.Profile.n_dim`.
         """
         raise NotImplementedError
 
     def _satisfaction(self, candidate, features_vector):
         """
-        This function computes the satisfaction of every voter given the candidate winner and
+        This function computes the satisfaction
+        of every voter given the winning candidate and
         its features vector.
 
         Parameters
         ----------
         candidate : int
-            The winner candidate
+            The winning candidate.
         features_vector : np.ndarray
-            The feature vector of the candidate winner.
+            The features vector of the winning candidate.
 
         Return
         ------
         float list
-            The list of the voters' satisfaction with this candidate. Should be of length :attr:`n_voters`.
+            The list of the voters' satisfactions
+            with this candidate. Should be of
+            length :attr:`~embedded_voting.Profile.n_voters`.
 
         """
         temp = [np.dot(self.profile_.embeddings[i], features_vector) for i in range(self.profile_.n_voters)]
@@ -144,17 +167,21 @@ class IterRule(MultiwinnerRule):
 
     def _updateWeight(self, satisfactions):
         """
-        This function updates voters' weights depending on their satisfaction with the recently elected candidate.
+        This function updates voters'
+        weights depending on their satisfactions
+         with the recently elected candidate.
 
         Parameters
         ----------
         satisfactions : float list
-            The list of the voters' satisfaction with this candidate. Should be of length :attr:`n_voters`.
+            The list of the voters' satisfaction
+            with this candidate. Should be of
+            length :attr:`~embedded_voting.Profile.n_voters`.
 
         Return
         ------
         IterRule
-            The object itself
+            The object itself.
         """
         if self.quota == "classic":
             quota_val = self.profile_.n_voters / self.k_
@@ -175,17 +202,18 @@ class IterRule(MultiwinnerRule):
 
     def set_quota(self, quota):
         """
-        A function to update the :attr:`quota` of the rule
+        A function to update the :attr:`quota` of the rule.
 
         Parameters
         ----------
         quota : str
-            The new quota, should be either "droop" or "classic"
+            The new quota, should be
+            either ``'droop'`` or ``'classic'``.
 
         Return
         ------
         MultiwinnerRule
-            The object itself
+            The object itself.
         """
         if quota not in ["classic", "droop"]:
             raise ValueError("Quota should be either 'classic' (n/k) or 'droop' (n/(k+1) + 1)")
@@ -196,16 +224,19 @@ class IterRule(MultiwinnerRule):
     @cached_property
     def _ruleResults(self):
         """
-        This function execute the rule and compute the winner, their features vectors, and the weights associated
-        to them.
+        This function execute the rule and compute
+        the winners, their features vectors, and the voters'
+        weights at each step.
 
         Return
         ------
         dict
-            A dictionary with 4 elements :
-            1) "winners" contains the list of winners.
-            2) "vectors" contains the list of candidates features vectors.
-            3) "weights_list" contains the list of voters' weight at each step.
+            A dictionary with 3 elements :
+            1) ``winners`` contains the list of winners.
+            2) ``vectors`` contains the list of
+            candidates features vectors.
+            3) ``weights_list`` contains the list of
+            voters' weight at each step.
         """
         n_voters = self.profile_.n_voters
 
@@ -243,32 +274,42 @@ class IterRule(MultiwinnerRule):
     @cached_property
     def features_vectors(self):
         """
-        This function return the features vectors winning committee.
+        This function return the
+        features vectors associated to
+        the candidates in the winning committee.
 
         Return
         ------
         list
-            The list of the features vectors of each candidate. Each vector is of length :attr:`n_dim`.
+            The list of the features vectors of each candidate.
+            Each vector is of length :attr:`~embedded_voting.Profile.n_dim`.
 
         """
         return self._ruleResults["vectors"]
 
     def plot_weights(self, plot_kind="3D", dim=None, row_size=5, verbose=True, show=True):
         """
-        This function plot the evolution of the voters' weights after each step of the rule.
+        This function plot the evolution of
+        the voters' weights after each step of the rule.
 
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``3D`` or ``ternary``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         row_size : int
-            Number of subplots by row. Default is set to 5.
+            Number of subplots by row.
+            By default, it is set to 5.
         verbose : bool
-            If True, print the total weight by remaining candidate at the end of each step.
+            If True, print the total weight divided by
+            the number of remaining candidates at
+            the end of each step.
         show : bool
-            If True, display the figure at the end of the function.
+            If True, displays the figure
+            at the end of the function.
 
         """
         ls_weight = self._ruleResults["weights_list"]
@@ -318,13 +359,17 @@ class IterRule(MultiwinnerRule):
         Parameters
         ----------
         plot_kind : str
-            The kind of plot we want to show. Can be "3D" or "ternary".
+            The kind of plot we want to show.
+            Can be ``3D`` or ``ternary``.
         dim : list
             The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
         row_size : int
-            Number of subplots by row. Default is set to 5.
+            Number of subplots by row.
+            By default, it is set to 5.
         show : bool
-            If True, plot the figure at the end of the function.
+            If True, displays the figure
+            at the end of the function.
 
         """
         winners = self.winners_

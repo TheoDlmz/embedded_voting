@@ -7,15 +7,17 @@ from embedded_voting.scoring.singlewinner.svd import SVDNash
 
 class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
     """
-    This class do the single voter manipulation analysis for the Borda extension. It is faster than
-    the general class SingleVoterManipulationExtension.
+    This class do the single voter manipulation
+    analysis for the :class:`BordaExtension` extension.
+    It is faster than the general class
+    class:`SingleVoterManipulationExtension`.
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we do the analysis
+        The profile of voters on which we do the analysis.
     rule : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
 
     Examples
     --------

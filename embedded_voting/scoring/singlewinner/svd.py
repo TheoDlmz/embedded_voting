@@ -18,7 +18,7 @@ class SVDRule(ScoringRule):
     Voting rule in which the aggregated score of
     a candidate is based on singular values
     of his embedding matrix
-    (cf :meth:`profile.embedding_matrix()`).
+    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
 
     Parameters
     ----------
@@ -135,7 +135,7 @@ class SVDNash(SVDRule):
     Voting rule in which the aggregated score of
     a candidate is the product of the singular values
     of his embedding matrix
-    (cf :meth:`profile.embedding_matrix()`).
+    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
 
     Parameters
     ----------
@@ -174,7 +174,7 @@ class SVDSum(SVDRule):
     Voting rule in which the aggregated score of
     a candidate is the sum of the singular values
     of his embedding matrix
-    (cf :meth:`profile.embedding_matrix()`).
+    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
 
     Parameters
     ----------
@@ -213,7 +213,7 @@ class SVDMin(SVDRule):
     Voting rule in which the aggregated score of
     a candidate is the minimum singular value
     of his embedding matrix
-    (cf :meth:`profile.embedding_matrix()`).
+    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
 
     Parameters
     ----------
@@ -252,7 +252,7 @@ class SVDMax(SVDRule):
     Voting rule in which the aggregated score of
     a candidate is the maximum singular value
     of his embedding matrix
-    (cf :meth:`profile.embedding_matrix()`).
+    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
 
     Parameters
     ----------
@@ -303,7 +303,7 @@ class SVDMax(SVDRule):
         ------
         np.ndarray
             The feature vector of the
-            candidate, of length :attr:`profile.n_dim`.
+            candidate, of length :attr:`~embedded_voting.Profile.n_dim`.
         """
         embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
         _, vp, vec = np.linalg.svd(embeddings)
@@ -325,7 +325,7 @@ class SVDMax(SVDRule):
         ------
         np.ndarray
             The feature vectors of all the candidates,
-             of shape :attr:`profile.n_candidates`, :attr:`profile.n_dim`.
+            of shape :attr:`~embedded_voting.Profile.n_candidates`, :attr:`~embedded_voting.Profile.n_dim`.
 
         Examples
         --------

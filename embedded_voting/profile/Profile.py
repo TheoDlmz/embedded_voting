@@ -218,7 +218,7 @@ class Profile(DeleteCacheMixin):
             raise ValueError("Cannot dilate a profile with less than 2 candidates")
 
         center = self.embeddings.sum(axis=0)
-        center = center / np.linalg.norm(center)
+        center = normalize(center)
         min_value = np.dot(profile[0], center)
         for i in range(self.n_voters):
             val = np.dot(profile[i], center)
@@ -283,6 +283,62 @@ class Profile(DeleteCacheMixin):
             new_scores = np.minimum(new_scores, 1)
         self.scores = new_scores.T
 
+        return self
+
+    def recenter(self):
+        """
+        Recenter the embeddings of the
+        voters so that they are the most
+        possible on the positive ortan.
+
+        Return
+        ------
+        Profile
+            The profile itself.
+
+        Examples
+        --------
+        >>> my_profile = Profile(5, 3)
+        >>> embeddings = -np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]])
+        >>> scores = np.random.rand(3, 5)
+        >>> _ = my_profile.add_voters(embeddings, scores, normalize_embs=True)
+        >>> my_profile.embeddings
+        array([[-0.45267873, -0.81482171, -0.36214298],
+               [-0.42163702, -0.73786479, -0.52704628],
+               [-0.66666667, -0.33333333, -0.66666667]])
+        >>> my_profile.recenter().embeddings
+        array([[0.40215359, 0.75125134, 0.52334875],
+               [0.56352875, 0.6747875 , 0.47654713],
+               [0.70288844, 0.24253193, 0.66867489]])
+        """
+
+        if self.n_voters < 2:
+            raise ValueError("Cannot recenter a profile with less than 2 candidates")
+
+        center = self.embeddings.sum(axis=0)
+        center = normalize(center)
+        target_center = np.ones(self.n_dim)
+        target_center = normalize(target_center)
+        if np.dot(center, target_center) == -1:
+            self.embeddings = - self.embeddings
+            return self
+        elif np.dot(center, target_center) == 1:
+            return self
+
+        orthogonal_center = center - np.dot(center, target_center)*target_center
+        orthogonal_center = normalize(orthogonal_center)
+        theta = -np.arccos(np.dot(center, target_center))
+        rotation_matrix = np.array([[np.cos(theta), - np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+        new_embeddings = np.zeros((self.n_voters, self.n_dim))
+        for i in range(self.n_voters):
+            embeddings_i = self.embeddings[i]
+            comp_1 = embeddings_i.dot(target_center)
+            comp_2 = embeddings_i.dot(orthogonal_center)
+            vector = [comp_1, comp_2]
+            remainder = embeddings_i - comp_1*target_center - comp_2*orthogonal_center
+            new_vector = rotation_matrix.dot(vector)
+            new_embeddings[i] = new_vector[0]*target_center + new_vector[1]*orthogonal_center + remainder
+        self.embeddings = new_embeddings
         return self
 
     def scored_embeddings(self, candidate, square_root=True):
@@ -409,7 +465,7 @@ class Profile(DeleteCacheMixin):
             x1 = v[dim[0]]
             x2 = v[dim[1]]
             x3 = v[dim[2]]
-            ax.plot([0, x1], [0, x2], [0, x3], color=(x1 * 0.8, x2 * 0.8, x3 * 0.8), alpha=0.4)
+            ax.plot([0, x1], [0, x2], [0, x3], color=(x1**2 * 0.8, x2**2 * 0.8, x3**2 * 0.8), alpha=0.4)
             ax.scatter([x1], [x2], [x3], color='k', s=1)
         return ax
 
@@ -443,7 +499,7 @@ class Profile(DeleteCacheMixin):
             x2 = v[dim[2]]
             x3 = v[dim[1]]
             vec = [x1, x2, x3]
-            tax.scatter([normalize(vec)**2], color=(x1 * 0.8, x3 * 0.8, x2 * 0.8), alpha=0.9, s=30)
+            tax.scatter([normalize(vec)**2], color=(x1**2 * 0.8, x3**2 * 0.8, x2**2 * 0.8), alpha=0.9, s=30)
 
         return tax
 
@@ -537,7 +593,7 @@ class Profile(DeleteCacheMixin):
             x1 = v[dim[0]]
             x2 = v[dim[1]]
             x3 = v[dim[2]]
-            ax.plot([0, s * x1], [0, s * x2], [0, s * x3], color=(x1 * 0.8, x2 * 0.8, x3 * 0.8), alpha=0.4)
+            ax.plot([0, s * x1], [0, s * x2], [0, s * x3], color=(x1**2 * 0.8, x2**2 * 0.8, x3**2 * 0.8), alpha=0.4)
 
         return ax
 
@@ -574,7 +630,7 @@ class Profile(DeleteCacheMixin):
             x2 = v[dim[2]]
             x3 = v[dim[1]]
             vec = [x1, x2, x3]
-            tax.scatter([normalize(vec)**2], color=(x1 * 0.8, x3 * 0.8, x2 * 0.8), alpha=0.7, s=max(s * 50, 1))
+            tax.scatter([normalize(vec)**2], color=(x1**2 * 0.8, x3**2 * 0.8, x2**2 * 0.8), alpha=0.7, s=max(s * 50, 1))
 
         return tax
 

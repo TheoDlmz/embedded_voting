@@ -51,7 +51,7 @@ class FakeSVDRule(ScoringRule):
         By default, it is False.
     similarity : callable
         A similarity function that associate a pair
-        of features vector to a similarity value (a float)
+        of features vector to a similarity value (a float).
         Input : np.ndarray, np.ndarray.
         Output : float.
 

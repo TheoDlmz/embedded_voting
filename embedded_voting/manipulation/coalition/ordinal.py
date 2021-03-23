@@ -8,30 +8,32 @@ from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension,
 
 class ManipulationCoalitionExtension(ManipulationCoalition):
     """
-    This class extends the ManipulationCoalition class to ordinal extension (irv, borda, plurality, etc.), because
-    the ManipulationCoalition cannot be used for ordinal preferences.
+    This class extends the :class:`ManipulationCoalition`
+    class to ordinal extension (irv, borda, plurality, etc.), because
+    the :class:`ManipulationCoalition` cannot
+    be used for ordinal preferences.
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we do the analysis.
+        The profile of voters on which we do the analysis.
     extension : PositionalRuleExtension
-        The extension used.
+        The ordinal extension used.
     rule : ScoringRule
-        The rule we are analysing.
+        The aggregation rule we want to analysis.
 
     Attributes
     ----------
     rule_ : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
+    winner_ : int
+        The index of the winner of the election without manipulation.
+    welfare_ : float list
+        The welfares of the candidates without manipulation.
     extended_rule : ScoringRule
         The rule we are analysing
     extension : PositionalRuleExtension
         The extension used.
-    winner_ : int
-        The index of the winner of the election without manipulation
-    welfare_ : float list
-        The welfare of the candidates without manipulation
 
     Examples
     --------
@@ -98,14 +100,15 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
 
 class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     """
-    This class do the coalition manipulation analysis for the Borda extension.
+    This class do the coalition manipulation
+    analysis for the :class:`BordaExtension` extension.
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we do the analysis
+        The profile of voters on which we do the analysis.
     rule : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
 
     Examples
     --------
@@ -127,16 +130,17 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
 
 class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     """
-    This class do the coalition manipulation analysis for the k-Approval extension.
+    This class do the coalition manipulation
+    analysis for the :class:`KApprovalExtension` extension.
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we do the analysis
+        The profile of voters on which we do the analysis.
     k : int
-        The parameter of the k-approval rule
+        The parameter of the k-approval rule.
     rule : ScoringRule
-        The rule we are analysing
+        The aggregation rule we want to analysis.
 
     Examples
     --------
@@ -158,15 +162,15 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
 
 class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     """
-    This class do the coalition manipulation analysis for the instant runoff extension.
+    This class do the coalition manipulation
+    analysis for the :class:`InstantRunoffExtension` extension.
 
     Parameters
     ----------
     profile : Profile
-        The profile of voter on which we do the analysis
+        The profile of voters on which we do the analysis.
     rule : ScoringRule
-        The rule we are analysing
-
+        The aggregation rule we want to analysis.
 
     Examples
     --------

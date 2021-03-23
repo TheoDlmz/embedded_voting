@@ -5,25 +5,31 @@ from embedded_voting.profile.ParametricProfile import ParametricProfile
 
 class IterSVD(IterRule):
     """
-    Iterative multiwinner rule based on a SVD aggregation rule.
+    Iterative multiwinner rule based on
+    a SVD aggregation rule.
 
     Parameters
     __________
     profile : Profile
         The profile of voters.
     k : int
-        The size of the committee
+        The size of the committee.
     aggregation_rule : callable
-        The aggregation rule for the singular values. By default, it is the maximum.
+        The aggregation rule for the singular values.
+        By default, it is the maximum.
     square_root : bool
-        If True, we take the square root of the score instead of the score itself for
-        the embeddings matrix.
+        If True, we take the square root of
+        the scores instead of the scores for
+        the :meth:`~embedded_voting.Profile.scored_embeddings`.
     quota : str
-        The quota used for the re-weighing step. Either "droop" quota (n/(k+1) +1) or
-        "classic" quota (n/k).
+        The quota used for the re-weighing step.
+        Either ``'droop'`` quota `(n/(k+1) +1)` or
+        ``'classic'`` quota `(n/k)`.
     take_min : bool
-        If True, when the total satisfaction is less than the quota,
-        we replace the quota by the total satisfaction. By default, it is set to false.
+        If True, when the total
+        satisfaction is less than the :attr:`~embedded_voting.IterRule.quota`,
+        we replace the quota by the total satisfaction.
+        By default, it is set to False.
 
     Examples
     --------
