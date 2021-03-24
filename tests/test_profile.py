@@ -4,6 +4,7 @@ from embedded_voting.profile.MovingVoter import MovingVoterProfile
 from embedded_voting.scoring.singlewinner.svd import *
 import pytest
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def test_plot():
@@ -15,6 +16,7 @@ def test_plot():
     my_profile.plot_candidates("ternary", show=False)
     my_profile = MovingVoterProfile(SVDNash())
     my_profile.plot_scores_evolution(show=False)
+    plt.close()
 
 
 def test_error():
@@ -22,6 +24,8 @@ def test_error():
     my_profile.uniform_distribution(1)
     with pytest.raises(ValueError):
         my_profile.dilate()
+    with pytest.raises(ValueError):
+        my_profile.recenter()
     my_profile.uniform_distribution(100)
     with pytest.raises(ValueError):
         my_profile.plot_profile("toto", show=False)
@@ -52,5 +56,43 @@ def test_particular_case():
     my_profile.dilate()
     for i in range(3):
         assert list(my_profile.embeddings[i]) == [0.7071067811865475, 0.7071067811865475]
+    my_profile.recenter()
+    for i in range(3):
+        assert list(my_profile.embeddings[i]) == [0.7071067811865475, 0.7071067811865475]
 
+    my_profile = Profile(5, 2)
+    for i in range(3):
+        my_profile.add_voter([-.5, -.5], np.random.rand(5))
+    my_profile.recenter()
+    for i in range(3):
+        assert list(my_profile.embeddings[i]) == [0.7071067811865475, 0.7071067811865475]
+
+
+def test_rotations():
+    my_profile = Profile(5, 2)
+    for i in range(20):
+        my_profile.add_voter([0.6, 0.4], np.random.rand(5))
+    for i in range(3):
+        my_profile.add_voter([0.4, 0.6], np.random.rand(5))
+    my_profile.dilate()
+    for i in range(5):
+        assert list(my_profile.embeddings[i]) == [0.8662807728058746, 0.4995574267958169]
+
+    my_profile = Profile(5, 2)
+    for i in range(20):
+        my_profile.add_voter([0.6, 0.4], np.random.rand(5))
+    for i in range(3):
+        my_profile.add_voter([0.4, 0.6], np.random.rand(5))
+    my_profile.dilate(approx=False)
+    for i in range(5):
+        assert list(my_profile.embeddings[i]) == [0.9999999999999998, -3.3306690738754696e-16]
+
+    my_profile = Profile(5, 2)
+    for i in range(20):
+        my_profile.add_voter([1, 0], np.random.rand(5))
+    for i in range(3):
+        my_profile.add_voter([0.8, 0.2], np.random.rand(5))
+    my_profile.recenter(approx=False)
+    for i in range(5):
+        assert list(my_profile.embeddings[i]) == [0.7882054380161093, 0.6154122094026356]
 

@@ -26,6 +26,7 @@ def test_plot():
     election.plot_features("ternary", show=False)
     with pytest.raises(ValueError):
         election.plot_features("3D", dim=[1, 2, 3, 4], show=False)
+    plt.close()
 
 
 def test_special_cases():

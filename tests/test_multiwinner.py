@@ -2,6 +2,7 @@ from embedded_voting.profile.ParametricProfile import ParametricProfile
 from embedded_voting.scoring.multiwinner.svd import IterSVD
 import numpy as np
 import pytest
+import matplotlib.pyplot as plt
 
 
 def test_plots():
@@ -16,7 +17,7 @@ def test_plots():
     election.plot_winners("3D", show=False)
     election.plot_weights("ternary", show=False)
     election.plot_weights("3D", show=False)
-
+    plt.close()
 
 def test_errors():
     scores = [[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 0], [0, 0, 0, 0, 0, 1]]
