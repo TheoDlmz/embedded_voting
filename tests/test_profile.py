@@ -76,7 +76,7 @@ def test_rotations():
         my_profile.add_voter([0.4, 0.6], np.random.rand(5))
     my_profile.dilate()
     for i in range(5):
-        assert list(my_profile.embeddings[i]) == [0.8662807728058746, 0.4995574267958169]
+        assert round(list(my_profile.embeddings[i])[0], 2) == 0.87
 
     my_profile = Profile(5, 2)
     for i in range(20):
@@ -85,7 +85,7 @@ def test_rotations():
         my_profile.add_voter([0.4, 0.6], np.random.rand(5))
     my_profile.dilate(approx=False)
     for i in range(5):
-        assert list(my_profile.embeddings[i]) == [0.9999999999999998, -3.3306690738754696e-16]
+        assert round(list(my_profile.embeddings[i])[0], 2) == 1
 
     my_profile = Profile(5, 2)
     for i in range(20):
@@ -94,5 +94,5 @@ def test_rotations():
         my_profile.add_voter([0.8, 0.2], np.random.rand(5))
     my_profile.recenter(approx=False)
     for i in range(5):
-        assert list(my_profile.embeddings[i]) == [0.7882054380161093, 0.6154122094026356]
+        assert round(list(my_profile.embeddings[i])[0], 2) == 0.79
 
