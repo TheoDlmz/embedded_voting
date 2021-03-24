@@ -21,7 +21,7 @@ def test_error():
     my_profile = Profile(5, 3)
     my_profile.uniform_distribution(1)
     with pytest.raises(ValueError):
-        my_profile.dilate_profile()
+        my_profile.dilate()
     my_profile.uniform_distribution(100)
     with pytest.raises(ValueError):
         my_profile.plot_profile("toto", show=False)
@@ -49,7 +49,7 @@ def test_particular_case():
     my_profile = Profile(5, 2)
     for i in range(3):
         my_profile.add_voter([.5, .5], np.random.rand(5))
-    my_profile.dilate_profile()
+    my_profile.dilate()
     for i in range(3):
         assert list(my_profile.embeddings[i]) == [0.7071067811865475, 0.7071067811865475]
 

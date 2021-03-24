@@ -4,7 +4,8 @@ import numpy as np
 
 class MLERule(ScoringRule):
     """
-    This rule supposes that the embeddings of the
+    A rule that computes the scores of the candidates
+    with the assumption that the embeddings of the
     voters correspond to a covariance matrix.
     """
 

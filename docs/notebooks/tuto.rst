@@ -10,3 +10,5 @@ Tutorials
     ordinal
     manipulation
     multiwinner
+    aggregation_intro
+    aggregation_2

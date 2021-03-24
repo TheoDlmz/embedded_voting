@@ -9,6 +9,7 @@ from embedded_voting.scoring.singlewinner.ordinal import BordaExtension
 from embedded_voting.scoring.singlewinner.svd import SVDSum, SVDNash
 import numpy as np
 from embedded_voting.profile.Profile import Profile
+import matplotlib.pyplot as plt
 
 
 def test_single_voter():
@@ -52,6 +53,7 @@ def test_coalition():
 
 
 def test_plots():
+    plt.close()
     my_profile = Profile(4, 3)
     my_profile.add_voters(np.random.rand(5, 3), [[1, 0.5, 0.2, 0.1]]*5)
     manipulation = SingleVoterManipulation(my_profile, rule=SVDNash())

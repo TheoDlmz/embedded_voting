@@ -7,3 +7,5 @@ Algorithm Aggregation
    :caption: Contents:
 
    models
+   auto_profile
+   mle_rule

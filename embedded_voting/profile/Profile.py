@@ -185,11 +185,53 @@ class Profile(DeleteCacheMixin):
 
         return self
 
-    def dilate_profile(self):
+    def _get_center(self):
+        """
+        Return the center of the profile, computed
+        as the center of the :attr:`n_dim`-dimensional
+        cube of maximal volume.
+
+        Return
+        ------
+        np.ndarray
+            The embeddings of the center vector. Should be of length :attr:`n_dim`.
+        """
+
+        embeddings = self.embeddings
+        matrix_rank = np.linalg.matrix_rank(embeddings)
+        volume = 0
+        n_voters = self.n_voters
+        current_subset = list(np.arange(matrix_rank))
+        mean = np.zeros(self.n_dim)
+        while current_subset[0] <= n_voters - matrix_rank:
+            current_embeddings = embeddings[current_subset, ...]
+            new_volume = np.sqrt(np.linalg.det(np.dot(current_embeddings, current_embeddings.T)))
+            if new_volume > volume:
+                volume = new_volume
+                mean = normalize(current_embeddings.sum(axis=0))
+            x = 1
+            while current_subset[matrix_rank - x] == n_voters - x:
+                x += 1
+            val = current_subset[matrix_rank - x] + 1
+            while x > 0:
+                current_subset[matrix_rank - x] = val
+                val += 1
+                x -= 1
+
+        return mean
+
+    def dilate(self, approx=True):
         """
         Dilate the embeddings of the
         voters so that they take all
         the space possible in the positive ortan.
+
+        Parameters
+        ----------
+        approx : bool
+            If True, we compute the center of the population
+            with a polynomial time algorithm. If False, we use
+            an algorithm exponential in :attr:`n_dim`.
 
         Return
         ------
@@ -206,7 +248,7 @@ class Profile(DeleteCacheMixin):
         array([[0.66226618, 0.52981294, 0.52981294],
                [0.52981294, 0.52981294, 0.66226618],
                [0.52981294, 0.66226618, 0.52981294]])
-        >>> my_profile.dilate_profile().embeddings
+        >>> my_profile.dilate().embeddings
         array([[0.98559856, 0.11957316, 0.11957316],
                [0.11957316, 0.11957316, 0.98559856],
                [0.11957316, 0.98559856, 0.11957316]])
@@ -217,8 +259,10 @@ class Profile(DeleteCacheMixin):
         if self.n_voters < 2:
             raise ValueError("Cannot dilate a profile with less than 2 candidates")
 
-        center = self.embeddings.sum(axis=0)
-        center = normalize(center)
+        if approx:
+            center = normalize(self.embeddings.sum(axis=0))
+        else:
+            center = self._get_center()
         min_value = np.dot(profile[0], center)
         for i in range(self.n_voters):
             val = np.dot(profile[i], center)
@@ -285,11 +329,18 @@ class Profile(DeleteCacheMixin):
 
         return self
 
-    def recenter(self):
+    def recenter(self, approx=True):
         """
         Recenter the embeddings of the
         voters so that they are the most
         possible on the positive ortan.
+
+        Parameters
+        ----------
+        approx : bool
+            If True, we compute the center of the population
+            with a polynomial time algorithm. If False, we use
+            an algorithm exponential in :attr:`n_dim`.
 
         Return
         ------
@@ -315,8 +366,10 @@ class Profile(DeleteCacheMixin):
         if self.n_voters < 2:
             raise ValueError("Cannot recenter a profile with less than 2 candidates")
 
-        center = self.embeddings.sum(axis=0)
-        center = normalize(center)
+        if approx:
+            center = normalize(self.embeddings.sum(axis=0))
+        else:
+            center = self._get_center()
         target_center = np.ones(self.n_dim)
         target_center = normalize(target_center)
         if np.dot(center, target_center) == -1:

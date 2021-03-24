@@ -1,10 +1,13 @@
-======
-Models
-======
+================
+Scores Generator
+================
 
-.. autoclass:: embedded_voting.ScoreGenerator
-    :members:
+.. toctree::
+   :caption: Contents:
 
-.. autoclass:: embedded_voting.MultivariateGenerator
-    :members:
+   models/general
+   models/multivariate
+   models/grouped_noise
+   models/grouped_mean
+   models/grouped_mix
 
