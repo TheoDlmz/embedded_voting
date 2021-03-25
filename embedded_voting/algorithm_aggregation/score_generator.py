@@ -83,6 +83,7 @@ class ScoreGenerator:
             If True, displays the plot at the end of the function.
         """
         true_value, scores = self.sample_scores()
+        fig, ax = plt.subplots()
         if self.groups_sizes is not None:
             color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
             count = 0
@@ -91,16 +92,16 @@ class ScoreGenerator:
             color = ["k"]
             count = self.n_voters
             n_group = 0
-        plt.plot([true_value[0]]*2, [0, 1], color="red", label="True value")
+        ax.plot([true_value[0]]*2, [0, 1], color="red", label="True value")
         for i in range(self.n_voters):
             if i >= count:
                 count += self.groups_sizes[n_group+1]
                 n_group += 1
-                plt.plot([scores[i]]*2, [0, 1], color=color[n_group], label="group %i" % (n_group+1))
+                ax.plot([scores[i]]*2, [0, 1], color=color[n_group], label="group %i" % (n_group+1))
             else:
-                plt.plot([scores[i]]*2, [0, 1], color=color[n_group])
-        plt.ylim(0, 1)
-        plt.title("Distribution of voters' guesses")
+                ax.plot([scores[i]]*2, [0, 1], color=color[n_group])
+        ax.set_ylim(0, 1)
+        ax.set_title("Distribution of voters' guesses")
         plt.legend()
         if show:
             plt.show()  # pragma: no cover
