@@ -103,7 +103,7 @@ class ScoreGenerator:
         plt.title("Distribution of voters' guesses")
         plt.legend()
         if show:
-            plt.show()
+            plt.show()  # pragma: no cover
 
 
 class MultivariateGenerator(ScoreGenerator):
@@ -222,15 +222,15 @@ class GroupedNoiseGenerator(ScoreGenerator):
     >>> np.random.seed(42)
     >>> generator = GroupedNoiseGenerator([2, 2])
     >>> generator.sample_scores()
-    (array([13.74540119]), array([[14.03963831],
-           [14.81094637],
-           [13.41737103],
-           [13.44883031]]))
+    (array([13.74540...]), array([[14.03963...],
+           [14.81094...],
+           [13.41737...],
+           [13.44883...]]))
     >>> generator.set_noise(5).sample_scores()
-    (array([11.8340451]), array([[10.72001772],
-           [12.17969022],
-           [ 6.49894333],
-           [10.09491229]]))
+    (array([11.8340...]), array([[10.72001...],
+           [12.17969...],
+           [ 6.49894...],
+           [10.09491...]]))
     """
     def __init__(self, groups_sizes, group_noise=1, minimum_score=10, maximum_score=20):
         groups_sizes = np.array(groups_sizes)
@@ -311,20 +311,20 @@ class GroupedMeanGenerator(ScoreGenerator):
     >>> np.random.seed(44)
     >>> generator = GroupedMeanGenerator([2, 2])
     >>> generator.sample_scores()
-    (array([18.34842149]), array([[19.07101495],
-           [19.07101496],
-           [19.27467426],
-           [19.27467425]]))
+    (array([18.34842...]), array([[19.07101...],
+           [19.07101...],
+           [19.27467...],
+           [19.27467...]]))
     >>> generator.set_group_noise(5).sample_scores()
-    (array([11.13463701]), array([[13.44952491],
-           [13.44952496],
-           [10.50678588],
-           [10.50678588]]))
+    (array([11.13463...]), array([[13.44952...],
+           [13.44952...],
+           [10.50678...],
+           [10.50678...]]))
     >>> generator.set_independent_noise(0.5).sample_scores()
-    (array([11.72894927]), array([[11.96098993],
-           [11.76216681],
-           [10.84109054],
-           [10.717212  ]]))
+    (array([11.72894...]), array([[11.96098...],
+           [11.76216...],
+           [10.84109...],
+           [10.71721...]]))
     """
     def __init__(self, groups_sizes, group_noise=1, independent_noise=0, minimum_score=10, maximum_score=20):
         groups_sizes = np.array(groups_sizes)
@@ -432,26 +432,26 @@ class GroupedMixGenerator(ScoreGenerator):
     >>> features = [[1, 0], [0, 1], [1, 1]]
     >>> generator = GroupedMixGenerator([2, 2, 2], features)
     >>> generator.sample_scores()
-    (array([13.74540119]), array([[14.81094637],
-           [14.81094637],
-           [13.41737103],
-           [13.41737103],
-           [14.1141587 ],
-           [14.1141587 ]]))
+    (array([13.74540...]), array([[14.81094...],
+           [14.81094...],
+           [13.41737...],
+           [13.41737...],
+           [14.11415...],
+           [14.11415...]]))
     >>> generator.set_group_noise(5).sample_scores()
-    (array([11.39493861]), array([[15.4406018 ],
-           [15.4406018 ],
-           [10.91386444],
-           [10.91386444],
-           [13.17723312],
-           [13.17723312]]))
+    (array([11.39493...]), array([[15.44060...],
+           [15.44060...],
+           [10.91386...],
+           [10.91386...],
+           [13.17723...],
+           [13.17723...]]))
     >>> generator.set_independent_noise(0.5).sample_scores()
-    (array([10.65051593]), array([[8.79988367],
-           [8.61393697],
-           [9.26444938],
-           [9.15248809],
-           [9.2686618 ],
-           [8.44142778]]))
+    (array([10.65051...]), array([[8.79988...],
+           [8.61393...],
+           [9.26444...],
+           [9.15248...],
+           [9.26866...],
+           [8.44142...]]))
 
     """
     def __init__(self, groups_sizes, groups_features, group_noise=1, independent_noise=0,
