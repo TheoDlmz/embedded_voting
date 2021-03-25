@@ -139,19 +139,19 @@ class MultivariateGenerator(ScoreGenerator):
     >>> np.random.seed(42)
     >>> generator = MultivariateGenerator(np.ones((5, 5)))
     >>> generator.sample_scores()
-    (array([13.74540119]), array([[14.85728131],
-           [14.85728131],
-           [14.85728131],
-           [14.85728131],
-           [14.85728131]]))
+    (array([13.74540...]), array([[14.85728...],
+           [14.85728...],
+           [14.85728...],
+           [14.85728...],
+           [14.85728...]]))
     >>> generator.set_noise(0.5)
     <embedded_voting.algorithm_aggregation.score_generator.MultivariateGenerator object at ...>
     >>> generator.sample_scores()
-    (array([12.9122914]), array([[13.81223438],
-           [13.95888662],
-           [13.21274843],
-           [13.65293116],
-           [13.98058382]]))
+    (array([12.91229...]), array([[13.81223...],
+           [13.95888...],
+           [13.21274...],
+           [13.65293...],
+           [13.98058...]]))
 
     """
     def __init__(self, covariance_matrix, independent_noise=0, minimum_score=10, maximum_score=20):
