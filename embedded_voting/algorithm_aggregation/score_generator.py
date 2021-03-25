@@ -308,23 +308,23 @@ class GroupedMeanGenerator(ScoreGenerator):
 
     Examples
     --------
-    >>> np.random.seed(42)
+    >>> np.random.seed(44)
     >>> generator = GroupedMeanGenerator([2, 2])
     >>> generator.sample_scores()
-    (array([13.74540119]), array([[13.45116408],
-           [13.45116407],
-           [13.17474881],
-           [13.17474881]]))
+    (array([18.34842149]), array([[19.07101495],
+           [19.07101496],
+           [19.27467426],
+           [19.27467425]]))
     >>> generator.set_group_noise(5).sample_scores()
-    (array([12.9122914]), array([[14.95567959],
-           [14.95567964],
-           [14.68259968],
-           [14.68259968]]))
+    (array([11.13463701]), array([[13.44952491],
+           [13.44952496],
+           [10.50678588],
+           [10.50678588]]))
     >>> generator.set_independent_noise(0.5).sample_scores()
-    (array([16.07544852]), array([[16.90967874],
-           [17.17373918],
-           [15.32728466],
-           [15.63668434]]))
+    (array([11.72894927]), array([[11.96098993],
+           [11.76216681],
+           [10.84109054],
+           [10.717212  ]]))
     """
     def __init__(self, groups_sizes, group_noise=1, independent_noise=0, minimum_score=10, maximum_score=20):
         groups_sizes = np.array(groups_sizes)
@@ -475,7 +475,7 @@ class GroupedMixGenerator(ScoreGenerator):
 
         Return
         ------
-        GroupedMeanGenerator
+        GroupedMixGenerator
             The object itself
         """
         self.group_noise = group_noise
@@ -492,7 +492,7 @@ class GroupedMixGenerator(ScoreGenerator):
 
         Return
         ------
-        GroupedMeanGenerator
+        GroupedMixGenerator
             The object itself
         """
         self.independent_noise = independent_noise
