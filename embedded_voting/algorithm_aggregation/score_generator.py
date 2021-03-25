@@ -134,6 +134,25 @@ class MultivariateGenerator(ScoreGenerator):
     independent_noise : float
         The variance of the independent noise.
 
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> generator = MultivariateGenerator(np.ones((5, 5)))
+    >>> generator.sample_scores()
+    (array([13.74540119]), array([[14.85728131],
+           [14.85728131],
+           [14.85728131],
+           [14.85728131],
+           [14.85728131]]))
+    >>> generator.set_noise(0.5)
+    <embedded_voting.algorithm_aggregation.score_generator.MultivariateGenerator object at ...>
+    >>> generator.sample_scores()
+    (array([12.9122914]), array([[13.81223438],
+           [13.95888662],
+           [13.21274843],
+           [13.65293116],
+           [13.98058382]]))
+
     """
     def __init__(self, covariance_matrix, independent_noise=0, minimum_score=10, maximum_score=20):
         n_voters = len(covariance_matrix)
@@ -198,11 +217,26 @@ class GroupedNoiseGenerator(ScoreGenerator):
     group_noise : float
         The variance used to sample the variances of each group.
 
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> generator = GroupedNoiseGenerator([2, 2])
+    >>> generator.sample_scores()
+    (array([13.74540119]), array([[14.03963831],
+           [14.81094637],
+           [13.41737103],
+           [13.44883031]]))
+    >>> generator.set_noise(5).sample_scores()
+    (array([11.8340451]), array([[10.72001772],
+           [12.17969022],
+           [ 6.49894333],
+           [10.09491229]]))
     """
-    def __init__(self, groups_sizes, group_noise=0, minimum_score=10, maximum_score=20):
+    def __init__(self, groups_sizes, group_noise=1, minimum_score=10, maximum_score=20):
+        groups_sizes = np.array(groups_sizes)
         n_voters = int(groups_sizes.sum())
         super().__init__(n_voters, minimum_score, maximum_score)
-        self.groups_sizes = np.array(groups_sizes)
+        self.groups_sizes = groups_sizes
         self.group_noise = group_noise
 
     def set_noise(self, group_noise):
@@ -272,11 +306,31 @@ class GroupedMeanGenerator(ScoreGenerator):
     independent_noise : float
         The variance used to sample the independent noise of each voter.
 
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> generator = GroupedMeanGenerator([2, 2])
+    >>> generator.sample_scores()
+    (array([13.74540119]), array([[13.45116408],
+           [13.45116407],
+           [13.17474881],
+           [13.17474881]]))
+    >>> generator.set_group_noise(5).sample_scores()
+    (array([12.9122914]), array([[14.95567959],
+           [14.95567964],
+           [14.68259968],
+           [14.68259968]]))
+    >>> generator.set_independent_noise(0.5).sample_scores()
+    (array([16.07544852]), array([[16.90967874],
+           [17.17373918],
+           [15.32728466],
+           [15.63668434]]))
     """
-    def __init__(self, groups_sizes, group_noise=0, independent_noise=0, minimum_score=10, maximum_score=20):
+    def __init__(self, groups_sizes, group_noise=1, independent_noise=0, minimum_score=10, maximum_score=20):
+        groups_sizes = np.array(groups_sizes)
         n_voters = int(groups_sizes.sum())
         super().__init__(n_voters, minimum_score, maximum_score)
-        self.groups_sizes = np.array(groups_sizes)
+        self.groups_sizes = groups_sizes
         self.group_noise = group_noise
         self.independent_noise = independent_noise
 
@@ -347,7 +401,7 @@ class GroupedMixGenerator(ScoreGenerator):
     groups_sizes : list or np.ndarray
         The number of voters in each groups.
         The sum is equal to :attr:`~embedded_voting.ScoreGenerator.n_voters`.
-    groups_features : np.ndarray
+    groups_features : list or np.ndarray
         The features of each group of voters.
         Should be of the same length than :attr:`group_sizes`.
         Each row of this matrix correspond to the features of a group.
@@ -372,12 +426,40 @@ class GroupedMixGenerator(ScoreGenerator):
     independent_noise : float
         The variance used to sample the independent noise of each voter.
 
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> features = [[1, 0], [0, 1], [1, 1]]
+    >>> generator = GroupedMixGenerator([2, 2, 2], features)
+    >>> generator.sample_scores()
+    (array([13.74540119]), array([[14.81094637],
+           [14.81094637],
+           [13.41737103],
+           [13.41737103],
+           [14.1141587 ],
+           [14.1141587 ]]))
+    >>> generator.set_group_noise(5).sample_scores()
+    (array([11.39493861]), array([[15.4406018 ],
+           [15.4406018 ],
+           [10.91386444],
+           [10.91386444],
+           [13.17723312],
+           [13.17723312]]))
+    >>> generator.set_independent_noise(0.5).sample_scores()
+    (array([10.65051593]), array([[8.79988367],
+           [8.61393697],
+           [9.26444938],
+           [9.15248809],
+           [9.2686618 ],
+           [8.44142778]]))
+
     """
-    def __init__(self, groups_sizes, groups_features, group_noise=0, independent_noise=0,
+    def __init__(self, groups_sizes, groups_features, group_noise=1, independent_noise=0,
                  minimum_score=10, maximum_score=20):
+        groups_sizes = np.array(groups_sizes)
         n_voters = int(groups_sizes.sum())
         super().__init__(n_voters, minimum_score, maximum_score)
-        self.groups_sizes = np.array(groups_sizes)
+        self.groups_sizes = groups_sizes
         self.groups_features = np.array(groups_features)
         self.group_noise = group_noise
         self.independent_noise = independent_noise
@@ -397,6 +479,7 @@ class GroupedMixGenerator(ScoreGenerator):
             The object itself
         """
         self.group_noise = group_noise
+        return self
 
     def set_independent_noise(self, independent_noise):
         """
@@ -413,6 +496,7 @@ class GroupedMixGenerator(ScoreGenerator):
             The object itself
         """
         self.independent_noise = independent_noise
+        return self
 
     def sample_scores(self, n_alternatives=1):
         scores = np.zeros((self.n_voters, n_alternatives))
