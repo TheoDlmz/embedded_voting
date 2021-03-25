@@ -29,6 +29,9 @@ class ScoreGenerator:
     maximum_score : float or int
         The maximum true value of an alternative.
         By default, it is set to 20.
+    groups_sizes : list
+        The number of voter in each group.
+        If set to None, then there is no "groups".
 
     """
 
@@ -36,6 +39,7 @@ class ScoreGenerator:
         self.n_voters = n_voters
         self.minimum_score = minimum_score
         self.maximum_score = maximum_score
+        self.groups_sizes = None
 
     def generate_true_score(self):
         """
@@ -69,10 +73,32 @@ class ScoreGenerator:
         raise NotImplementedError
 
     def plot_scores(self, show=True):
+        """
+        This function plots the true value of a candidate and the scores
+        given by each voter for some candidate randomly selected.
+
+        Parameters
+        ----------
+        show : bool
+            If True, displays the plot at the end of the function.
+        """
         true_value, scores = self.sample_scores()
+        if self.groups_sizes is not None:
+            color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
+            count = 0
+            n_group = -1
+        else:
+            color = ["k"]
+            count = self.n_voters
+            n_group = 0
         plt.plot([true_value[0]]*2, [0, 1], color="red", label="True value")
         for i in range(self.n_voters):
-            plt.plot([scores[i]]*2, [0, 1], color="black")
+            if i >= count:
+                count += self.groups_sizes[n_group+1]
+                n_group += 1
+                plt.plot([scores[i]]*2, [0, 1], color=color[n_group], label="group %i" % (n_group+1))
+            else:
+                plt.plot([scores[i]]*2, [0, 1], color=color[n_group])
         plt.ylim(0, 1)
         plt.title("Distribution of voters' guesses")
         plt.legend()
@@ -110,10 +136,10 @@ class MultivariateGenerator(ScoreGenerator):
 
     """
     def __init__(self, covariance_matrix, independent_noise=0, minimum_score=10, maximum_score=20):
-        self.covariance_matrix = covariance_matrix
-        self.independent_noise = independent_noise
         n_voters = len(covariance_matrix)
         super().__init__(n_voters, minimum_score, maximum_score)
+        self.covariance_matrix = covariance_matrix
+        self.independent_noise = independent_noise
 
     def set_noise(self, independent_noise):
         """
@@ -174,10 +200,10 @@ class GroupedNoiseGenerator(ScoreGenerator):
 
     """
     def __init__(self, groups_sizes, group_noise=0, minimum_score=10, maximum_score=20):
+        n_voters = int(groups_sizes.sum())
+        super().__init__(n_voters, minimum_score, maximum_score)
         self.groups_sizes = np.array(groups_sizes)
         self.group_noise = group_noise
-        n_voters = int(self.groups_sizes.sum())
-        super().__init__(n_voters, minimum_score, maximum_score)
 
     def set_noise(self, group_noise):
         """
@@ -211,25 +237,6 @@ class GroupedNoiseGenerator(ScoreGenerator):
             scores_i = np.random.multivariate_normal(np.ones(self.n_voters)*truth_i, cov)
             scores[:, i] = scores_i
         return truth, scores
-
-    def plot_scores(self, show=True):
-        true_value, scores = self.sample_scores()
-        count = 0
-        n_group = -1
-        color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
-        plt.plot([true_value[0]]*2, [0, 1], color="red", label="True value")
-        for i in range(self.n_voters):
-            if i >= count:
-                count += self.groups_sizes[n_group+1]
-                n_group += 1
-                plt.plot([scores[i]]*2, [0, 1], color=color[n_group], label="group %i" % (n_group+1))
-            else:
-                plt.plot([scores[i]]*2, [0, 1], color=color[n_group])
-        plt.ylim(0, 1)
-        plt.title("Distribution of voters' guesses")
-        plt.legend()
-        if show:
-            plt.show()
 
 
 class GroupedMeanGenerator(ScoreGenerator):
@@ -267,11 +274,11 @@ class GroupedMeanGenerator(ScoreGenerator):
 
     """
     def __init__(self, groups_sizes, group_noise=0, independent_noise=0, minimum_score=10, maximum_score=20):
+        n_voters = int(groups_sizes.sum())
+        super().__init__(n_voters, minimum_score, maximum_score)
         self.groups_sizes = np.array(groups_sizes)
         self.group_noise = group_noise
         self.independent_noise = independent_noise
-        n_voters = int(self.groups_sizes.sum())
-        super().__init__(n_voters, minimum_score, maximum_score)
 
     def set_group_noise(self, group_noise):
         """
@@ -325,25 +332,6 @@ class GroupedMeanGenerator(ScoreGenerator):
 
         return truth, scores
 
-    def plot_scores(self, show=True):
-        true_value, scores = self.sample_scores()
-        count = 0
-        n_group = -1
-        color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
-        plt.plot([true_value[0]]*2, [0, 1], color="red", label="True value")
-        for i in range(self.n_voters):
-            if i >= count:
-                count += self.groups_sizes[n_group+1]
-                n_group += 1
-                plt.plot([scores[i]]*2, [0, 1], color=color[n_group], label="group %i" % (n_group+1))
-            else:
-                plt.plot([scores[i]]*2, [0, 1], color=color[n_group])
-        plt.ylim(0, 1)
-        plt.title("Distribution of voters' guesses")
-        plt.legend()
-        if show:
-            plt.show()
-
 
 class GroupedMixGenerator(ScoreGenerator):
     """
@@ -387,12 +375,12 @@ class GroupedMixGenerator(ScoreGenerator):
     """
     def __init__(self, groups_sizes, groups_features, group_noise=0, independent_noise=0,
                  minimum_score=10, maximum_score=20):
+        n_voters = int(groups_sizes.sum())
+        super().__init__(n_voters, minimum_score, maximum_score)
         self.groups_sizes = np.array(groups_sizes)
         self.groups_features = np.array(groups_features)
         self.group_noise = group_noise
         self.independent_noise = independent_noise
-        n_voters = int(self.groups_sizes.sum())
-        super().__init__(n_voters, minimum_score, maximum_score)
 
     def set_group_noise(self, group_noise):
         """
@@ -448,22 +436,3 @@ class GroupedMixGenerator(ScoreGenerator):
             scores[:, i] = scores_i
 
         return truth, scores
-
-    def plot_scores(self, show=True):
-        true_value, scores = self.sample_scores()
-        count = 0
-        n_group = -1
-        color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
-        plt.plot([true_value[0]]*2, [0, 1], color="red", label="True value")
-        for i in range(self.n_voters):
-            if i >= count:
-                count += self.groups_sizes[n_group+1]
-                n_group += 1
-                plt.plot([scores[i]]*2, [0, 1], color=color[n_group], label="group %i" % (n_group+1))
-            else:
-                plt.plot([scores[i]]*2, [0, 1], color=color[n_group])
-        plt.ylim(0, 1)
-        plt.title("Distribution of voters' guesses")
-        plt.legend()
-        if show:
-            plt.show()
