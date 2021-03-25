@@ -145,7 +145,7 @@ class MultivariateGenerator(ScoreGenerator):
            [14.85728...],
            [14.85728...],
            [14.85728...]]))
-    >>> generator.set_noise(0.5)
+    >>> generator.set_independent_noise(0.5)
     <embedded_voting.algorithm_aggregation.score_generator.MultivariateGenerator object at ...>
     >>> generator.sample_scores()
     (array([12.91229...]), array([[13.81223...],
@@ -161,7 +161,7 @@ class MultivariateGenerator(ScoreGenerator):
         self.covariance_matrix = covariance_matrix
         self.independent_noise = independent_noise
 
-    def set_noise(self, independent_noise):
+    def set_independent_noise(self, independent_noise):
         """
         Update the :attr:`independent_noise` of the model.
 
@@ -227,7 +227,7 @@ class GroupedNoiseGenerator(ScoreGenerator):
            [14.81094...],
            [13.41737...],
            [13.44883...]]))
-    >>> generator.set_noise(5).sample_scores()
+    >>> generator.set_group_noise(5).sample_scores()
     (array([11.8340...]), array([[10.72001...],
            [12.17969...],
            [ 6.49894...],
@@ -240,7 +240,7 @@ class GroupedNoiseGenerator(ScoreGenerator):
         self.groups_sizes = groups_sizes
         self.group_noise = group_noise
 
-    def set_noise(self, group_noise):
+    def set_group_noise(self, group_noise):
         """
         Update the :attr:`group_noise` of the model.
 

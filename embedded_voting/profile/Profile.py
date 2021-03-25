@@ -25,7 +25,7 @@ class Profile(DeleteCacheMixin):
 
     Attributes
     ----------
-    n_voters : :py:class:`int`
+    n_voters : int
         The number of voters in the profile.
     n_candidates : int
         The number of candidates in this profile.
