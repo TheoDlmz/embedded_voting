@@ -11,7 +11,7 @@ import numpy as np
 
 def create_3D_plot(fig, position=None):
     """
-    Create the background for a 3D plot on the positive ortan.
+    Create the background for a 3D plot on the non-negative orthant.
 
     Parameters
     ----------
@@ -50,7 +50,7 @@ def create_3D_plot(fig, position=None):
 
 def create_ternary_plot(fig, position=None):
     """
-        Create the background for a 2D ternary plot of the positive ortan.
+        Create the background for a 2D ternary plot of the non-negative orthant.
 
         Return
         ______

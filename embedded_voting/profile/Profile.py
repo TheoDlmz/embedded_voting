@@ -25,7 +25,7 @@ class Profile(DeleteCacheMixin):
 
     Attributes
     ----------
-    n_voters : int
+    n_voters : :py:class:`int`
         The number of voters in the profile.
     n_candidates : int
         The number of candidates in this profile.
@@ -146,7 +146,7 @@ class Profile(DeleteCacheMixin):
         """
         Add `n_voters` voters to the profile.
         The embeddings of these voters are uniformly distributed
-        on the positive ortan and there scores
+        on the non-negative orthant and there scores
         are uniformly distributed between 0 and 1.
 
         Parameters
@@ -224,7 +224,7 @@ class Profile(DeleteCacheMixin):
         """
         Dilate the embeddings of the
         voters so that they take all
-        the space possible in the positive ortan.
+        the space possible in the non-negative orthant.
 
         Parameters
         ----------
@@ -333,7 +333,7 @@ class Profile(DeleteCacheMixin):
         """
         Recenter the embeddings of the
         voters so that they are the most
-        possible on the positive ortan.
+        possible on the non-negative orthant.
 
         Parameters
         ----------
@@ -526,7 +526,7 @@ class Profile(DeleteCacheMixin):
         """
         Plot a figure of the profile on a 2D space
         representing the surface of the unit sphere
-        on the positive ortan.
+        on the non-negative orthant.
 
         Parameters
         ----------
@@ -653,7 +653,7 @@ class Profile(DeleteCacheMixin):
     def _plot_scores_ternary(self, sizes, fig, position, dim):
         """
         Plot a figure of the profile on a 2D space
-        representing the sphere in the positive ortan,
+        representing the sphere in the non-negative orthant,
         with the voters dots having the sizes passed
         as parameters.
 
