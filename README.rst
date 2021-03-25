@@ -32,7 +32,14 @@ This contains the code for the work on embedded voting done during my internship
 Features
 --------
 
-* TODO (soon)
+* Create a voting profile in which voters are associated to embeddings.
+* Run elections on these profiles with different rules, using the geometrical aspects of the embeddings.
+* The rules are defined for cardinal preferences, but some of them are adapted for the case of ordinal preferences.
+* There are rules for single-winner elections and multi-winner elections.
+* Classes to analyse the evolution of the score when the embeddings of one voter are changing.
+* Classes to analyse the manipulability of the rules.
+* Classes for algorithm aggregation.
+* A lot of tutorials.
 
 Credits
 -------
