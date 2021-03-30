@@ -1,4 +1,5 @@
 from embedded_voting.profile.Profile import Profile
+from sklearn.decomposition import PCA
 import numpy as np
 
 
@@ -26,7 +27,8 @@ class AutoProfile(Profile):
             the covariance matrix. Should be of shape _, :attr:`~embedded_voting.Profile.n_candidates`.
         n_dim : int
             The number of dimension we want in our profile.
-            If it is 0, the number of dimension is inferred with the eigenvalues.
+            If it is 0, the number of dimension is inferred with the eigenvalues with the class PCA
+            of scikit-learn.
             By default, it is set to 0.
         normalize_score : bool
             If True, normalize the scores to `[0, 1]` range at the end of the function.
@@ -63,14 +65,9 @@ class AutoProfile(Profile):
         else:
             samples = np.array(samples)
             samples_total = np.concatenate([samples, scores], axis=1)
-        cov = np.cov(samples_total)
 
         if n_dim == 0:
-            eigen_values, _ = np.linalg.eig(cov)
-            eigen_values = np.sort(eigen_values)[::-1]
-            eigen_values_participation = eigen_values / np.sum(eigen_values)
-            while n_dim < len(eigen_values_participation) and eigen_values_participation[n_dim] > 0.01:
-                n_dim += 1
+            n_dim = PCA(n_components="mle").fit(samples_total.T).n_components_
 
         cov_transpose = np.cov(samples_total.T)
         _, eigen_vectors = np.linalg.eig(cov_transpose)

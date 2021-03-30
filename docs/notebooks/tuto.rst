@@ -12,3 +12,4 @@ Tutorials
     multiwinner
     aggregation_intro
     aggregation_2
+    aggregation_3
