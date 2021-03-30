@@ -65,15 +65,19 @@ class AutoProfile(Profile):
         else:
             samples = np.array(samples)
             samples_total = np.concatenate([samples, scores], axis=1)
-
         if n_dim == 0:
-            n_dim = PCA(n_components="mle").fit(samples_total.T).n_components_
+            pca = PCA(n_components="mle")
+        else:
+            pca = PCA(n_components=n_dim)
 
-        cov_transpose = np.cov(samples_total.T)
-        _, eigen_vectors = np.linalg.eig(cov_transpose)
-        projection_matrix = (eigen_vectors.T[:][:n_dim]).T
-        embs = samples_total.dot(projection_matrix)
+        if samples_total.shape[0] > samples_total.shape[1]:
+            embs = pca.fit_transform(samples_total)
 
+        else:
+            projection_matrix = pca.fit_transform(samples_total.T)
+            embs = samples_total.dot(projection_matrix)
+
+        n_dim = pca.n_components_
         self.n_dim = n_dim
         self.embeddings = np.zeros((0, n_dim))
 
