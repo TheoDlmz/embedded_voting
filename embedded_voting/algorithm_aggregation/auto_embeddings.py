@@ -48,17 +48,18 @@ class AutoProfile(Profile):
         >>> profile.n_dim
         2
         >>> profile.embeddings
-        array([[-0.52310182, -0.85227019],
-               [-0.52310182, -0.85227019],
-               [-0.52310182, -0.85227019],
-               [-0.52310182, -0.85227019],
-               [-0.52310182, -0.85227019],
-               [-0.29009365,  0.95699826],
-               [-0.29009365,  0.95699826],
-               [-0.29009365,  0.95699826],
-               [-0.29009365,  0.95699826],
-               [-0.29009365,  0.95699826]])
+        array([[-0.44956993,  0.89324514],
+               [-0.44956993,  0.89324514],
+               [-0.44956993,  0.89324514],
+               [-0.44956993,  0.89324514],
+               [-0.44956993,  0.89324514],
+               [-0.9421524 , -0.3351848 ],
+               [-0.9421524 , -0.3351848 ],
+               [-0.9421524 , -0.3351848 ],
+               [-0.9421524 , -0.3351848 ],
+               [-0.9421524 , -0.3351848 ]])
         """
+        self.reset_profile()
         scores = np.array(scores)
         if samples is None:
             samples_total = scores
@@ -126,6 +127,8 @@ class AutoProfile(Profile):
                [0.00551433, 0.00551433, 0.09415171, 0.09415171],
                [0.00551433, 0.00551433, 0.09415171, 0.09415171]])
         """
+        self.reset_profile()
+
         scores = np.array(scores)
         if samples is None:
             samples_total = scores
@@ -137,5 +140,8 @@ class AutoProfile(Profile):
         if normalize_score:
             scores = (scores - np.min(scores)) / (np.max(scores) - np.min(scores))
 
+        n_dim = len(cov)
+        self.n_dim = n_dim
+        self.embeddings = np.zeros((0, n_dim))
         self.add_voters(cov, scores, normalize_embs=False)
         return self
