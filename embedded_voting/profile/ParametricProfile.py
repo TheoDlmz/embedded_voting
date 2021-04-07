@@ -51,16 +51,6 @@ class ParametricProfile(Profile):
         The number of dimensions of the voters' embeddings.
     n_voters : int
         The number of voters in the profile.
-    _orthogonal_profile : np.ndarray
-        matrix of shape :attr:`n_voters`, :attr:`n_dim`
-        containing the "orthogonal" profile.
-    _random_profile : np.ndarray
-        matrix of shape :attr:`n_voters`, :attr:`n_dim`
-        containing the "random" profile.
-    _thetas : list
-        list of length :attr:`n_voters` containing
-        angular distances between the embeddings of the two
-        profiles for each voter.
     scores_matrix : np.ndarray
         Matrix of shape :attr:`n_dim`, :attr:`n_candidates`
         containing the scores given by each group.
@@ -82,12 +72,22 @@ class ParametricProfile(Profile):
     3
     >>> my_profile.n_candidates
     4
-    >>> len(my_profile._thetas)
-    100
 
     """
 
     def __init__(self, n_candidates, n_dim, n_voters, scores_matrix=None, prob=None):
+        """
+        _orthogonal_profile : np.ndarray
+            matrix of shape :attr:`n_voters`, :attr:`n_dim`
+            containing the "orthogonal" profile.
+        _random_profile : np.ndarray
+            matrix of shape :attr:`n_voters`, :attr:`n_dim`
+            containing the "random" profile.
+        _thetas : list
+            list of length :attr:`n_voters` containing
+            angular distances between the embeddings of the two
+            profiles for each voter.
+        """
         super().__init__(n_candidates, n_dim)
         if prob is None:
             prob = np.ones(self.n_dim)/self.n_dim

@@ -3,6 +3,7 @@ Tutorials
 ===========
 
 .. toctree::
+   :maxdepth: 2
 
     profile
     election
