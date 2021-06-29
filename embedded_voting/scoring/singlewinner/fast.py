@@ -48,8 +48,6 @@ class Fast(ScoringRule):
     [0, 2, 1]
     >>> election.winner_
     0
-    >>> election.welfare_
-    [1.0, 0.0, 0.640015624924835]
 
     """
     def __init__(self,  profile=None, function=None, aggregation_rule=np.prod):
@@ -136,8 +134,6 @@ class FastNash(Fast):
     [0, 2, 1]
     >>> election.winner_
     0
-    >>> election.welfare_
-    [1.0, 0.0, 0.640015624924835]
 
     """
     def __init__(self,  profile=None, function=None):
@@ -171,8 +167,6 @@ class FastSum(Fast):
     [0, 2, 1]
     >>> election.winner_
     0
-    >>> election.welfare_
-    [1.0, 0.0, 0.640015624924835]
 
     """
     def __init__(self, profile=None, function=None):
@@ -205,8 +199,6 @@ class FastMin(Fast):
     [0, 2, 1]
     >>> election.winner_
     0
-    >>> election.welfare_
-    [1.0, 0.0, 0.640015624924835]
 
     """
     def __init__(self, profile=None, function=None):
@@ -239,8 +231,6 @@ class FastLog(Fast):
     [0, 2, 1]
     >>> election.winner_
     0
-    >>> election.welfare_
-    [1.0, 0.0, 0.7088954658756377]
 
     """
     def __init__(self, profile=None, function=None):
