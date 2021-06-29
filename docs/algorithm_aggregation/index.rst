@@ -7,5 +7,7 @@ Algorithm Aggregation
    :caption: Contents:
 
    models
-   auto_profile
+   embedder
+   elector
+   fastrule
    mle_rule

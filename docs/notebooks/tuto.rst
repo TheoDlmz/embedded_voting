@@ -4,12 +4,10 @@ Tutorials
 
 .. toctree::
 
+    tutoagg
     profile
     election
     moving
     ordinal
     manipulation
     multiwinner
-    aggregation_intro
-    aggregation_2
-    aggregation_3

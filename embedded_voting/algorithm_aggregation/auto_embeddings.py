@@ -9,7 +9,7 @@ class AutoProfile(Profile):
     using the scores and some training samples.
     """
 
-    def add_voters_auto(self, scores,  samples=None, n_dim=0, normalize_score=True):
+    def add_voters_auto(self, scores,  samples=None, n_dim=0, normalize_score=True, normalize_embs=True):
         """
         This function will create embeddings for the voters based on the scores
         they gave to the candidate and to other input passed as training samples
@@ -85,8 +85,29 @@ class AutoProfile(Profile):
         if normalize_score:
             scores = (scores - np.min(scores)) / (np.max(scores) - np.min(scores))
         embs = np.real(embs)
-        self.add_voters(embs, scores)
+        self.add_voters(embs, scores, normalize_embs)
         return self
+
+    def add_voters_fake(self, scores, samples=None, normalize_score=True):
+
+        self.reset_profile()
+        scores = np.array(scores)
+        if samples is None:
+            samples_total = scores
+        else:
+            samples = np.array(samples)
+            samples_total = np.concatenate([samples, scores], axis=1)
+
+
+
+        embs = samples_total
+
+        self.n_dim = embs.shape[1]
+        self.embeddings = np.zeros((0, self.n_dim))
+
+        self.add_voters(embs, scores, True)
+        return self
+
 
     def add_voters_cov(self, scores, samples=None, normalize_score=False):
         """
@@ -136,6 +157,26 @@ class AutoProfile(Profile):
             samples = np.array(samples)
             samples_total = np.concatenate([samples, scores], axis=1)
         cov = np.cov(samples_total)
+
+        if normalize_score:
+            scores = (scores - np.min(scores)) / (np.max(scores) - np.min(scores))
+
+        n_dim = len(cov)
+        self.n_dim = n_dim
+        self.embeddings = np.zeros((0, n_dim))
+        self.add_voters(cov, scores, normalize_embs=False)
+        return self
+
+    def add_voters_prod(self, scores, samples=None, normalize_score=False):
+        self.reset_profile()
+
+        scores = np.array(scores)
+        if samples is None:
+            samples_total = scores
+        else:
+            samples = np.array(samples)
+            samples_total = np.concatenate([samples, scores], axis=1)
+        cov = np.dot(samples_total, samples_total.T)
 
         if normalize_score:
             scores = (scores - np.min(scores)) / (np.max(scores) - np.min(scores))
