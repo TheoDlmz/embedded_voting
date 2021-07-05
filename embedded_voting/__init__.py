@@ -12,7 +12,6 @@ from embedded_voting.scoring import *
 from embedded_voting.manipulation import *
 from embedded_voting.utils.plots import *
 from embedded_voting.algorithm_aggregation.score_generator import *
-from embedded_voting.algorithm_aggregation.maximumlikelihood import *
-from embedded_voting.algorithm_aggregation.auto_embeddings import *
+from embedded_voting.algorithm_aggregation.mlerules import *
 from embedded_voting.algorithm_aggregation.embedder import *
 from embedded_voting.algorithm_aggregation.elector import *

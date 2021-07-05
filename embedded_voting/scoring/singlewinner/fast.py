@@ -58,8 +58,6 @@ class Fast(ScoringRule):
         else:
             self.function = function
 
-        if profile is not None:
-            self(profile)
         self._modified_scores = None
         if profile is not None:
             self(profile)
