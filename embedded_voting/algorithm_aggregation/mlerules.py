@@ -11,7 +11,7 @@ class MLEGaussian(ScoringRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 3)
+    >>> my_profile = Profile(3, 2)
     >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
     >>> embeddings = [[1, 1], [1, 0], [0, 1]]
     >>> _ = my_profile.add_voters(embeddings, scores, normalize_embs=False)
