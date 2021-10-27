@@ -7,7 +7,7 @@ This file is part of Embedded Voting.
 """
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.Profile import Profile
+from embedded_voting.profile.profile import Profile
 from embedded_voting.scoring.singlewinner.svd import *
 
 
@@ -59,33 +59,34 @@ class PositionalRuleExtension(ScoringRule):
 
     Examples
     --------
-    >>> my_profile = Profile(4, 2)
-    >>> scores = [[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]]
-    >>> embeddings = [[1, 0], [1, 1], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = SVDNash(my_profile)
+    >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> profile = Profile(ratings, embeddings)
+    >>> election = SVDNash(profile)
     >>> election.ranking_
     [3, 0, 1, 2]
-    >>> election_bis = PositionalRuleExtension(my_profile, [2, 1, 1, 0])
-    >>> election_bis.fake_profile.scores
+    >>> profile_bis = PositionalRuleExtension([2, 1, 1, 0])(profile)
+    >>> profile_bis.fake_profile.ratings
     array([[0. , 0.5, 0.5, 1. ],
            [0.5, 1. , 0.5, 0. ],
            [1. , 0.5, 0. , 0.5]])
-    >>> election_bis.set_rule(SVDNash()).ranking_
+    >>> profile_bis.set_rule(SVDNash()).ranking_
     [1, 3, 0, 2]
     """
 
-    def __init__(self, profile,  points, rule=None):
+    def __init__(self, points, profile=None, rule=None):
         super().__init__(profile)
-        if len(points) != self.profile_.n_candidates:
+        if profile is not None and len(points) != self.profile_.n_candidates:
             raise ValueError("The positional rule must be of length %i" % self.profile_.n_candidates)
         self.points = points
         self.base_rule = rule
         if rule is not None:
             self._score_components = rule._score_components
-        self.fake_profile = self._create_fake_profile()
+        if profile is not None:
+            self.fake_profile = self._create_fake_profile()
         self._rule = None
-        self(profile)
+        if profile is not None:
+            self(profile)
 
     def __call__(self, profile):
         self.profile_ = profile
@@ -110,7 +111,6 @@ class PositionalRuleExtension(ScoringRule):
             The object itself.
         """
         self.base_rule = rule
-        self.fake_profile = self._create_fake_profile()
         self._rule = self.base_rule(self.fake_profile)
         self._score_components = rule._score_components
         self.delete_cache()
@@ -128,16 +128,14 @@ class PositionalRuleExtension(ScoringRule):
             The fake profile.
         """
         points = np.array(self.points)/np.max(self.points)
-        fake_profile = np.zeros((self.profile_.n_voters, self.profile_.n_candidates))
+        fake_ratings = np.zeros((self.profile_.n_voters, self.profile_.n_candidates))
         for i in range(self.profile_.n_voters):
-            scores_i = self.profile_.scores[i]
+            scores_i = self.profile_.ratings[i]
             ord_i = np.argsort(scores_i)[::-1]
             ord_i = np.argsort(ord_i)
-            fake_profile[i] = points[ord_i]
+            fake_ratings[i] = points[ord_i]
 
-        p = self.profile_.copy()
-        p.scores = fake_profile
-        return p
+        return Profile(fake_ratings, self.profile_.embeddings)
 
     def score_(self, candidate):
         return self._rule.scores_[candidate]
@@ -199,12 +197,11 @@ class PluralityExtension(PositionalRuleExtension):
 
     Examples
     --------
-    >>> my_profile = Profile(4, 2)
-    >>> scores = [[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]]
-    >>> embeddings = [[1, 0], [1, 1], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = PluralityExtension(my_profile)
-    >>> election.fake_profile.scores
+    >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> profile = Profile(ratings, embeddings)
+    >>> election = PluralityExtension(4)(profile)
+    >>> election.fake_profile.ratings
     array([[0., 0., 0., 1.],
            [0., 1., 0., 0.],
            [1., 0., 0., 0.]])
@@ -212,10 +209,16 @@ class PluralityExtension(PositionalRuleExtension):
     [3, 1, 0, 2]
     """
 
-    def __init__(self, profile, rule=None):
-        n_candidates = profile.n_candidates
+    def __init__(self, n_candidates=None, profile=None, rule=None):
+        if n_candidates is None and profile is None:
+            raise ValueError("n_candidates or profile should be not None")
+        if n_candidates is None:
+            n_candidates = profile.n_candidates
         points = [1] + [0]*(n_candidates-1)
-        super().__init__(profile, points, rule)
+        if profile is not None:
+            if profile.n_candidates != n_candidates:
+                raise ValueError("n_candidates should be the same than in the profile")
+        super().__init__(points, profile, rule)
 
 
 class KApprovalExtension(PositionalRuleExtension):
@@ -241,23 +244,29 @@ class KApprovalExtension(PositionalRuleExtension):
 
     Examples
     --------
-    >>> my_profile = Profile(4, 2)
-    >>> scores = [[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]]
-    >>> embeddings = [[1, 0], [1, 1], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = KApprovalExtension(my_profile)
-    >>> election.fake_profile.scores
+    >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> profile = Profile(ratings, embeddings)
+    >>> election = KApprovalExtension(n_candidates=4, k=2)(profile)
+    >>> election.fake_profile.ratings
     array([[0., 0., 1., 1.],
            [0., 1., 1., 0.],
            [1., 1., 0., 0.]])
     >>> election.set_rule(SVDNash(use_rank=True)).ranking_
     [1, 2, 3, 0]
     """
-    def __init__(self, profile, k=2, rule=None):
-        n_candidates = profile.n_candidates
-        assert(k < n_candidates)
+    def __init__(self, n_candidates=None, k=2, profile=None, rule=None):
+        if n_candidates is None and profile is None:
+            raise ValueError("n_candidates or profile should be not None")
+        if n_candidates is None:
+            n_candidates = profile.n_candidates
+        if k >= n_candidates:
+            raise ValueError("k should be < n_candidates")
+        if profile is not None:
+            if profile.n_candidates != n_candidates:
+                raise ValueError("n_candidates should be the same than in the profile")
         points = [1]*k + [0]*(n_candidates-k)
-        super().__init__(profile, points, rule)
+        super().__init__(points, profile, rule)
 
 
 class VetoExtension(PositionalRuleExtension):
@@ -278,22 +287,27 @@ class VetoExtension(PositionalRuleExtension):
 
     Examples
     --------
-    >>> my_profile = Profile(4, 2)
-    >>> scores = [[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]]
-    >>> embeddings = [[1, 0], [1, 1], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = VetoExtension(my_profile)
-    >>> election.fake_profile.scores
+    >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> profile = Profile(ratings, embeddings)
+    >>> election = VetoExtension(n_candidates=4, profile=profile)
+    >>> election.fake_profile.ratings
     array([[0., 1., 1., 1.],
            [1., 1., 1., 0.],
            [1., 1., 0., 1.]])
     >>> election.set_rule(SVDNash()).ranking_
     [1, 3, 0, 2]
     """
-    def __init__(self, profile, rule=None):
-        n_candidates = profile.n_candidates
+    def __init__(self, n_candidates=None, profile=None, rule=None):
+        if n_candidates is None and profile is None:
+            raise ValueError("n_candidates or profile should be not None")
+        if n_candidates is None:
+            n_candidates = profile.n_candidates
+        if profile is not None:
+            if profile.n_candidates != n_candidates:
+                raise ValueError("n_candidates should be the same than in the profile")
         points = [1]*(n_candidates-1) + [0]
-        super().__init__(profile, points, rule)
+        super().__init__(points, profile, rule)
 
 
 class BordaExtension(PositionalRuleExtension):
@@ -314,22 +328,27 @@ class BordaExtension(PositionalRuleExtension):
 
     Examples
     --------
-    >>> my_profile = Profile(4, 2)
-    >>> scores = [[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]]
-    >>> embeddings = [[1, 0], [1, 1], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = BordaExtension(my_profile)
-    >>> election.fake_profile.scores
+    >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> profile = Profile(ratings, embeddings)
+    >>> election = BordaExtension(n_candidates=4, profile=profile)
+    >>> election.fake_profile.ratings
     array([[0.        , 0.33333333, 0.66666667, 1.        ],
            [0.33333333, 1.        , 0.66666667, 0.        ],
            [1.        , 0.66666667, 0.        , 0.33333333]])
     >>> election.set_rule(SVDNash()).ranking_
     [1, 3, 2, 0]
     """
-    def __init__(self, profile, rule=None):
-        n_candidates = profile.n_candidates
+    def __init__(self, n_candidates=None, profile=None, rule=None):
+        if n_candidates is None and profile is None:
+            raise ValueError("n_candidates or profile should be not None")
+        if n_candidates is None:
+            n_candidates = profile.n_candidates
+        if profile is not None:
+            if profile.n_candidates != n_candidates:
+                raise ValueError("n_candidates should be the same than in the profile")
         points = [n_candidates-i-1 for i in range(n_candidates)]
-        super().__init__(profile, points, rule)
+        super().__init__(points, profile, rule)
 
 
 class InstantRunoffExtension(ScoringRule):
@@ -352,11 +371,10 @@ class InstantRunoffExtension(ScoringRule):
 
     Examples
     --------
-    >>> my_profile = Profile(4, 2)
-    >>> scores = [[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]]
-    >>> embeddings = [[1, 0], [1, 1], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = InstantRunoffExtension(my_profile)
+    >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> profile = Profile(ratings, embeddings)
+    >>> election = InstantRunoffExtension(profile)
     >>> election.set_rule(SVDNash()).ranking_
     [1, 3, 2, 0]
     """
@@ -403,17 +421,15 @@ class InstantRunoffExtension(ScoringRule):
         Profile
             The fake profile.
         """
-        fake_profile = np.zeros((self.profile_.n_voters, self.profile_.n_candidates))
+        fake_ratings = np.zeros((self.profile_.n_voters, self.profile_.n_candidates))
         points = np.zeros(self.profile_.n_candidates)
         points[0] = 1
 
         for i in range(self.profile_.n_voters):
-            scores_i = self.profile_.scores[i].copy()
+            scores_i = self.profile_.ratings[i].copy()
             scores_i[eliminated] = 0
             ord_i = np.argsort(scores_i)[::-1]
             ord_i = np.argsort(ord_i)
-            fake_profile[i] = points[ord_i]
+            fake_ratings[i] = points[ord_i]
 
-        p = self.profile_.copy()
-        p.scores = fake_profile
-        return p
+        return Profile(fake_ratings, self.profile_.embeddings)

@@ -7,7 +7,8 @@ This file is part of Embedded Voting.
 """
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.Profile import Profile
+from embedded_voting.profile.profile import Profile
+from embedded_voting.embeddings.embeddings import Embeddings
 
 
 class ZonotopeRule(ScoringRule):
@@ -24,19 +25,18 @@ class ZonotopeRule(ScoringRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = ZonotopeRule(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+    >>> election = ZonotopeRule(profile)
     >>> election.scores_
-    [(2, 1.016102549694411), (2, 0.5477225575051661), (2, 0.9196152422706632)]
+    [(2, 1.016102549694411), (2, 0.5477225575051662), (2, 0.9196152422706632)]
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
     >>> election.welfare_
-    [1.0, 0.0, 0.7939978029958997]
+    [1.0, 0.0, 0.7939978029958996]
 
     """
     def __init__(self, profile=None):
@@ -51,7 +51,7 @@ class ZonotopeRule(ScoringRule):
         current_subset = list(np.arange(matrix_rank))
         while current_subset[0] <= n_voters - matrix_rank:
             current_embeddings = embeddings[current_subset, ...]
-            if matrix_rank < self.profile_.n_dim:
+            if matrix_rank < self.profile_.embeddings.n_dim:
                 vol_i = np.linalg.det(np.dot(current_embeddings, current_embeddings.T))
                 vol_i = max(0, vol_i)
                 vol_i = np.sqrt(vol_i)
@@ -75,7 +75,7 @@ class MaxCubeRule(ScoringRule):
     """
     Voting rule in which the aggregated score of
     a candidate is the volume of a cube
-    described by :attr:`~embedded_voting.Profile.n_dim` rows of
+    described by :attr:`~embedded_voting.Profile.embeddings.n_dim` rows of
     the candidate embedding matrix `M` such
     that `M[i] = score[i, candidate] * embeddings[i]`.
     (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
@@ -87,19 +87,18 @@ class MaxCubeRule(ScoringRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = MaxCubeRule(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+    >>> election = MaxCubeRule(profile)
     >>> election.scores_
-    [(2, 0.41833001326703784), (2, 0.547722557505166), (2, 0.3999999999999999)]
+    [(2, 0.4183300132670379), (2, 0.5477225575051662), (2, 0.3999999999999999)]
     >>> election.ranking_
     [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_
-    [0.12408405037529154, 1.0, 0.0]
+    [0.12408405037529173, 1.0, 0.0]
 
     """
     def __init__(self, profile=None):

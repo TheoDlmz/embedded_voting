@@ -1,7 +1,7 @@
-==================
-Parametric Profile
-==================
+=================
+Profile Generator
+=================
 
-.. autoclass:: embedded_voting.ParametricProfile
+.. autoclass:: embedded_voting.ProfileGenerator
     :members:
 

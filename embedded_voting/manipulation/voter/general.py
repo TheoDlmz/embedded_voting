@@ -1,5 +1,5 @@
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.profile.ParametricProfile import ParametricProfile
+from embedded_voting.profile.parametric import ProfileGenerator
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 from embedded_voting.scoring.singlewinner.ordinal import BordaExtension
 import numpy as np
@@ -42,12 +42,12 @@ class SingleVoterManipulation(DeleteCacheMixin):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+    >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
     >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
-    [0.700152659355562, 1.0, 0.0]
+    [0.8914711297748728, 1.0, 0.0]
     """
 
     def __init__(self, profile, rule=None):
@@ -112,18 +112,18 @@ class SingleVoterManipulation(DeleteCacheMixin):
             The index of the best candidate
             that can be elected by manipulation.
         """
-        score_i = self.profile_.scores[i].copy()
+        score_i = self.profile_.ratings[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
 
         # If the favorite of the voter is the winner, he will not manipulate
         if preferences_order[0] == self.winner_:
             return self.winner_
 
-        self.profile_.scores[i] = np.ones(self.profile_.n_candidates)
+        self.profile_.ratings[i] = np.ones(self.profile_.n_candidates)
         scores_max = self.rule_(self.profile_).scores_
-        self.profile_.scores[i] = np.zeros(self.profile_.n_candidates)
+        self.profile_.ratings[i] = np.zeros(self.profile_.n_candidates)
         scores_min = self.rule_(self.profile_).scores_
-        self.profile_.scores[i] = score_i
+        self.profile_.ratings[i] = score_i
 
         all_scores = [(s, i, 1) for i, s in enumerate(scores_max)]
         all_scores += [(s, i, 0) for i, s in enumerate(scores_min)]
@@ -160,10 +160,10 @@ class SingleVoterManipulation(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
         >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
         >>> manipulation.manipulation_global_
-        [1, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+        [1, 0, 0, 0, 1, 1, 1, 1, 1, 0]
         """
         return [self.manipulation_voter(i) for i in range(self.profile_.n_voters)]
 
@@ -183,10 +183,10 @@ class SingleVoterManipulation(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
         >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
         >>> manipulation.prop_manipulator_
-        0.3
+        0.4
         """
         return len([x for x in self.manipulation_global_ if x != self.winner_]) / self.profile_.n_voters
 
@@ -205,10 +205,10 @@ class SingleVoterManipulation(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
         >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
         >>> manipulation.avg_welfare_
-        0.9100457978066686
+        0.9565884519099491
         """
         return np.mean([self.welfare_[x] for x in self.manipulation_global_])
 
@@ -227,10 +227,10 @@ class SingleVoterManipulation(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
         >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
         >>> manipulation.worst_welfare_
-        0.700152659355562
+        0.8914711297748728
         """
         return np.min([self.welfare_[x] for x in self.manipulation_global_])
 
@@ -250,7 +250,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
+        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
         >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
         >>> manipulation.is_manipulable_
         True
@@ -275,7 +275,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
             and ``polarisation`` parameters tested.
             The total number of test is `map_size` `^2`.
         scores_matrix : np.ndarray
-            Matrix of shape :attr:`~embedded_voting.Profile.n_dim`,
+            Matrix of shape :attr:`~embedded_voting.Profile.embeddings.n_dim`,
             :attr:`~embedded_voting.Profile.n_candidates` containing
             the scores given by each group.
             More precisely, `scores_matrix[i,j]` is the score given by the group
@@ -296,15 +296,15 @@ class SingleVoterManipulation(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> profile = ParametricProfile(5, 3, 100)
+        >>> profile = ProfileGenerator(100, 5, 3)(0, 0)
         >>> manipulation = SingleVoterManipulation(profile, rule=SVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['manipulator']
-        array([[0.44, 0.  , 0.5 , 0.24, 0.32],
-               [0.47, 0.  , 0.36, 0.  , 0.  ],
-               [0.  , 0.  , 0.06, 0.  , 0.  ],
-               [0.  , 0.5 , 0.  , 0.  , 0.  ],
-               [0.  , 0.  , 0.  , 0.4 , 0.  ]])
+        array([[0.01, 0.  , 0.  , 0.  , 0.  ],
+               [0.  , 0.  , 0.  , 0.  , 0.  ],
+               [0.  , 0.  , 0.  , 0.  , 0.21],
+               [0.44, 0.  , 0.  , 0.52, 0.  ],
+               [0.  , 0.  , 0.  , 0.  , 0.  ]])
         """
 
         manipulator = np.zeros((map_size, map_size))
@@ -313,19 +313,18 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
         n_candidates = self.profile_.n_candidates
         n_voters = self.profile_.n_voters
-        n_dim = self.profile_.n_dim
+        n_dim = self.profile_.embeddings.n_dim
 
-        parametric_profile = ParametricProfile(n_candidates, n_dim, n_voters)
+        generator = ProfileGenerator(n_voters, n_candidates, n_dim)
 
         if scores_matrix is not None:
-            parametric_profile.set_scores(scores_matrix)
+            generator.set_scores(scores_matrix)
 
         for i in range(map_size):
             for j in range(map_size):
                 if scores_matrix is None:
-                    parametric_profile.set_scores()
-                parametric_profile.set_parameters(i / (map_size-1), j / (map_size-1))
-                self.set_profile(parametric_profile)
+                    generator.set_scores()
+                self.set_profile(generator(i / (map_size-1), j / (map_size-1)))
                 manipulator[i, j] = self.prop_manipulator_
                 worst_welfare[i, j] = self.worst_welfare_
                 avg_welfare[i, j] = self.avg_welfare_
@@ -375,15 +374,15 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-    >>> extension = BordaExtension(my_profile)
-    >>> manipulation = SingleVoterManipulationExtension(my_profile, extension, SVDNash())
+    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+    >>> extension = BordaExtension(profile=profile)
+    >>> manipulation = SingleVoterManipulationExtension(profile, extension, SVDNash())
     >>> manipulation.prop_manipulator_
-    0.1
+    0.3
     >>> manipulation.manipulation_global_
-    [1, 2, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 2, 1, 1, 2, 2, 1, 1, 1, 1]
     >>> manipulation.avg_welfare_
-    0.9
+    0.7
     """
 
     def __init__(self, profile, extension, rule=None):
@@ -409,7 +408,7 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
         return self
 
     def manipulation_voter(self, i):
-        score_i = self.profile_.scores[i].copy()
+        score_i = self.profile_.ratings[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
         points = np.arange(self.profile_.n_candidates)[::-1]
         if preferences_order[0] == self.winner_:
@@ -418,7 +417,7 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
         best_manipulation_i = np.where(preferences_order == self.winner_)[0][0]
 
         for perm in itertools.permutations(range(self.profile_.n_candidates)):
-            self.profile_.scores[i] = points[list(perm)]
+            self.profile_.ratings[i] = points[list(perm)]
             fake_run = self.extended_rule(self.profile_)
             new_winner = fake_run.winner_
             index_candidate = np.where(preferences_order == new_winner)[0][0]
@@ -428,6 +427,6 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
                     break
 
         best_manipulation = preferences_order[best_manipulation_i]
-        self.profile_.scores[i] = score_i
+        self.profile_.ratings[i] = score_i
 
         return best_manipulation

@@ -1,4 +1,4 @@
-from embedded_voting.algorithm_aggregation.score_generator import GroupedMeanGenerator, MultivariateGenerator
+from embedded_voting.generators import *
 import matplotlib.pyplot as plt
 import numpy as np
 

@@ -9,7 +9,8 @@ import numpy as np
 from embedded_voting.utils.cached import cached_property
 from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.Profile import Profile
+from embedded_voting.profile.profile import Profile
+from embedded_voting.embeddings.embeddings import Embeddings
 import matplotlib.pyplot as plt
 
 
@@ -26,19 +27,18 @@ class FeaturesRule(ScoringRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = FeaturesRule(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+    >>> election = FeaturesRule(profile)
     >>> election.scores_
-    [0.47463203435596457, 0.9271320343559648, 0.4335660171779823]
+    [0.44784902576697316, 0.9271320343559639, 0.43356601717798204]
     >>> election.ranking_
     [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_
-    [0.08320268363041217, 1.0, 0.0]
+    [0.028938395456510148, 1.0, 0.0]
     """
 
     @cached_property
@@ -53,9 +53,9 @@ class FeaturesRule(ScoringRule):
             The matrix of features.
             Its shape is :attr:`~embedded_voting.Profile.n_candidates`, :attr:`~embedded_voting.Profile.n_dim`
         """
-        embeddings = self.profile_.embeddings
-        scores = self.profile_.scores
-        return np.dot(np.dot(np.linalg.pinv(np.dot(embeddings.T, embeddings)), embeddings.T), scores).T
+        positions = self.profile_.embeddings.positions
+        ratings = self.profile_.ratings
+        return np.dot(np.dot(np.linalg.pinv(np.dot(positions.T, positions)), positions.T), ratings).T
 
     def score_(self, candidate):
         return (self.features_[candidate] ** 2).sum()
@@ -89,14 +89,14 @@ class FeaturesRule(ScoringRule):
         n_candidate = self.profile_.n_candidates
         n_rows = (n_candidate - 1) // row_size + 1
         fig = plt.figure(figsize=(row_size * 5, n_rows * 5))
-        position = [n_rows, row_size, 1]
+        plot_position = [n_rows, row_size, 1]
         features = self.features_
         for candidate in range(n_candidate):
             ax = self.profile_.plot_candidate(candidate,
                                               plot_kind=plot_kind,
                                               dim=dim,
                                               fig=fig,
-                                              position=position,
+                                              plot_position=plot_position,
                                               show=False)
             if plot_kind == "3D":
                 x1 = features[candidate, dim[0]]
@@ -113,7 +113,7 @@ class FeaturesRule(ScoringRule):
                 size_features = np.linalg.norm(feature_bis)
                 feature_bis = normalize(feature_bis)
                 ax.scatter([feature_bis ** 2], color='k', s=50*size_features+1)
-            position[2] += 1
+            plot_position[2] += 1
 
         if show:
             plt.show()  # pragma: no cover

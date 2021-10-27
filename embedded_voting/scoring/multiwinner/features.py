@@ -1,6 +1,6 @@
 
 from embedded_voting.scoring.multiwinner.general import IterRule
-from embedded_voting.profile.ParametricProfile import ParametricProfile
+from embedded_voting.profile.parametric import ProfileGenerator
 import numpy as np
 
 
@@ -13,10 +13,10 @@ class IterFeatures(IterRule):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores = [[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]]
+    >>> ratings = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]])
     >>> probability = [3/4, 1/4]
-    >>> my_profile = ParametricProfile(6, 2, 100, scores, probability).set_parameters(1, 1)
-    >>> election = IterFeatures(my_profile, 3)
+    >>> profile = ProfileGenerator(100, 6, 2, ratings, probability)(1, 1)
+    >>> election = IterFeatures(profile, 3)
     >>> election.winners_
     [0, 3, 1]
     >>> _ = election.set_k(4)
@@ -39,7 +39,7 @@ class IterFeatures(IterRule):
         embeddings : np.ndarray
             The embeddings of the voters.
             Should be of shape :attr:`~embedded_voting.Profile.n_voters`,
-            :attr:`~embedded_voting.Profile.n_dim`.
+            :attr:`~embedded_voting.Profile.embeddings.n_dim`.
         scores : np.ndarray
             The scores given by the voters to the candidates.
             Should be of shape :attr:`~embedded_voting.Profile.n_voters`,
@@ -50,14 +50,14 @@ class IterFeatures(IterRule):
         np.ndarray
             The features of every candidates.
             Of shape :attr:`~embedded_voting.Profile.n_candidates`,
-            :attr:`~embedded_voting.Profile.n_dim`.
+            :attr:`~embedded_voting.Profile.embeddings.n_dim`.
         """
         return np.dot(np.dot(np.linalg.inv(np.dot(embeddings.T, embeddings)), embeddings.T), scores).T
 
     def _winner_k(self, winners):
 
-        features = self.compute_features(self.profile_.embeddings,
-                                         np.dot(np.diag(self.weights), self.profile_.scores))
+        features = self.compute_features(self.profile_.embeddings.positions,
+                                         np.dot(np.diag(self.weights), self.profile_.ratings))
         scores = np.sum(features ** 2, axis=1)
 
         scores = np.array(scores)

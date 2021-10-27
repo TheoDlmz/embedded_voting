@@ -1,7 +1,7 @@
 
 import numpy as np
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.profile.ParametricProfile import ParametricProfile
+from embedded_voting.profile.parametric import ProfileGenerator
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 import matplotlib.pyplot as plt
 from embedded_voting.utils.plots import create_map_plot
@@ -45,12 +45,12 @@ class ManipulationCoalition(DeleteCacheMixin):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-    >>> manipulation = ManipulationCoalition(my_profile, SVDNash())
+    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+    >>> manipulation = ManipulationCoalition(profile, SVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
-    [0.700152659355562, 1.0, 0.0]
+    [0.8914711297748728, 1.0, 0.0]
 
     """
     def __init__(self, profile, rule=None):
@@ -110,17 +110,17 @@ class ManipulationCoalition(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-        >>> manipulation = ManipulationCoalition(my_profile, SVDNash())
+        >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+        >>> manipulation = ManipulationCoalition(profile, SVDNash())
         >>> manipulation.trivial_manipulation(0, verbose=True)
-        3 voters interested to elect 0 instead of 1
+        4 voters interested to elect 0 instead of 1
         Winner is 0
         True
         """
 
         voters_interested = []
         for i in range(self.profile_.n_voters):
-            score_i = self.profile_.scores[i]
+            score_i = self.profile_.ratings[i]
             if score_i[self.winner_] < score_i[candidate]:
                 voters_interested.append(i)
 
@@ -128,13 +128,13 @@ class ManipulationCoalition(DeleteCacheMixin):
             print("%i voters interested to elect %i instead of %i" %
                   (len(voters_interested), candidate, self.winner_))
 
-        old_profile = self.profile_.scores.copy()
+        old_profile = self.profile_.ratings.copy()
         for i in voters_interested:
-            self.profile_.scores[i] = np.zeros(self.profile_.n_candidates)
-            self.profile_.scores[i][candidate] = 1
+            self.profile_.ratings[i] = np.zeros(self.profile_.n_candidates)
+            self.profile_.ratings[i][candidate] = 1
 
         new_winner = self.rule_(self.profile_).winner_
-        self.profile_.scores = old_profile
+        self.profile_.ratings = old_profile
 
         if verbose:
             print("Winner is %i" % new_winner)
@@ -157,8 +157,8 @@ class ManipulationCoalition(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-        >>> manipulation = ManipulationCoalition(my_profile, SVDNash())
+        >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+        >>> manipulation = ManipulationCoalition(profile, SVDNash())
         >>> manipulation.is_manipulable_
         True
         """
@@ -185,8 +185,8 @@ class ManipulationCoalition(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-        >>> manipulation = ManipulationCoalition(my_profile, SVDNash())
+        >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+        >>> manipulation = ManipulationCoalition(profile, SVDNash())
         >>> manipulation.worst_welfare_
         0.0
         """
@@ -233,15 +233,15 @@ class ManipulationCoalition(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> profile = ParametricProfile(5, 3, 100)
+        >>> profile = ProfileGenerator(100, 5, 3)(0, 0)
         >>> manipulation = ManipulationCoalition(profile, rule=SVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['worst_welfare']
-        array([[0.        , 0.        , 0.        , 0.15165069, 0.97727603],
-               [0.        , 0.        , 0.        , 0.28446627, 0.40463717],
-               [0.        , 0.        , 0.        , 0.        , 0.95109702],
-               [0.        , 0.        , 0.66435128, 0.32073955, 0.60274981],
-               [0.        , 0.        , 0.        , 0.42815235, 0.        ]])
+        array([[0.        , 0.        , 0.41741546, 1.        , 0.4982297 ],
+               [0.        , 0.        , 0.        , 0.14175864, 1.        ],
+               [0.        , 0.        , 0.5536796 , 0.43986763, 0.47120528],
+               [0.        , 0.        , 0.        , 0.28219718, 0.03216955],
+               [0.        , 0.        , 0.        , 0.63924358, 0.28677042]])
         """
 
         manipulator_map = np.zeros((map_size, map_size))
@@ -249,19 +249,18 @@ class ManipulationCoalition(DeleteCacheMixin):
 
         n_candidates = self.profile_.n_candidates
         n_voters = self.profile_.n_voters
-        n_dim = self.profile_.n_dim
+        n_dim = self.profile_.embeddings.n_dim
 
-        parametric_profile = ParametricProfile(n_candidates, n_dim, n_voters)
+        generator = ProfileGenerator(n_voters, n_candidates, n_dim)
 
         if scores_matrix is not None:
-            parametric_profile.set_scores(scores_matrix)
+            generator.set_scores(scores_matrix)
 
         for i in range(map_size):
             for j in range(map_size):
                 if scores_matrix is None:
-                    parametric_profile.set_scores()
-                parametric_profile.set_parameters(i / (map_size-1), j / (map_size-1))
-                self.set_profile(parametric_profile)
+                    generator.set_scores()
+                self.set_profile(generator(i / (map_size-1), j / (map_size-1)))
 
                 worst_welfare = self.welfare_[self.winner_]
                 is_manipulable = 0

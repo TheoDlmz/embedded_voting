@@ -1,0 +1,1 @@
+from embedded_voting.aggregation.aggregator import Aggregator

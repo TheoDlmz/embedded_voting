@@ -7,5 +7,7 @@ Profile classes
    :caption: Contents:
 
    profile
+   impartial
    paramprofile
    moving
+   fast

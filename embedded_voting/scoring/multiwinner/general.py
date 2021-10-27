@@ -136,7 +136,7 @@ class IterRule(MultiwinnerRule):
             The `k^th` winner.
         np.ndarray
             The feature vector associated to this candidate.
-            The vector should be of length :attr:`~embedded_voting.Profile.n_dim`.
+            The vector should be of length :attr:`~embedded_voting.Profile.embeddings.n_dim`.
         """
         raise NotImplementedError
 
@@ -161,8 +161,8 @@ class IterRule(MultiwinnerRule):
             length :attr:`~embedded_voting.Profile.n_voters`.
 
         """
-        temp = [np.dot(self.profile_.embeddings[i], features_vector) for i in range(self.profile_.n_voters)]
-        temp = [self.profile_.scores[i, candidate] * temp[i] for i in range(self.profile_.n_voters)]
+        temp = [np.dot(self.profile_.embeddings.positions[i], features_vector) for i in range(self.profile_.n_voters)]
+        temp = [self.profile_.ratings[i, candidate] * temp[i] for i in range(self.profile_.n_voters)]
         return temp
 
     def _updateWeight(self, satisfactions):
@@ -282,7 +282,7 @@ class IterRule(MultiwinnerRule):
         ------
         list
             The list of the features vectors of each candidate.
-            Each vector is of length :attr:`~embedded_voting.Profile.n_dim`.
+            Each vector is of length :attr:`~embedded_voting.Profile.embeddings.n_dim`.
 
         """
         return self._ruleResults["vectors"]
@@ -317,17 +317,17 @@ class IterRule(MultiwinnerRule):
         n_candidates = len(ls_weight)
         n_rows = (n_candidates - 1) // row_size + 1
         fig = plt.figure(figsize=(5 * row_size, n_rows * 5))
-        position = [n_rows, row_size, 1]
+        plot_position = [n_rows, row_size, 1]
         if dim is None:
             dim = [0, 1, 2]
         for i in range(n_candidates):
-            ax = self.profile_.plot_scores(ls_weight[i],
-                                           plot_kind=plot_kind,
-                                           title="Step %i" % i,
-                                           dim=dim,
-                                           fig=fig,
-                                           position=position,
-                                           show=False)
+            ax = self.profile_.embeddings.plot_scores(ls_weight[i],
+                                                      plot_kind=plot_kind,
+                                                      title="Step %i" % i,
+                                                      dim=dim,
+                                                      fig=fig,
+                                                      plot_position=plot_position,
+                                                      show=False)
 
             if i < n_candidates - 1:
                 x1 = vectors[i][dim[0]]
@@ -343,7 +343,7 @@ class IterRule(MultiwinnerRule):
                     feature_bis = normalize(feature_bis)
                     ax.scatter([feature_bis ** 2], color='k', s=50*size_features+1)
 
-            position[2] += 1
+            plot_position[2] += 1
 
         if verbose:
             sum_w = [ls_weight[i].sum() / (n_candidates - i - 1) for i in range(n_candidates - 1)]

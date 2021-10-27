@@ -7,9 +7,10 @@ This file is part of Embedded Voting.
 """
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.Profile import Profile
+from embedded_voting.profile.profile import Profile
 from embedded_voting.utils.cached import cached_property
 import matplotlib.pyplot as plt
+from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.utils.miscellaneous import normalize
 
 
@@ -52,19 +53,18 @@ class SVDRule(ScoringRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = SVDRule(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+    >>> election = SVDRule(profile)
     >>> election.scores_
-    [0.806225774829855, 0.547722557505166, 0.5567764362830023]
+    [0.6041522986797286, 0.547722557505166, 0.5567764362830023]
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
     >>> election.welfare_
-    [1.0, 0.0, 0.03502424020689993]
+    [1.0, 0.0, 0.16044515869439538]
 
     """
     def __init__(self, profile=None, aggregation_rule=np.prod, square_root=True, use_rank=False):
@@ -113,17 +113,16 @@ class SVDRule(ScoringRule):
 
         Examples
         --------
-        >>> my_profile = Profile(3, 2)
-        >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-        >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-        >>> _ = my_profile.add_voters(embeddings, scores)
-        >>> election = SVDRule(my_profile)
+        >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+        >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+        >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+        >>> election = SVDRule(profile)
         >>> election.ranking_
         [0, 2, 1]
         >>> election.set_rule(np.sum)
         <embedded_voting.scoring.singlewinner.svd.SVDRule object at ...>
         >>> election.ranking_
-        [0, 1, 2]
+        [1, 0, 2]
         """
         self.aggregation_rule = aggregation_rule
         self.delete_cache()
@@ -150,19 +149,18 @@ class SVDNash(SVDRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = SVDNash(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+    >>> election = SVDNash(profile)
     >>> election.scores_
-    [0.806225774829855, 0.547722557505166, 0.5567764362830023]
+    [0.6041522986797286, 0.547722557505166, 0.5567764362830023]
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
     >>> election.welfare_
-    [1.0, 0.0, 0.03502424020689993]
+    [1.0, 0.0, 0.16044515869439538]
 
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
@@ -189,19 +187,18 @@ class SVDSum(SVDRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = SVDSum(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings))
+    >>> election = SVDSum(profile)
     >>> election.scores_
-    [1.8200141619393269, 1.6417810801109665, 1.5535613514007114]
+    [1.6150246429573318, 1.6417810801109665, 1.5535613514007114]
     >>> election.ranking_
-    [0, 1, 2]
+    [1, 0, 2]
     >>> election.winner_
-    0
+    1
     >>> election.welfare_
-    [1.0, 0.3310895033605581, 0.0]
+    [0.6967068756070167, 1.0, 0.0]
 
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
@@ -228,19 +225,18 @@ class SVDMin(SVDRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = SVDMin(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+    >>> election = SVDMin(profile)
     >>> election.scores_
-    [0.7620641440477796, 0.4657304054015261, 0.5608830567730065]
+    [0.5885971537535042, 0.4657304054015261, 0.5608830567730065]
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
     >>> election.welfare_
-    [1.0, 0.0, 0.32109962168387557]
+    [1.0, 0.0, 0.7744377762720253]
 
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
@@ -267,19 +263,18 @@ class SVDMax(SVDRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = SVDMax(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+    >>> election = SVDMax(profile)
     >>> election.scores_
-    [1.0579500178915473, 1.1760506747094404, 0.9926782946277048]
+    [1.0264274892038276, 1.1760506747094404, 0.9926782946277048]
     >>> election.ranking_
     [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_
-    [0.3559517700252816, 1.0, 0.0]
+    [0.18404731705548893, 1.0, 0.0]
 
     """
     def __init__(self, profile=None, square_root=True, use_rank=False):
@@ -329,13 +324,12 @@ class SVDMax(SVDRule):
 
         Examples
         --------
-        >>> my_profile = Profile(3, 2)
-        >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-        >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-        >>> _ = my_profile.add_voters(embeddings, scores)
-        >>> election = SVDMax(my_profile)
+        >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+        >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+        >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+        >>> election = SVDMax(profile)
         >>> election.features_
-        array([[0.8517226 , 0.57664428],
+        array([[0.93600783, 0.38770714],
                [0.28947845, 1.04510904],
                [0.22891028, 0.96967952]])
         """
@@ -370,14 +364,14 @@ class SVDMax(SVDRule):
         n_candidate = self.profile_.n_candidates
         n_rows = (n_candidate - 1) // row_size + 1
         fig = plt.figure(figsize=(row_size * 5, n_rows * 5))
-        position = [n_rows, row_size, 1]
+        plot_position = [n_rows, row_size, 1]
         features = self.features_
         for candidate in range(n_candidate):
             ax = self.profile_.plot_candidate(candidate,
                                               plot_kind=plot_kind,
                                               dim=dim,
                                               fig=fig,
-                                              position=position,
+                                              plot_position=plot_position,
                                               show=False)
             if plot_kind == "3D":
                 x1 = features[candidate, dim[0]]
@@ -394,7 +388,7 @@ class SVDMax(SVDRule):
                 size_features = np.linalg.norm(feature_bis)
                 feature_bis = normalize(feature_bis)
                 ax.scatter([feature_bis ** 2], color='k', s=50*size_features+1)
-            position[2] += 1
+            plot_position[2] += 1
 
         if show:
             plt.show()  # pragma: no cover
@@ -423,19 +417,18 @@ class SVDLog(SVDRule):
 
     Examples
     --------
-    >>> my_profile = Profile(3, 2)
-    >>> scores = [[.5, .6, .3], [.7, 0, .2], [.5, 1, .8]]
-    >>> embeddings = [[1, 1], [1, 0], [0, 1]]
-    >>> _ = my_profile.add_voters(embeddings, scores)
-    >>> election = SVDLog(my_profile)
+    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
+    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
+    >>> election = SVDLog(profile)
     >>> election.scores_
-    [1.2881962813428856, 1.1598653051965206, 1.1347313336962574]
+    [1.169125718695728, 1.1598653051965206, 1.1347313336962574]
     >>> election.ranking_
     [0, 1, 2]
     >>> election.winner_
     0
     >>> election.welfare_
-    [1.0, 0.1637766270779778, 0.0]
+    [1.0, 0.7307579856610341, 0.0]
 
     """
     def __init__(self, profile=None, const=1, square_root=True, use_rank=False):

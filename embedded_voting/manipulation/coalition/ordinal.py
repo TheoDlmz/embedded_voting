@@ -1,7 +1,7 @@
 
 import numpy as np
 from embedded_voting.manipulation.coalition.general import ManipulationCoalition
-from embedded_voting.profile.ParametricProfile import ParametricProfile
+from embedded_voting.profile.parametric import ProfileGenerator
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension, BordaExtension, KApprovalExtension
 
@@ -39,9 +39,9 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-    >>> extension = InstantRunoffExtension(my_profile)
-    >>> manipulation = ManipulationCoalitionExtension(my_profile, extension, SVDNash())
+    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+    >>> extension = InstantRunoffExtension(profile)
+    >>> manipulation = ManipulationCoalitionExtension(profile, extension, SVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.is_manipulable_
@@ -76,7 +76,7 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
 
         voters_interested = []
         for i in range(self.profile_.n_voters):
-            score_i = self.profile_.scores[i]
+            score_i = self.profile_.ratings[i]
             if score_i[self.winner_] < score_i[candidate]:
                 voters_interested.append(i)
 
@@ -84,13 +84,13 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
             print("%i voters interested to elect %i instead of %i" %
                   (len(voters_interested), candidate, self.winner_))
 
-        old_profile = self.profile_.scores.copy()
+        old_profile = self.profile_.ratings.copy()
         for i in voters_interested:
-            self.profile_.scores[i][self.winner_] = -1
-            self.profile_.scores[i][candidate] = 2
+            self.profile_.ratings[i][self.winner_] = -1
+            self.profile_.ratings[i][candidate] = 2
 
         new_winner = self.extended_rule(self.profile_).winner_
-        self.profile_.scores = old_profile
+        self.profile_.ratings = old_profile
 
         if verbose:
             print("Winner is %i" % new_winner)
@@ -114,8 +114,8 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-    >>> manipulation = ManipulationCoalitionBorda(my_profile, rule=SVDNash())
+    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+    >>> manipulation = ManipulationCoalitionBorda(profile, rule=SVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.is_manipulable_
@@ -125,7 +125,7 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     """
 
     def __init__(self, profile, rule=None):
-        super().__init__(profile, extension=BordaExtension(profile), rule=rule)
+        super().__init__(profile, extension=BordaExtension(profile=profile), rule=rule)
 
 
 class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
@@ -146,8 +146,8 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-    >>> manipulation = ManipulationCoalitionKApp(my_profile, k=2, rule=SVDNash())
+    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+    >>> manipulation = ManipulationCoalitionKApp(profile, k=2, rule=SVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.is_manipulable_
@@ -157,7 +157,7 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     """
 
     def __init__(self, profile, k=2, rule=None):
-        super().__init__(profile, extension=KApprovalExtension(profile, k=k), rule=rule)
+        super().__init__(profile, extension=KApprovalExtension(profile=profile, k=k), rule=rule)
 
 
 class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
@@ -176,8 +176,8 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-    >>> manipulation = ManipulationCoalitionIRV(my_profile, SVDNash())
+    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+    >>> manipulation = ManipulationCoalitionIRV(profile, SVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.is_manipulable_
@@ -187,4 +187,4 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     """
 
     def __init__(self, profile, rule=None):
-        super().__init__(profile, extension=InstantRunoffExtension(profile), rule=rule)
+        super().__init__(profile, extension=InstantRunoffExtension(profile=profile), rule=rule)

@@ -1,7 +1,7 @@
 import numpy as np
 from embedded_voting.manipulation.voter.general import SingleVoterManipulationExtension
 from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension
-from embedded_voting.profile.ParametricProfile import ParametricProfile
+from embedded_voting.profile.parametric import ProfileGenerator
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 
 
@@ -23,8 +23,8 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-    >>> manipulation = SingleVoterManipulationIRV(my_profile, SVDNash())
+    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+    >>> manipulation = SingleVoterManipulationIRV(profile, SVDNash())
     >>> manipulation.prop_manipulator_
     0.0
     >>> manipulation.avg_welfare_
@@ -36,7 +36,7 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
     """
 
     def __init__(self, profile, rule=None):
-        super().__init__(profile, InstantRunoffExtension(profile), rule)
+        super().__init__(profile, InstantRunoffExtension(profile=profile), rule)
 
     def _create_fake_scores(self, eliminated, scores):
         """
@@ -70,9 +70,9 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
         return fake_profile
 
     def manipulation_voter(self, i):
-        scores = self.profile_.scores.copy()
-        score_i = self.profile_.scores[i].copy()
-        preferences_order = np.argsort(score_i)[::-1]
+        ratings = self.profile_.ratings.copy()
+        ratings_i = self.profile_.ratings[i].copy()
+        preferences_order = np.argsort(ratings_i)[::-1]
 
         m = self.profile_.n_candidates
 
@@ -92,13 +92,13 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
                 if index_candidate < best_manipulation_i:
                     best_manipulation_i = index_candidate
             else:
-                fake_profile = self._create_fake_scores(el, scores)
+                fake_profile = self._create_fake_scores(el, ratings)
                 fake_profile[i] = np.ones(self.profile_.n_candidates)
-                self.profile_.scores = fake_profile
+                self.profile_.ratings = fake_profile
                 scores_max = self.extended_rule.rule_(self.profile_).scores_
 
                 fake_profile[i] = np.zeros(self.profile_.n_candidates)
-                self.profile_.scores = fake_profile
+                self.profile_.ratings = fake_profile
                 scores_min = self.extended_rule.rule_(self.profile_).scores_
 
                 all_scores = [(s, j, 1) for j, s in enumerate(scores_max) if j not in el]
@@ -116,7 +116,7 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
                     if all_scores[1][2] == 0 and one == -1:
                         queue_eliminated.append((el+[all_scores[1][1]], all_scores[0][1]))
 
-        self.profile_.scores = scores
+        self.profile_.ratings = ratings
 
         best_manipulation = preferences_order[best_manipulation_i]
 

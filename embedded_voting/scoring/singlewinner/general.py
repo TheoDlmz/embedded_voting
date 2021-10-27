@@ -159,7 +159,7 @@ class ScoringRule(DeleteCacheMixin):
             return np.ones(self.profile_.n_candidates)
         return list((scores - min_score) / (max_score - min_score))
 
-    def plot_winner(self, plot_kind="3D", dim=None, fig=None, position=None, show=True):
+    def plot_winner(self, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
         """
         Plot the winner of the election.
 
@@ -173,7 +173,7 @@ class ScoringRule(DeleteCacheMixin):
             By default, it is set to ``[0, 1, 2]``.
         fig : matplotlib figure
             The figure on which we add the plot.
-        position : list
+        plot_position : list
             The position of the plot on the figure.
             Should be of the form
             ``[n_rows, n_columns, position]``.
@@ -188,7 +188,12 @@ class ScoringRule(DeleteCacheMixin):
 
         """
         winner = self.winner_
-        ax = self.profile_.plot_candidate(winner, plot_kind=plot_kind, dim=dim, fig=fig, position=position, show=show)
+        ax = self.profile_.plot_candidate(winner,
+                                          plot_kind=plot_kind,
+                                          dim=dim,
+                                          fig=fig,
+                                          plot_position=plot_position,
+                                          show=show)
         return ax
 
     def plot_ranking(self, plot_kind="3D", dim=None, row_size=5, show=True):

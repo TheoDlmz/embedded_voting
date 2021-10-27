@@ -1,6 +1,6 @@
 from embedded_voting.scoring.multiwinner.general import IterRule
 import numpy as np
-from embedded_voting.profile.ParametricProfile import ParametricProfile
+from embedded_voting.profile.parametric import ProfileGenerator
 
 
 class IterSVD(IterRule):
@@ -34,10 +34,10 @@ class IterSVD(IterRule):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores = [[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]]
+    >>> ratings = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]])
     >>> probability = [3/4, 1/4]
-    >>> my_profile = ParametricProfile(6, 2, 100, scores, probability).set_parameters(1, 1)
-    >>> election = IterSVD(my_profile, 3)
+    >>> profile = ProfileGenerator(100, 6, 2, ratings, probability)(1, 1)
+    >>> election = IterSVD(profile, 3)
     >>> election.winners_
     [0, 1, 3]
     >>> _ = election.set_k(4)
@@ -62,7 +62,7 @@ class IterSVD(IterRule):
         for candidate in range(self.profile_.n_candidates):
             if candidate in winners:
                 scores.append(0)
-                vectors.append(np.zeros(self.profile_.n_dim))
+                vectors.append(np.zeros(self.profile_.embeddings.n_dim))
                 continue
             embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
             weights = self.weights

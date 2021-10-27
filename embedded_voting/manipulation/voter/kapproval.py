@@ -1,7 +1,7 @@
 import numpy as np
 from embedded_voting.manipulation.voter.general import SingleVoterManipulationExtension
 from embedded_voting.scoring.singlewinner.ordinal import KApprovalExtension
-from embedded_voting.profile.ParametricProfile import ParametricProfile
+from embedded_voting.profile.parametric import ProfileGenerator
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 
 
@@ -25,24 +25,24 @@ class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
     --------
     >>> np.random.seed(42)
     >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ParametricProfile(3, 3, 10, scores).set_parameters(0.8, 0.8)
-    >>> manipulation = SingleVoterManipulationKApp(my_profile, 2, SVDNash())
+    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
+    >>> manipulation = SingleVoterManipulationKApp(profile, 2, SVDNash())
     >>> manipulation.prop_manipulator_
-    0.0
+    0.2
     >>> manipulation.avg_welfare_
-    1.0
+    0.8
     >>> manipulation.worst_welfare_
-    1.0
+    0.0
     >>> manipulation.manipulation_global_
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 2, 2, 1, 1, 1, 1]
     """
 
     def __init__(self, profile, k=2, rule=None):
-        super().__init__(profile, KApprovalExtension(profile, k=k), rule)
+        super().__init__(profile, KApprovalExtension(profile=profile, k=k), rule)
 
     def manipulation_voter(self, i):
-        fake_scores_i = self.extended_rule.fake_profile.scores[i].copy()
-        score_i = self.profile_.scores[i].copy()
+        fake_scores_i = self.extended_rule.fake_profile.ratings[i].copy()
+        score_i = self.profile_.ratings[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
 
         k = int(np.sum(self.extension.points))
@@ -51,11 +51,11 @@ class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
         if preferences_order[0] == self.winner_:
             return self.winner_
 
-        self.extended_rule.fake_profile.scores[i] = np.ones(self.profile_.n_candidates)
+        self.extended_rule.fake_profile.ratings[i] = np.ones(self.profile_.n_candidates)
         scores_max = self.extended_rule.base_rule(self.extended_rule.fake_profile).scores_
-        self.extended_rule.fake_profile.scores[i] = np.zeros(self.profile_.n_candidates)
+        self.extended_rule.fake_profile.ratings[i] = np.zeros(self.profile_.n_candidates)
         scores_min = self.extended_rule.base_rule(self.extended_rule.fake_profile).scores_
-        self.extended_rule.fake_profile.scores[i] = fake_scores_i
+        self.extended_rule.fake_profile.ratings[i] = fake_scores_i
 
         all_scores = [(s, j, 1) for j, s in enumerate(scores_max)]
         all_scores += [(s, j, 0) for j, s in enumerate(scores_min)]
