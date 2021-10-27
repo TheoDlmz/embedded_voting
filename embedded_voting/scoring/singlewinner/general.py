@@ -32,16 +32,16 @@ class ScoringRule(DeleteCacheMixin):
 
     """
 
-    def __init__(self, profile=None):
+    def __init__(self, profile=None, _score_components=1):
         self.profile_ = profile
-        self._score_components = 1
+        self._score_components = _score_components
 
     def __call__(self, profile):
         self.profile_ = profile
         self.delete_cache()
         return self
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         """
         Return the aggregated score
         of a given candidate. This should be
@@ -72,7 +72,27 @@ class ScoringRule(DeleteCacheMixin):
             candidate is a float if :attr:`_score_components` = 1
             and a tuple of length :attr:`_score_components` otherwise.
         """
-        return [self.score_(candidate) for candidate in range(self.profile_.n_candidates)]
+        return [self._score_(candidate) for candidate in range(self.profile_.n_candidates)]
+
+    def score(self, candidate):
+        """
+        Return the aggregated score
+        of a given candidate. This one is called
+        by the user to prevent from calling _score_
+        every time.
+
+        Parameters
+        ----------
+        candidate : int
+            Index of the candidate for whom we want the score.
+
+        Return
+        ------
+        float or tuple
+            if :attr:`~embedded_voting.ScoringRule._score_components` = 1, return a float,
+            otherwise a tuple of length :attr:`~embedded_voting.ScoringRule._score_components`.
+        """
+        return self.scores_[candidate]
 
     @cached_property
     def scores_zip(self):
@@ -120,10 +140,7 @@ class ScoringRule(DeleteCacheMixin):
         if self._score_components == 1:
             return list(np.argsort(self.scores_)[::-1])
         else:
-            full_scores = []
-            for i in range(self._score_components):
-                full_scores.append([s[i] for s in self.scores_])
-            full_scores = full_scores[::-1]
+            full_scores = [[s[i] for s in self.scores_] for i in range(self._score_components)][::-1]
             return list(np.lexsort(full_scores)[::-1])
 
     @cached_property

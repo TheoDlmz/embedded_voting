@@ -57,7 +57,7 @@ class FeaturesRule(ScoringRule):
         ratings = self.profile_.ratings
         return np.dot(np.dot(np.linalg.pinv(np.dot(positions.T, positions)), positions.T), ratings).T
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         return (self.features_[candidate] ** 2).sum()
 
     def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):

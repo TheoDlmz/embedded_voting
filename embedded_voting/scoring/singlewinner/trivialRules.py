@@ -43,7 +43,7 @@ class SumScores(ScoringRule):
     >>> election.welfare_
     [0.3333333333333328, 1.0, 0.0]
     """
-    def score_(self, candidate):
+    def _score_(self, candidate):
         return self.profile_.ratings[::, candidate].sum()
 
 
@@ -83,7 +83,7 @@ class ProductScores(ScoringRule):
         super().__init__(profile)
         self._score_components = 2
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         scores = self.profile_.ratings[::, candidate]
         count = 0
         prod = 1

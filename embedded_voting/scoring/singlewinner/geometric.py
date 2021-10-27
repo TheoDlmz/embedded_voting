@@ -40,10 +40,9 @@ class ZonotopeRule(ScoringRule):
 
     """
     def __init__(self, profile=None):
-        super().__init__(profile)
-        self._score_components = 2
+        super().__init__(profile, _score_components=2)
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         embeddings = self.profile_.scored_embeddings(candidate)
         matrix_rank = np.linalg.matrix_rank(embeddings)
         volume = 0
@@ -102,10 +101,9 @@ class MaxCubeRule(ScoringRule):
 
     """
     def __init__(self, profile=None):
-        super().__init__(profile)
-        self._score_components = 2
+        super().__init__(profile, _score_components=2)
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         embeddings = self.profile_.scored_embeddings(candidate)
         matrix_rank = np.linalg.matrix_rank(embeddings)
         volume = 0

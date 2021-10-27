@@ -34,7 +34,7 @@ class MLEGaussian(ScoringRule):
         self.inverse_cov = np.linalg.pinv(np.cov(self.profile_.embeddings.positions)).sum(axis=0)
         return self
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         scores = self.profile_.ratings[::, candidate]
         sum_cov = self.inverse_cov
         score = 0

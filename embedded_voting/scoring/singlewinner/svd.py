@@ -68,16 +68,15 @@ class SVDRule(ScoringRule):
 
     """
     def __init__(self, profile=None, aggregation_rule=np.prod, square_root=True, use_rank=False):
-        super().__init__(profile=profile)
+        score_components = 1
+        if use_rank:
+            score_components = 2
+        super().__init__(profile, _score_components=score_components)
         self.square_root = square_root
         self.aggregation_rule = aggregation_rule
         self.use_rank = use_rank
-        if use_rank:
-            self._score_components = 2
-        else:
-            self._score_components = 1
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
 
         if embeddings.shape[0] < embeddings.shape[1]:

@@ -137,7 +137,7 @@ class PositionalRuleExtension(ScoringRule):
 
         return Profile(fake_ratings, self.profile_.embeddings)
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         return self._rule.scores_[candidate]
 
     def plot_fake_profile(self, plot_kind="3D", dim=None, list_candidates=None,
@@ -394,7 +394,7 @@ class InstantRunoffExtension(ScoringRule):
         self.delete_cache()
         return self
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         raise NotImplementedError
 
     @cached_property

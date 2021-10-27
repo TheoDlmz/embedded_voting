@@ -86,7 +86,7 @@ class Fast(ScoringRule):
 
         return self
 
-    def score_(self, candidate):
+    def _score_(self, candidate):
         try:
             embeddings = self.profile_.fast_embeddings.positions.copy()
             for i in range(self.profile_.n_voters):
