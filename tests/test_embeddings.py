@@ -5,6 +5,7 @@ from embedded_voting.embeddings.generator import RandomEmbeddings, ParametrizedE
 import numpy as np
 import pytest
 
+
 def test_embeddings():
     emb = Embeddings(np.array([[.2, .5, .3], [.3, .2, .2], [.6, .2, .3]]))
     emb.dilate(approx=False)
@@ -25,6 +26,8 @@ def test_embeddings():
     emb.plot("ternary", dim=[1, 2, 0], show=False)
     with pytest.raises(ValueError):
         emb.plot("test", show=False)
+    with pytest.raises(ValueError):
+        emb.plot("3D", dim=[1, 2], show=False)
 
     ratings = np.array([[1, .8, .5], [.6, .5, .2], [.6, .9, .5]])
     emb.plot_candidate(ratings, 0, "3D", show=False)
@@ -37,8 +40,7 @@ def test_embeddings():
     with pytest.raises(ValueError):
         emb.plot_candidates(ratings, "test", show=False)
 
-    emb = Embeddings(np.array([[0, -1], [-1, 0]]))
-    emb.recenter()
+    Embeddings(np.array([[0, -1], [-1, 0]])).recenter()
 
 
 def test_embedder():
