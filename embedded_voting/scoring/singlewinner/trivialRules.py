@@ -8,8 +8,8 @@ This file is part of Embedded Voting.
 
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.profile import Profile
 from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.profile.ratings import Ratings
 
 
 class SumScores(ScoringRule):
@@ -30,10 +30,9 @@ class SumScores(ScoringRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings))
-    >>> election = SumScores(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = SumScores()(ratings, embeddings)
     >>> election.scores_
     [1.4, 1.6, 1.3]
     >>> election.ranking_
@@ -44,7 +43,7 @@ class SumScores(ScoringRule):
     [0.3333333333333328, 1.0, 0.0]
     """
     def _score_(self, candidate):
-        return self.profile_.ratings[::, candidate].sum()
+        return self.ratings[::, candidate].sum()
 
 
 class ProductScores(ScoringRule):
@@ -65,10 +64,9 @@ class ProductScores(ScoringRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings))
-    >>> election = ProductScores(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = ProductScores()(ratings, embeddings)
     >>> election.scores_
     [(3, 0.06999999999999999), (2, 0.6), (3, 0.048)]
     >>> election.ranking_
@@ -79,12 +77,11 @@ class ProductScores(ScoringRule):
     [1.0, 0.0, 0.6857142857142858]
     """
 
-    def __init__(self, profile=None):
-        super().__init__(profile)
-        self._score_components = 2
+    def __init__(self):
+        super().__init__(_score_components=2)
 
     def _score_(self, candidate):
-        scores = self.profile_.ratings[::, candidate]
+        scores = self.ratings[::, candidate]
         count = 0
         prod = 1
         for s in scores:

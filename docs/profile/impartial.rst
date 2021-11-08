@@ -1,5 +1,5 @@
 =========================
-Impartial Culture Profile
+Impartial Culture Ratings
 =========================
 
 .. autoclass:: embedded_voting.ImpartialCulture

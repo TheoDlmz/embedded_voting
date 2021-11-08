@@ -1,6 +1,7 @@
 
 from embedded_voting.scoring.multiwinner.general import IterRule
-from embedded_voting.profile.parametric import ProfileGenerator
+from embedded_voting.embeddings.generator import ParametrizedEmbeddings
+from embedded_voting.profile.generator import CorrelatedRatings
 import numpy as np
 
 
@@ -13,10 +14,11 @@ class IterFeatures(IterRule):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> ratings = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]])
+    >>> scores_matrix = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]])
     >>> probability = [3/4, 1/4]
-    >>> profile = ProfileGenerator(100, 6, 2, ratings, probability)(1, 1)
-    >>> election = IterFeatures(profile, 3)
+    >>> embeddings = ParametrizedEmbeddings(100, 2, probability)(1)
+    >>> ratings = CorrelatedRatings(6, 2, scores_matrix)(embeddings, 1)
+    >>> election = IterFeatures(3)(ratings, embeddings)
     >>> election.winners_
     [0, 3, 1]
     >>> _ = election.set_k(4)
@@ -56,8 +58,7 @@ class IterFeatures(IterRule):
 
     def _winner_k(self, winners):
 
-        features = self.compute_features(self.profile_.embeddings.positions,
-                                         np.dot(np.diag(self.weights), self.profile_.ratings))
+        features = self.compute_features(self.embeddings.positions, np.dot(np.diag(self.weights), self.ratings))
         scores = np.sum(features ** 2, axis=1)
 
         scores = np.array(scores)

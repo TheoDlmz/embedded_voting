@@ -8,6 +8,7 @@ This file is part of Embedded Voting.
 
 import numpy as np
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
+from embedded_voting.embeddings.embedder import IdentityEmbedder
 
 
 class ScoringRule(DeleteCacheMixin):
@@ -23,7 +24,7 @@ class ScoringRule(DeleteCacheMixin):
 
     Attributes
     ----------
-    profile : Profile
+    ratings : Profile
         The profile of voters on which we run the election.
     _score_components : int
         The number of components in the aggregated
@@ -32,12 +33,19 @@ class ScoringRule(DeleteCacheMixin):
 
     """
 
-    def __init__(self, profile=None, _score_components=1):
-        self.profile_ = profile
+    def __init__(self, _score_components=1):
         self._score_components = _score_components
+        self.ratings = None
+        self.embeddings = None
 
-    def __call__(self, profile):
-        self.profile_ = profile
+    def __call__(self, ratings, embeddings=None):
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+        self.ratings = ratings
+        if embeddings is None and self.embeddings is None:
+            self.embeddings = IdentityEmbedder()(self.ratings)
+        elif embeddings is not None:
+            self.embeddings = embeddings
         self.delete_cache()
         return self
 
@@ -72,7 +80,7 @@ class ScoringRule(DeleteCacheMixin):
             candidate is a float if :attr:`_score_components` = 1
             and a tuple of length :attr:`_score_components` otherwise.
         """
-        return [self._score_(candidate) for candidate in range(self.profile_.n_candidates)]
+        return [self._score_(candidate) for candidate in range(self.ratings.shape[1])]
 
     def score(self, candidate):
         """
@@ -95,7 +103,7 @@ class ScoringRule(DeleteCacheMixin):
         return self.scores_[candidate]
 
     @cached_property
-    def scores_zip(self):
+    def scores_float_(self):
         """
         Return the scores of all candidates,
         but there is only one component for each candidate.
@@ -113,17 +121,8 @@ class ScoringRule(DeleteCacheMixin):
         if self._score_components == 1:
             return self.scores_
         else:
-            scores = self.scores_
-            max_comp = max(scores)
-            scores_bis = []
-            for s in scores:
-                s1 = s[:-1]
-                s2 = s[-1]
-                if s1 == max_comp[:-1]:
-                    scores_bis.append(s2)
-                else:
-                    scores_bis.append(0)
-            return scores_bis
+            max_comp = max(self.scores_)
+            return [s[-1] if s[:-1] == max_comp[:-1] else 0 for s in self.scores_]
 
     @cached_property
     def ranking_(self):
@@ -169,11 +168,11 @@ class ScoringRule(DeleteCacheMixin):
             Return the welfare of all candidates.
 
         """
-        scores = self.scores_zip
+        scores = self.scores_float_
         max_score = np.max(scores)
         min_score = np.min(scores)
         if max_score == min_score:
-            return np.ones(self.profile_.n_candidates)
+            return np.ones(self.ratings.shape[0])
         return list((scores - min_score) / (max_score - min_score))
 
     def plot_winner(self, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
@@ -205,12 +204,13 @@ class ScoringRule(DeleteCacheMixin):
 
         """
         winner = self.winner_
-        ax = self.profile_.plot_candidate(winner,
-                                          plot_kind=plot_kind,
-                                          dim=dim,
-                                          fig=fig,
-                                          plot_position=plot_position,
-                                          show=show)
+        ax = self.embeddings.plot_candidate(self.ratings,
+                                            winner,
+                                            plot_kind=plot_kind,
+                                            dim=dim,
+                                            fig=fig,
+                                            plot_position=plot_position,
+                                            show=show)
         return ax
 
     def plot_ranking(self, plot_kind="3D", dim=None, row_size=5, show=True):
@@ -234,5 +234,10 @@ class ScoringRule(DeleteCacheMixin):
         """
         ranking = self.ranking_
         titles = ["#%i. Candidate %i" % (i+1, c) for i, c in enumerate(ranking)]
-        self.profile_.plot_candidates(plot_kind=plot_kind, dim=dim, list_candidates=ranking,
-                                      list_titles=titles, row_size=row_size, show=show)
+        self.embeddings.plot_candidates(self.ratings,
+                                        plot_kind=plot_kind,
+                                        dim=dim,
+                                        list_candidates=ranking,
+                                        list_titles=titles,
+                                        row_size=row_size,
+                                        show=show)

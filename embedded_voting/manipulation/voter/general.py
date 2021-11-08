@@ -1,5 +1,6 @@
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.profile.parametric import ProfileGenerator
+from embedded_voting.embeddings.generator import ParametrizedEmbeddings
+from embedded_voting.profile.generator import CorrelatedRatings
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 from embedded_voting.scoring.singlewinner.ordinal import BordaExtension
 import numpy as np
@@ -20,16 +21,18 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
     Parameters
     ----------
-    profile : Profile
-        The profile of voters on which we do the analysis.
+    ratings: Ratings or np.ndarray
+        The ratings of voters to candidates
+    embeddings: Embeddings
+        The embeddings of the voters
     rule : ScoringRule
         The aggregation rule we want to analysis.
 
     Attributes
     ----------
-    profile_ : Profile
+    profile : Profile
         The profile of voters on which we do the analysis.
-    rule_ : ScoringRule
+    rule : ScoringRule
         The aggregation rule we want to analysis.
     winner_ : int
         The index of the winner of the election without manipulation.
@@ -41,20 +44,25 @@ class SingleVoterManipulation(DeleteCacheMixin):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-    >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
+    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+    >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
     [0.8914711297748728, 1.0, 0.0]
     """
 
-    def __init__(self, profile, rule=None):
-        self.profile_ = profile
-        self.rule_ = rule
+    def __init__(self, ratings, embeddings, rule=None):
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+
+        self.ratings = ratings
+        self.embeddings = embeddings
+        self.rule = rule
         if rule is not None:
-            global_rule = self.rule_(self.profile_)
+            global_rule = self.rule(self.ratings, self.embeddings)
             self.winner_ = global_rule.winner_
             self.scores_ = global_rule.scores_
             self.welfare_ = global_rule.welfare_
@@ -64,31 +72,36 @@ class SingleVoterManipulation(DeleteCacheMixin):
             self.welfare_ = None
 
     def __call__(self, rule):
-        self.rule_ = rule
-        global_rule = self.rule_(self.profile_)
+        self.rule = rule
+        global_rule = self.rule(self.ratings, self.embeddings)
         self.winner_ = global_rule.winner_
         self.scores_ = global_rule.scores_
         self.welfare_ = global_rule.welfare_
         self.delete_cache()
         return self
 
-    def set_profile(self, profile):
+    def set_profile(self, ratings, embeddings=None):
         """
         This function update the profile of voters
         on which we do the analysis.
 
         Parameters
         ----------
-        profile : Profile
-            The new profile.
+        ratings : Ratings or np.ndarray
+        embeddings : Embeddings
 
         Return
         ------
         SingleVoterManipulation
             The object itself.
         """
-        self.profile_ = profile
-        global_rule = self.rule_(self.profile_)
+        if embeddings is None:
+            embeddings = self.embeddings
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+        self.embeddings = embeddings
+        self.ratings = ratings
+        global_rule = self.rule(self.ratings, self.embeddings)
         self.winner_ = global_rule.winner_
         self.scores_ = global_rule.scores_
         self.welfare_ = global_rule.welfare_
@@ -112,18 +125,19 @@ class SingleVoterManipulation(DeleteCacheMixin):
             The index of the best candidate
             that can be elected by manipulation.
         """
-        score_i = self.profile_.ratings[i].copy()
+        score_i = self.ratings[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
 
         # If the favorite of the voter is the winner, he will not manipulate
         if preferences_order[0] == self.winner_:
             return self.winner_
 
-        self.profile_.ratings[i] = np.ones(self.profile_.n_candidates)
-        scores_max = self.rule_(self.profile_).scores_
-        self.profile_.ratings[i] = np.zeros(self.profile_.n_candidates)
-        scores_min = self.rule_(self.profile_).scores_
-        self.profile_.ratings[i] = score_i
+        n_candidates = self.ratings.shape[1]
+        self.ratings[i] = np.ones(n_candidates)
+        scores_max = self.rule(self.ratings, self.embeddings).scores_
+        self.ratings[i] = np.zeros(n_candidates)
+        scores_min = self.rule(self.ratings, self.embeddings).scores_
+        self.ratings[i] = score_i
 
         all_scores = [(s, i, 1) for i, s in enumerate(scores_max)]
         all_scores += [(s, i, 0) for i, s in enumerate(scores_min)]
@@ -159,13 +173,14 @@ class SingleVoterManipulation(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-        >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
+        >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.manipulation_global_
         [1, 0, 0, 0, 1, 1, 1, 1, 1, 0]
         """
-        return [self.manipulation_voter(i) for i in range(self.profile_.n_voters)]
+        return [self.manipulation_voter(i) for i in range(self.ratings.shape[0])]
 
     @cached_property
     def prop_manipulator_(self):
@@ -182,13 +197,14 @@ class SingleVoterManipulation(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-        >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
+        >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.prop_manipulator_
         0.4
         """
-        return len([x for x in self.manipulation_global_ if x != self.winner_]) / self.profile_.n_voters
+        return len([x for x in self.manipulation_global_ if x != self.winner_]) / self.ratings.shape[0]
 
     @cached_property
     def avg_welfare_(self):
@@ -204,9 +220,10 @@ class SingleVoterManipulation(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-        >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
+        >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.avg_welfare_
         0.9565884519099491
         """
@@ -226,9 +243,10 @@ class SingleVoterManipulation(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-        >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
+        >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.worst_welfare_
         0.8914711297748728
         """
@@ -249,13 +267,14 @@ class SingleVoterManipulation(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> my_profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-        >>> manipulation = SingleVoterManipulation(my_profile, SVDNash())
+        >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.is_manipulable_
         True
         """
-        for i in range(self.profile_.n_voters):
+        for i in range(self.ratings.shape[0]):
             if self.manipulation_voter(i) != self.winner_:
                 return True
         return False
@@ -296,35 +315,38 @@ class SingleVoterManipulation(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> profile = ProfileGenerator(100, 5, 3)(0, 0)
-        >>> manipulation = SingleVoterManipulation(profile, rule=SVDNash())
+        >>> emb = ParametrizedEmbeddings(100, 3)(0)
+        >>> rat = CorrelatedRatings(5, 3)(emb)
+        >>> manipulation = SingleVoterManipulation(rat, emb, rule=SVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['manipulator']
-        array([[0.01, 0.  , 0.  , 0.  , 0.  ],
+        array([[0.02, 0.49, 0.  , 0.  , 0.  ],
                [0.  , 0.  , 0.  , 0.  , 0.  ],
-               [0.  , 0.  , 0.  , 0.  , 0.21],
-               [0.44, 0.  , 0.  , 0.52, 0.  ],
-               [0.  , 0.  , 0.  , 0.  , 0.  ]])
+               [0.54, 0.  , 0.  , 0.4 , 0.  ],
+               [0.01, 0.51, 0.  , 0.  , 0.  ],
+               [0.  , 0.  , 0.  , 0.36, 0.  ]])
         """
 
         manipulator = np.zeros((map_size, map_size))
         worst_welfare = np.zeros((map_size, map_size))
         avg_welfare = np.zeros((map_size, map_size))
 
-        n_candidates = self.profile_.n_candidates
-        n_voters = self.profile_.n_voters
-        n_dim = self.profile_.embeddings.n_dim
+        n_voters, n_candidates = self.ratings.shape
+        n_dim = self.embeddings.n_dim
 
-        generator = ProfileGenerator(n_voters, n_candidates, n_dim)
+        embeddings_generator = ParametrizedEmbeddings(n_voters, n_dim)
+        ratings_generator = CorrelatedRatings(n_candidates, n_dim)
 
         if scores_matrix is not None:
-            generator.set_scores(scores_matrix)
+            ratings_generator.set_scores(scores_matrix)
 
         for i in range(map_size):
             for j in range(map_size):
                 if scores_matrix is None:
-                    generator.set_scores()
-                self.set_profile(generator(i / (map_size-1), j / (map_size-1)))
+                    ratings_generator.set_scores()
+                embeddings = embeddings_generator(polarisation=i/(map_size-1))
+                ratings = ratings_generator(embeddings, coherence=j/(map_size-1))
+                self.set_profile(ratings, embeddings)
                 manipulator[i, j] = self.prop_manipulator_
                 worst_welfare[i, j] = self.worst_welfare_
                 avg_welfare[i, j] = self.avg_welfare_
@@ -359,7 +381,7 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
 
     Attributes
     ----------
-    rule_ : ScoringRule
+    rule : ScoringRule
         The aggregation rule we want to analysis.
     winner_ : int
         The index of the winner of the election without manipulation.
@@ -373,10 +395,11 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-    >>> extension = BordaExtension(profile=profile)
-    >>> manipulation = SingleVoterManipulationExtension(profile, extension, SVDNash())
+    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+    >>> extension = BordaExtension(3)
+    >>> manipulation = SingleVoterManipulationExtension(ratings, embeddings, extension, SVDNash())
     >>> manipulation.prop_manipulator_
     0.3
     >>> manipulation.manipulation_global_
@@ -385,40 +408,42 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
     0.7
     """
 
-    def __init__(self, profile, extension, rule=None):
-        super().__init__(profile)
-        self.rule_ = rule
+    def __init__(self, ratings, embeddings, extension, rule=None):
+        super().__init__(ratings, embeddings)
+        self.rule = rule
         self.extension = extension
         if rule is not None:
             self.extended_rule = self.extension.set_rule(rule)
-            self.extended_rule(self.profile_)
+            self.extended_rule(self.ratings, self.embeddings)
             self.winner_ = self.extended_rule.winner_
-            self.welfare_ = self.rule_(self.profile_).welfare_
+            self.welfare_ = self.rule(self.ratings, self.embeddings).welfare_
             self.delete_cache()
         else:
             self.extended_rule = None
 
     def __call__(self, rule):
-        self.rule_ = rule
+        self.rule = rule
         self.extended_rule = self.extension.set_rule(rule)
-        self.extended_rule(self.profile_)
+        self.extended_rule(self.ratings, self.embeddings)
         self.winner_ = self.extended_rule.winner_
-        self.welfare_ = self.rule_(self.profile_).welfare_
+        self.welfare_ = self.rule(self.ratings, self.embeddings).welfare_
         self.delete_cache()
         return self
 
     def manipulation_voter(self, i):
-        score_i = self.profile_.ratings[i].copy()
+        score_i = self.ratings[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
-        points = np.arange(self.profile_.n_candidates)[::-1]
+
+        n_candidates = self.ratings.shape[1]
+        points = np.arange(n_candidates)[::-1]
         if preferences_order[0] == self.winner_:
             return self.winner_
 
         best_manipulation_i = np.where(preferences_order == self.winner_)[0][0]
 
-        for perm in itertools.permutations(range(self.profile_.n_candidates)):
-            self.profile_.ratings[i] = points[list(perm)]
-            fake_run = self.extended_rule(self.profile_)
+        for perm in itertools.permutations(range(n_candidates)):
+            self.ratings[i] = points[list(perm)]
+            fake_run = self.extended_rule(self.ratings, self.embeddings)
             new_winner = fake_run.winner_
             index_candidate = np.where(preferences_order == new_winner)[0][0]
             if index_candidate < best_manipulation_i:
@@ -427,6 +452,6 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
                     break
 
         best_manipulation = preferences_order[best_manipulation_i]
-        self.profile_.ratings[i] = score_i
+        self.ratings[i] = score_i
 
         return best_manipulation

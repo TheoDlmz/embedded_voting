@@ -7,7 +7,7 @@ This file is part of Embedded Voting.
 """
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.profile import Profile
+from embedded_voting.profile.ratings import Ratings
 from embedded_voting.utils.cached import cached_property
 import matplotlib.pyplot as plt
 from embedded_voting.embeddings.embeddings import Embeddings
@@ -53,10 +53,9 @@ class SVDRule(ScoringRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-    >>> election = SVDRule(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = SVDRule()(ratings, embeddings)
     >>> election.scores_
     [0.6041522986797286, 0.547722557505166, 0.5567764362830023]
     >>> election.ranking_
@@ -67,17 +66,17 @@ class SVDRule(ScoringRule):
     [1.0, 0.0, 0.16044515869439538]
 
     """
-    def __init__(self, profile=None, aggregation_rule=np.prod, square_root=True, use_rank=False):
+    def __init__(self, aggregation_rule=np.prod, square_root=True, use_rank=False):
         score_components = 1
         if use_rank:
             score_components = 2
-        super().__init__(profile, _score_components=score_components)
+        super().__init__(_score_components=score_components)
         self.square_root = square_root
         self.aggregation_rule = aggregation_rule
         self.use_rank = use_rank
 
     def _score_(self, candidate):
-        embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
+        embeddings = self.embeddings.scored(np.sqrt(self.ratings[::, candidate]))
 
         if embeddings.shape[0] < embeddings.shape[1]:
             embeddings_matrix = embeddings.dot(embeddings.T)
@@ -112,10 +111,9 @@ class SVDRule(ScoringRule):
 
         Examples
         --------
-        >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-        >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-        >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-        >>> election = SVDRule(profile)
+        >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+        >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+        >>> election = SVDRule()(ratings, embeddings)
         >>> election.ranking_
         [0, 2, 1]
         >>> election.set_rule(np.sum)
@@ -137,8 +135,6 @@ class SVDNash(SVDRule):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -148,10 +144,9 @@ class SVDNash(SVDRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-    >>> election = SVDNash(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = SVDNash()(ratings, embeddings)
     >>> election.scores_
     [0.6041522986797286, 0.547722557505166, 0.5567764362830023]
     >>> election.ranking_
@@ -162,8 +157,8 @@ class SVDNash(SVDRule):
     [1.0, 0.0, 0.16044515869439538]
 
     """
-    def __init__(self, profile=None, square_root=True, use_rank=False):
-        super().__init__(profile=profile, aggregation_rule=np.prod, square_root=square_root, use_rank=use_rank)
+    def __init__(self, square_root=True, use_rank=False):
+        super().__init__(aggregation_rule=np.prod, square_root=square_root, use_rank=use_rank)
 
 
 class SVDSum(SVDRule):
@@ -175,8 +170,6 @@ class SVDSum(SVDRule):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -186,10 +179,9 @@ class SVDSum(SVDRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings))
-    >>> election = SVDSum(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = SVDSum()(ratings, embeddings)
     >>> election.scores_
     [1.6150246429573318, 1.6417810801109665, 1.5535613514007114]
     >>> election.ranking_
@@ -200,8 +192,8 @@ class SVDSum(SVDRule):
     [0.6967068756070167, 1.0, 0.0]
 
     """
-    def __init__(self, profile=None, square_root=True, use_rank=False):
-        super().__init__(profile=profile, aggregation_rule=np.sum, square_root=square_root, use_rank=use_rank)
+    def __init__(self, square_root=True, use_rank=False):
+        super().__init__(aggregation_rule=np.sum, square_root=square_root, use_rank=use_rank)
 
 
 class SVDMin(SVDRule):
@@ -213,8 +205,6 @@ class SVDMin(SVDRule):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -224,10 +214,9 @@ class SVDMin(SVDRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-    >>> election = SVDMin(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = SVDMin()(ratings, embeddings)
     >>> election.scores_
     [0.5885971537535042, 0.4657304054015261, 0.5608830567730065]
     >>> election.ranking_
@@ -238,8 +227,8 @@ class SVDMin(SVDRule):
     [1.0, 0.0, 0.7744377762720253]
 
     """
-    def __init__(self, profile=None, square_root=True, use_rank=False):
-        super().__init__(profile=profile, aggregation_rule=np.min, square_root=square_root, use_rank=use_rank)
+    def __init__(self, square_root=True, use_rank=False):
+        super().__init__(aggregation_rule=np.min, square_root=square_root, use_rank=use_rank)
 
 
 class SVDMax(SVDRule):
@@ -262,10 +251,9 @@ class SVDMax(SVDRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-    >>> election = SVDMax(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = SVDMax()(ratings, embeddings)
     >>> election.scores_
     [1.0264274892038276, 1.1760506747094404, 0.9926782946277048]
     >>> election.ranking_
@@ -276,8 +264,8 @@ class SVDMax(SVDRule):
     [0.18404731705548893, 1.0, 0.0]
 
     """
-    def __init__(self, profile=None, square_root=True, use_rank=False):
-        super().__init__(profile=profile, aggregation_rule=np.max, square_root=square_root, use_rank=use_rank)
+    def __init__(self, square_root=True, use_rank=False):
+        super().__init__(aggregation_rule=np.max, square_root=square_root, use_rank=use_rank)
 
     def _feature(self, candidate):
         """
@@ -299,7 +287,7 @@ class SVDMax(SVDRule):
             The feature vector of the
             candidate, of length :attr:`~embedded_voting.Profile.n_dim`.
         """
-        embeddings = self.profile_.scored_embeddings(candidate, square_root=self.square_root)
+        embeddings = self.embeddings.scored(np.sqrt(self.ratings[::, candidate]))
         _, vp, vec = np.linalg.svd(embeddings)
         vec = vec[0]
         if vec.sum() < 0:
@@ -323,16 +311,15 @@ class SVDMax(SVDRule):
 
         Examples
         --------
-        >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-        >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-        >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-        >>> election = SVDMax(profile)
+        >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+        >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+        >>> election = SVDMax()(ratings, embeddings)
         >>> election.features_
         array([[0.93600783, 0.38770714],
                [0.28947845, 1.04510904],
                [0.22891028, 0.96967952]])
         """
-        return np.array([self._feature(candidate) for candidate in range(self.profile_.n_candidates)])
+        return np.array([self._feature(candidate) for candidate in range(self.ratings.shape[1])])
 
     def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
@@ -360,18 +347,19 @@ class SVDMax(SVDRule):
             if len(dim) != 3:
                 raise ValueError("The number of dimensions should be 3")
 
-        n_candidate = self.profile_.n_candidates
+        n_candidate = self.ratings.shape[1]
         n_rows = (n_candidate - 1) // row_size + 1
         fig = plt.figure(figsize=(row_size * 5, n_rows * 5))
         plot_position = [n_rows, row_size, 1]
         features = self.features_
         for candidate in range(n_candidate):
-            ax = self.profile_.plot_candidate(candidate,
-                                              plot_kind=plot_kind,
-                                              dim=dim,
-                                              fig=fig,
-                                              plot_position=plot_position,
-                                              show=False)
+            ax = self.embeddings.plot_candidate(self.ratings,
+                                                candidate,
+                                                plot_kind=plot_kind,
+                                                dim=dim,
+                                                fig=fig,
+                                                plot_position=plot_position,
+                                                show=False)
             if plot_kind == "3D":
                 x1 = features[candidate, dim[0]]
                 x2 = features[candidate, dim[1]]
@@ -416,10 +404,9 @@ class SVDLog(SVDRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-    >>> election = SVDLog(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = SVDLog()(ratings, embeddings)
     >>> election.scores_
     [1.169125718695728, 1.1598653051965206, 1.1347313336962574]
     >>> election.ranking_
@@ -430,6 +417,6 @@ class SVDLog(SVDRule):
     [1.0, 0.7307579856610341, 0.0]
 
     """
-    def __init__(self, profile=None, const=1, square_root=True, use_rank=False):
-        super().__init__(profile=profile, aggregation_rule=lambda x: np.sum(np.log(1+x/const)),
+    def __init__(self, const=1, square_root=True, use_rank=False):
+        super().__init__(aggregation_rule=lambda x: np.sum(np.log(1+x/const)),
                          square_root=square_root, use_rank=use_rank)

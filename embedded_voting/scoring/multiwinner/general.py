@@ -8,6 +8,7 @@ This file is part of Embedded Voting.
 import numpy as np
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.utils.miscellaneous import normalize
+from embedded_voting.embeddings.embedder import IdentityEmbedder
 import matplotlib.pyplot as plt
 
 
@@ -20,25 +21,32 @@ class MultiwinnerRule(DeleteCacheMixin):
 
     Parameters
     ----------
-    profile : Profile
-        The profile of voters.
     k : int
         The size of the committee.
 
     Attributes
     ----------
-    profile_ : Profile
-        The profile of voters.
+    ratings: np.ndarray
+        The ratings given by voters to candidates
+    embeddings: Embeddings
+        The embeddings of the voters
     k_ : int
         The size of the committee.
     """
 
-    def __init__(self, profile=None, k=None):
-        self.profile_ = profile
+    def __init__(self,  k=None):
+        self.ratings = None
+        self.embeddings = None
         self.k_ = k
 
-    def __call__(self, profile, k=None):
-        self.profile_ = profile
+    def __call__(self, ratings, embeddings=None, k=None):
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+        self.ratings = ratings
+        if embeddings is None and self.embeddings is None:
+            self.embeddings = IdentityEmbedder()(self.ratings)
+        elif embeddings is not None:
+            self.embeddings = embeddings
         if k is not None:
             self.k_ = k
         self.delete_cache()
@@ -85,8 +93,6 @@ class IterRule(MultiwinnerRule):
 
     Parameters
     ----------
-    profile : Profile
-        The profile of voters.
     k : int
         The size of the committee.
     quota : str
@@ -110,15 +116,17 @@ class IterRule(MultiwinnerRule):
         satisfaction is less than the :attr:`quota`,
         we replace the quota by the total
         satisfaction. By default, it is set to False.
+    weights: np.ndarray
+        Current weight of every voter
     """
 
-    def __init__(self, profile=None, k=None, quota="classic", take_min=False):
+    def __init__(self, k=None, quota="classic", take_min=False):
         self.quota = quota
         self.take_min = take_min
         self.weights = np.ones(0)
         if quota not in ["classic", "droop"]:
             raise ValueError("Quota should be either 'classic' (n/k) or 'droop' (n/(k+1) + 1)")
-        super().__init__(profile=profile, k=k)
+        super().__init__(k=k)
 
     def _winner_k(self, winners):
         """
@@ -161,8 +169,8 @@ class IterRule(MultiwinnerRule):
             length :attr:`~embedded_voting.Profile.n_voters`.
 
         """
-        temp = [np.dot(self.profile_.embeddings.positions[i], features_vector) for i in range(self.profile_.n_voters)]
-        temp = [self.profile_.ratings[i, candidate] * temp[i] for i in range(self.profile_.n_voters)]
+        temp = [np.dot(self.embeddings.positions[i], features_vector) for i in range(self.ratings.shape[0])]
+        temp = [self.ratings[i, candidate] * temp[i] for i in range(self.ratings.shape[0])]
         return temp
 
     def _updateWeight(self, satisfactions):
@@ -183,14 +191,15 @@ class IterRule(MultiwinnerRule):
         IterRule
             The object itself.
         """
+        n_voters = self.ratings.shape[0]
         if self.quota == "classic":
-            quota_val = self.profile_.n_voters / self.k_
+            quota_val = n_voters / self.k_
         elif self.quota in "droop":
-            quota_val = self.profile_.n_voters / (self.k_ + 1) + 1
+            quota_val = n_voters / (self.k_ + 1) + 1
         else:
             raise ValueError("Quota should be either 'classic' (n/k) or 'droop' (n/(k+1) + 1)")
 
-        temp = [satisfactions[i] * self.weights[i] for i in range(self.profile_.n_voters)]
+        temp = [satisfactions[i] * self.weights[i] for i in range(n_voters)]
         total_sat = np.sum(temp)
 
         if self.take_min:
@@ -238,7 +247,7 @@ class IterRule(MultiwinnerRule):
             3) ``weights_list`` contains the list of
             voters' weight at each step.
         """
-        n_voters = self.profile_.n_voters
+        n_voters = self.ratings.shape[0]
 
         winners = []
         vectors = []
@@ -321,13 +330,13 @@ class IterRule(MultiwinnerRule):
         if dim is None:
             dim = [0, 1, 2]
         for i in range(n_candidates):
-            ax = self.profile_.embeddings.plot_scores(ls_weight[i],
-                                                      plot_kind=plot_kind,
-                                                      title="Step %i" % i,
-                                                      dim=dim,
-                                                      fig=fig,
-                                                      plot_position=plot_position,
-                                                      show=False)
+            ax = self.embeddings.plot_scores(ls_weight[i],
+                                             plot_kind=plot_kind,
+                                             title="Step %i" % i,
+                                             dim=dim,
+                                             fig=fig,
+                                             plot_position=plot_position,
+                                             show=False)
 
             if i < n_candidates - 1:
                 x1 = vectors[i][dim[0]]
@@ -375,9 +384,10 @@ class IterRule(MultiwinnerRule):
         winners = self.winners_
         titles = ["Winner n°%i" % (i + 1) for i in range(self.k_)]
 
-        self.profile_.plot_candidates(plot_kind=plot_kind,
-                                      dim=dim,
-                                      list_candidates=winners,
-                                      list_titles=titles,
-                                      row_size=row_size,
-                                      show=show)
+        self.embeddings.plot_candidates(self.ratings,
+                                        plot_kind=plot_kind,
+                                        dim=dim,
+                                        list_candidates=winners,
+                                        list_titles=titles,
+                                        row_size=row_size,
+                                        show=show)

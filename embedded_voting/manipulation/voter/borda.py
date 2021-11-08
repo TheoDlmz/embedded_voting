@@ -1,7 +1,8 @@
 import numpy as np
 from embedded_voting.manipulation.voter.general import SingleVoterManipulationExtension
 from embedded_voting.scoring.singlewinner.ordinal import BordaExtension
-from embedded_voting.profile.parametric import ProfileGenerator
+from embedded_voting.profile.generator import CorrelatedRatings
+from embedded_voting.embeddings.generator import ParametrizedEmbeddings
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 
 
@@ -14,17 +15,20 @@ class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
 
     Parameters
     ----------
-    profile : Profile
-        The profile of voters on which we do the analysis.
+    ratings: Ratings or np.ndarray
+        The ratings of voters to candidates
+    embeddings: Embeddings
+        The embeddings of the voters
     rule : ScoringRule
         The aggregation rule we want to analysis.
 
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-    >>> manipulation = SingleVoterManipulationBorda(profile, SVDNash())
+    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+    >>> manipulation = SingleVoterManipulationBorda(ratings, embeddings, SVDNash())
     >>> manipulation.prop_manipulator_
     0.3
     >>> manipulation.avg_welfare_
@@ -34,30 +38,32 @@ class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
     >>> manipulation.manipulation_global_
     [1, 2, 1, 1, 2, 2, 1, 1, 1, 1]
     """
-    def __init__(self, profile, rule=None):
-        super().__init__(profile, BordaExtension(profile=profile), rule)
+    def __init__(self, ratings, embeddings, rule=None):
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+        super().__init__(ratings, embeddings, BordaExtension(ratings.shape[1], rule), rule)
 
     def manipulation_voter(self, i):
-        fake_scores_i = self.extended_rule.fake_profile.ratings[i].copy()
-        score_i = self.profile_.ratings[i].copy()
+        fake_scores_i = self.extended_rule.fake_ratings[i].copy()
+        score_i = self.ratings[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
 
-        m = self.profile_.n_candidates
+        n_candidates = self.ratings.shape[1]
 
         if preferences_order[0] == self.winner_:
             return self.winner_
 
         all_scores = []
-        for e in range(m):
-            self.extended_rule.fake_profile.ratings[i] = np.ones(self.profile_.n_candidates) * (e / (m - 1))
-            altered_scores = self.extended_rule.base_rule(self.extended_rule.fake_profile).scores_
+        for e in range(n_candidates):
+            self.extended_rule.fake_ratings[i] = np.ones(n_candidates) * (e / (n_candidates - 1))
+            altered_scores = self.extended_rule.base_rule(self.extended_rule.fake_ratings, self.embeddings).scores_
             all_scores += [(s, j, e) for j, s in enumerate(altered_scores)]
 
-        self.extended_rule.fake_profile.ratings[i] = fake_scores_i
+        self.extended_rule.fake_ratings[i] = fake_scores_i
         all_scores.sort()
         all_scores = all_scores[::-1]
 
-        buckets = np.arange(m)
+        buckets = np.arange(n_candidates)
 
         best_manipulation_i = np.where(preferences_order == self.winner_)[0][0]
         for (_, j, kind) in all_scores:
@@ -65,7 +71,7 @@ class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
             if buckets[kind] < 0:
                 break
 
-            if kind == (m-1):
+            if kind == (n_candidates-1):
                 index_candidate = np.where(preferences_order == j)[0][0]
                 if index_candidate < best_manipulation_i:
                     best_manipulation_i = index_candidate

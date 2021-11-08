@@ -1,5 +1,5 @@
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.profile import Profile
+from embedded_voting.profile.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 import numpy as np
 
@@ -12,10 +12,9 @@ class MLEGaussian(ScoringRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-    >>> election = MLEGaussian(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = MLEGaussian()(ratings, embeddings)
     >>> election.scores_
     [-0.29999999999999993, 2.0, 1.4000000000000001]
     >>> election.ranking_
@@ -25,17 +24,14 @@ class MLEGaussian(ScoringRule):
     >>> election.welfare_
     [0.0, 1.0, 0.7391304347826089]
     """
-    def __init__(self,  profile=None):
-        super().__init__(profile=profile)
-        if profile is not None:
-            self(profile)
 
-    def __call__(self, profile):
-        self.inverse_cov = np.linalg.pinv(np.cov(self.profile_.embeddings.positions)).sum(axis=0)
+    def __call__(self, ratings, embeddings=None):
+        super().__call__(ratings, embeddings)
+        self.inverse_cov = np.linalg.pinv(np.cov(self.embeddings.positions)).sum(axis=0)
         return self
 
     def _score_(self, candidate):
-        scores = self.profile_.ratings[::, candidate]
+        scores = self.ratings[::, candidate]
         sum_cov = self.inverse_cov
         score = 0
         for i in range(len(scores)):

@@ -24,23 +24,22 @@ class Embeddings:
 
     Attributes
     ----------
+    positions : np.ndarray
+        The embeddings of the voters. Its dimensions are :attr:`n_voters`, :attr:`n_dim`.
     n_voters : int
         The number of voters in the profile.
     n_dim : int
         The number of dimensions of the voters' embeddings.
-    positions : np.ndarray
-        The embeddings of the voters. Its dimensions are :attr:`n_voters`, :attr:`n_dim`.
 
     Examples
     --------
-    >>> np.random.seed(42)
-    >>> embs = Embeddings(np.random.rand(100, 5))
+    >>> embs = Embeddings(np.array([[1, 0], [0, 1], [0.5, 0.5]]))
     >>> embs.n_voters
-    100
+    3
     >>> embs.n_dim
-    5
+    2
     >>> embs.positions[0]
-    array([0.26734547, 0.67861666, 0.5224948 , 0.4273204 , 0.11136558])
+    array([1., 0.])
     """
 
     def __init__(self, positions, norm=True):
@@ -48,6 +47,31 @@ class Embeddings:
         self.n_voters, self.n_dim = positions.shape
         if norm:
             self.normalize()
+
+    def scored(self, ratings):
+        """
+        This method compute the embeddings multiplied by ratings given by the voter. For each voter, its
+        embeddings are multiplied by the given rating
+
+        Parameters
+        ----------
+        ratings: np.ndarray
+            The vector of ratings given by the voters
+
+        Return
+        ------
+        np.ndarray
+            The scored embeddings
+
+        Examples
+        --------
+        >>> embs = Embeddings(np.array([[1, 0], [0, 1], [0.5, 0.5]]), norm=False)
+        >>> embs.scored(np.array([.8, .5, .4]))
+        array([[0.8, 0. ],
+               [0. , 0.5],
+               [0.2, 0.2]])
+        """
+        return np.multiply(self.positions, ratings[::, np.newaxis])
 
     def _get_center(self):
         """
@@ -493,6 +517,113 @@ class Embeddings:
 
         return ax
 
+    def plot_candidate(self, ratings, candidate, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
+        """
+        Plot a figure of the profile
+        with the voters having the ratings they give
+        to the `candidate` passed as parameters
+        as size.
+
+        Parameters
+        ----------
+        ratings: np.ndarray
+            Matrix of ratings given by voters to candidates
+        candidate : int
+            The candidate for which we
+            want to show the profile.
+            Should be lower than :attr:`n_candidates`.
+        plot_kind : str
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
+        fig : matplotlib figure
+            The figure on which we add the plot.
+        plot_position : list
+            The position of the plot on the figure.
+            Should be of the form
+            ``[n_rows, n_columns, position]``.
+        dim : list
+            The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
+        show : bool
+            If True, display the figure
+            at the end of the function.
+
+        Return
+        ------
+        matplotlib ax
+            The matplotlib ax with the figure,
+            if you want to add something to it.
+        """
+        return self.plot_scores(ratings[::, candidate],
+                                title="Candidate %i" % (candidate + 1),
+                                plot_kind=plot_kind,
+                                dim=dim,
+                                fig=fig,
+                                plot_position=plot_position,
+                                show=show)
+
+    def plot_candidates(self, ratings, plot_kind="3D", dim=None, list_candidates=None,
+                        list_titles=None, row_size=5, show=True):
+        """
+        Plot the profile of the voters
+        for every candidate or a list of candidates,
+        using the ratings given by the voters as size for
+        the voters. The plot is either on a 3D plot,
+        or on a ternary plot.
+        Only three dimensions can be represented.
+
+        Parameters
+        ----------
+        ratings: Ratings
+            Ratings given by voters to candidates
+        plot_kind : str
+            The kind of plot we want to show.
+            Can be ``'3D'`` or ``'ternary'``.
+        dim : list
+            The 3 dimensions we are using for our plot.
+            By default, it is set to ``[0, 1, 2]``.
+        list_candidates : int list
+            The list of candidates we want to plot.
+            Should contains integer lower than
+            :attr:`n_candidates`.
+            By default, we plot every candidates.
+        list_titles : str list
+            Contains the title of the plots.
+            Should be the same length than `list_candidates`.
+        row_size : int
+            Number of subplots by row.
+            By default, it is set to 5 plots by rows.
+        show : bool
+            If True, display the figure
+            at the end of the function.
+
+        """
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+        if list_candidates is None:
+            list_candidates = range(ratings.shape[1])
+        if list_titles is None:
+            list_titles = ["Candidate %i" % c for c in list_candidates]
+        else:
+            list_titles = ["%s " % t for t in list_titles]
+
+        n_candidates = len(list_candidates)
+        n_rows = (n_candidates - 1) // row_size + 1
+        fig = plt.figure(figsize=(5 * row_size, n_rows * 5))
+        position = [n_rows, row_size, 1]
+        for candidate, title in (zip(list_candidates, list_titles)):
+            self.plot_scores(ratings[::, candidate],
+                             title=title,
+                             plot_kind=plot_kind,
+                             dim=dim,
+                             fig=fig,
+                             plot_position=position,
+                             show=False)
+            position[2] += 1
+
+        if show:
+            plt.show()  # pragma: no cover
+
     def copy(self):
         """
         Return a copy of the embeddings.
@@ -510,7 +641,5 @@ class Embeddings:
         array([[0.5, 0.9, 0.4],
                [0.4, 0.7, 0.5],
                [0.4, 0.2, 0.4]])
-
-
         """
         return Embeddings(self.positions, norm=False)

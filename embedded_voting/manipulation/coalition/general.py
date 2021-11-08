@@ -1,10 +1,11 @@
 
 import numpy as np
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.profile.parametric import ProfileGenerator
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 import matplotlib.pyplot as plt
 from embedded_voting.utils.plots import create_map_plot
+from embedded_voting.embeddings.generator import ParametrizedEmbeddings
+from embedded_voting.profile.generator import CorrelatedRatings
 
 
 class ManipulationCoalition(DeleteCacheMixin):
@@ -23,16 +24,18 @@ class ManipulationCoalition(DeleteCacheMixin):
 
     Parameters
     ----------
-    profile : Profile
-        The profile of voters on which we do the analysis.
+    ratings: Ratings or np.ndarray
+        The ratings of voters to candidates
+    embeddings: Embeddings
+        The embeddings of the voters
     rule : ScoringRule
         The aggregation rule we want to analysis.
 
     Attributes
     ----------
-    profile_ : Profile
+    ratings : Profile
         The profile of voter on which we do the analysis.
-    rule_ : ScoringRule
+    rule : ScoringRule
         The aggregation rule we want to analysis.
     winner_ : int
         The index of the winner of the election without manipulation.
@@ -44,20 +47,24 @@ class ManipulationCoalition(DeleteCacheMixin):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-    >>> manipulation = ManipulationCoalition(profile, SVDNash())
+    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+    >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
     [0.8914711297748728, 1.0, 0.0]
 
     """
-    def __init__(self, profile, rule=None):
-        self.profile_ = profile
-        self.rule_ = rule
+    def __init__(self, ratings, embeddings, rule=None):
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+        self.ratings = ratings
+        self.embeddings = embeddings
+        self.rule = rule
         if rule is not None:
-            global_rule = self.rule_(self.profile_)
+            global_rule = self.rule(self.ratings, self.embeddings)
             self.winner_ = global_rule.winner_
             self.scores_ = global_rule.scores_
             self.welfare_ = global_rule.welfare_
@@ -67,17 +74,21 @@ class ManipulationCoalition(DeleteCacheMixin):
             self.welfare_ = None
 
     def __call__(self, rule):
-        self.rule_ = rule
-        global_rule = self.rule_(self.profile_)
+        self.rule = rule
+        global_rule = self.rule(self.ratings, self.embeddings)
         self.winner_ = global_rule.winner_
         self.scores_ = global_rule.scores_
         self.welfare_ = global_rule.welfare_
         self.delete_cache()
         return self
 
-    def set_profile(self, profile):
-        self.profile_ = profile
-        global_rule = self.rule_(self.profile_)
+    def set_profile(self, ratings, embeddings=None):
+        if embeddings is not None:
+            self.embeddings = embeddings
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+        self.ratings = ratings
+        global_rule = self.rule(self.ratings, self.embeddings)
         self.winner_ = global_rule.winner_
         self.scores_ = global_rule.scores_
         self.welfare_ = global_rule.welfare_
@@ -109,18 +120,19 @@ class ManipulationCoalition(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-        >>> manipulation = ManipulationCoalition(profile, SVDNash())
+        >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.trivial_manipulation(0, verbose=True)
-        4 voters interested to elect 0 instead of 1
+        2 voters interested to elect 0 instead of 1
         Winner is 0
         True
         """
 
         voters_interested = []
-        for i in range(self.profile_.n_voters):
-            score_i = self.profile_.ratings[i]
+        for i in range(self.ratings.shape[1]):
+            score_i = self.ratings[i]
             if score_i[self.winner_] < score_i[candidate]:
                 voters_interested.append(i)
 
@@ -128,13 +140,12 @@ class ManipulationCoalition(DeleteCacheMixin):
             print("%i voters interested to elect %i instead of %i" %
                   (len(voters_interested), candidate, self.winner_))
 
-        old_profile = self.profile_.ratings.copy()
+        profile = self.ratings.copy()
         for i in voters_interested:
-            self.profile_.ratings[i] = np.zeros(self.profile_.n_candidates)
-            self.profile_.ratings[i][candidate] = 1
+            profile[i] = np.zeros(self.ratings.shape[1])
+            profile[i][candidate] = 1
 
-        new_winner = self.rule_(self.profile_).winner_
-        self.profile_.ratings = old_profile
+        new_winner = self.rule(profile, self.embeddings).winner_
 
         if verbose:
             print("Winner is %i" % new_winner)
@@ -156,14 +167,15 @@ class ManipulationCoalition(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-        >>> manipulation = ManipulationCoalition(profile, SVDNash())
+        >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.is_manipulable_
         True
         """
 
-        for i in range(self.profile_.n_candidates):
+        for i in range(self.ratings.shape[1]):
             if i == self.winner_:
                 continue
             if self.trivial_manipulation(i):
@@ -184,14 +196,15 @@ class ManipulationCoalition(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> scores = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> profile = ProfileGenerator(10, 3, 3, scores)(0.8, 0.8)
-        >>> manipulation = ManipulationCoalition(profile, SVDNash())
+        >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
+        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.worst_welfare_
         0.0
         """
         worst_welfare = self.welfare_[self.winner_]
-        for i in range(self.profile_.n_candidates):
+        for i in range(self.ratings.shape[1]):
             if i == self.winner_:
                 continue
             if self.trivial_manipulation(i):
@@ -233,38 +246,41 @@ class ManipulationCoalition(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> profile = ProfileGenerator(100, 5, 3)(0, 0)
-        >>> manipulation = ManipulationCoalition(profile, rule=SVDNash())
+        >>> emb = ParametrizedEmbeddings(100, 3)(0)
+        >>> rat = CorrelatedRatings(5, 3)(emb)
+        >>> manipulation = ManipulationCoalition(rat, emb, SVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['worst_welfare']
-        array([[0.        , 0.        , 0.41741546, 1.        , 0.4982297 ],
-               [0.        , 0.        , 0.        , 0.14175864, 1.        ],
-               [0.        , 0.        , 0.5536796 , 0.43986763, 0.47120528],
-               [0.        , 0.        , 0.        , 0.28219718, 0.03216955],
-               [0.        , 0.        , 0.        , 0.63924358, 0.28677042]])
+        array([[1.        , 0.98024051, 1.        , 1.        , 1.        ],
+               [1.        , 1.        , 1.        , 1.        , 1.        ],
+               [0.87833419, 1.        , 1.        , 0.97819913, 1.        ],
+               [0.80173984, 0.74016286, 1.        , 1.        , 1.        ],
+               [0.81466796, 1.        , 1.        , 0.92431457, 1.        ]])
         """
 
         manipulator_map = np.zeros((map_size, map_size))
         worst_welfare_map = np.zeros((map_size, map_size))
 
-        n_candidates = self.profile_.n_candidates
-        n_voters = self.profile_.n_voters
-        n_dim = self.profile_.embeddings.n_dim
+        n_voters, n_candidates = self.ratings.shape
+        n_dim = self.embeddings.n_dim
 
-        generator = ProfileGenerator(n_voters, n_candidates, n_dim)
+        embeddings_generator = ParametrizedEmbeddings(n_voters, n_dim)
+        ratings_generator = CorrelatedRatings(n_candidates, n_dim)
 
         if scores_matrix is not None:
-            generator.set_scores(scores_matrix)
-
+            ratings_generator.set_scores(scores_matrix)
         for i in range(map_size):
             for j in range(map_size):
                 if scores_matrix is None:
-                    generator.set_scores()
-                self.set_profile(generator(i / (map_size-1), j / (map_size-1)))
+                    ratings_generator.set_scores()
+
+                embeddings = embeddings_generator(polarisation=i/(map_size-1))
+                ratings = ratings_generator(embeddings, coherence=j/(map_size-1))
+                self.set_profile(ratings, embeddings)
 
                 worst_welfare = self.welfare_[self.winner_]
                 is_manipulable = 0
-                for candidate in range(self.profile_.n_candidates):
+                for candidate in range(self.ratings.shape[1]):
                     if candidate == self.winner_:
                         continue
                     if self.trivial_manipulation(candidate):

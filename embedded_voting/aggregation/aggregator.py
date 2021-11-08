@@ -1,5 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+Copyright Théo Delemazure
+theo.delemazure@ens.fr
+
+This file is part of Embedded Voting.
+"""
+
 from embedded_voting.scoring.singlewinner.fast import FastNash
-from embedded_voting.profile.fastprofile import FastProfile
+from embedded_voting.embeddings.embedder import CorrelationEmbedder
+import numpy as np
 
 
 class Aggregator:
@@ -15,8 +24,12 @@ class Aggregator:
 
     Attributes
     ----------
-    embedder: FastProfile
-        The profile that keeps in memory information about the voters.
+    embeddings: Embeddings
+        The current embeddings of the voters
+
+    ratings_history: np.ndarray
+        The history of all ratings given by the voter. Is used to compute correlations between
+        voters.
 
     rule: ScoringRule
         The scoring rule used for the elections.
@@ -26,47 +39,49 @@ class Aggregator:
     >>> aggregator = Aggregator()
     >>> results = aggregator([[7, 5, 9, 5, 1, 8], [7, 5, 9, 5, 2, 7], [6, 4, 2, 4, 4, 6], [3, 8, 1, 3, 7, 8]])
     >>> results.ranking_
-    [5, 0, 1, 3, 2, 4]
+    [5, 1, 0, 3, 4, 2]
     >>> results.winner_
     5
     >>> results = aggregator([[2, 4, 8], [9, 2, 1], [0, 2, 5], [4, 5, 3]], train=True)
     >>> results.ranking_
-    [2, 1, 0]
+    [2, 0, 1]
     """
 
     def __init__(self, rule=None):
         if rule is None:
             rule = FastNash()
         self.rule = rule
-        self.embedder = None
+        self.embeddings = None
+        self.ratings_history = None
 
-    def __call__(self, scores, train=False):
+    def __call__(self, ratings, train=False):
         """
         This function run an election using the :attr:`embedder` and the scores.
 
         Parameters
         ----------
-        scores: np.ndarray or list
-            The matrix of scores given by the voters. ``scores[i,j]`` corresponds to the
+        ratings: np.ndarray or list
+            The matrix of scores given by the voters. ``ratings[i,j]`` corresponds to the
             score given by the voter i to candidate j.
 
         train: bool
             If True, we retrain the :attr:`embedder` before doing the election (using the
             data of the election).
         """
-        if self.embedder is None:
-            self.embedder = FastProfile(scores)
+        ratings = np.array(ratings)
+        if self.ratings_history is None:
+            self.ratings_history = ratings
         else:
-            self.embedder(scores)
+            self.ratings_history = np.concatenate([self.ratings_history, ratings], axis=1)
 
-        if train:
-            self.retrain()
+        if self.embeddings is None or train:
+            self.train()
 
         self.rule.delete_cache()
 
-        return self.rule(self.embedder)
+        return self.rule(ratings, self.embeddings)
 
-    def retrain(self):
+    def train(self):
         """
         This function can be used to train the embedder on the newest data
         it gathered during the recent elections.
@@ -76,5 +91,7 @@ class Aggregator:
         Aggregator
             The object
         """
-        self.embedder.train()
+        embedder = CorrelationEmbedder()
+        self.embeddings = embedder(self.ratings_history)
+        self.rule.n_v = embedder.n_sing_val
         return self

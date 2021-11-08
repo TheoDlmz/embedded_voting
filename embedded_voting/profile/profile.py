@@ -294,7 +294,7 @@ class Profile(DeleteCacheMixin):
             embeddings.append(self.embeddings.positions[i] * s)
         return np.array(embeddings)
 
-'''
+    '''
     def fake_covariance_matrix(self, candidate, f, square_root=True):
         """
         This function return a matrix `M`

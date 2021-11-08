@@ -1,8 +1,6 @@
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.profile import Profile
-from embedded_voting.embeddings.embeddings import Embeddings
-from embedded_voting.profile.fastprofile import FastProfile
+from embedded_voting.embeddings.embedder import CorrelationEmbedder
 
 
 class Fast(ScoringRule):
@@ -13,8 +11,6 @@ class Fast(ScoringRule):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     f : callable
         The transformation for the scores given by the voters.
         Input : np.ndarray. Output : np.ndarray
@@ -27,8 +23,13 @@ class Fast(ScoringRule):
 
     Attributes
     ----------
-    profile : Profile
-        The profile of voters on which we run the election.
+    ratings : np.ndarray
+        The ratings given by voters to candidates
+    embeddings: Embeddings
+        The embeddings of the voters
+    n_v: int
+        The number of singular values we want to consider when computing the score
+        of some candidate
     f : callable
         The transformation for the scores given by the voters.
         Input : np.ndarray. Output : np.ndarray
@@ -41,17 +42,16 @@ class Fast(ScoringRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> profile = FastProfile(scores)
-    >>> election = Fast(profile)
+    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> election = Fast()(ratings)
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
 
     """
-    def __init__(self,  profile=None, f=None, aggregation_rule=np.prod):
-        super().__init__(profile=profile)
+    def __init__(self,  f=None, aggregation_rule=np.prod):
+        super().__init__()
         self.aggregation_rule = aggregation_rule
         if f is None:
             self.f = lambda x: np.sqrt(np.maximum(0, x/np.linalg.norm(x)))
@@ -59,43 +59,36 @@ class Fast(ScoringRule):
             self.f = f
 
         self._modified_ratings = None
-        if profile is not None:
-            self(profile)
 
-    def __call__(self, profile):
-        self.profile_ = profile
-
-        modified_ratings = np.zeros(profile.ratings.shape)
-        for i in range(profile.n_voters):
-            modified_ratings[i] = self.f(profile.ratings[i])
-
+    def __call__(self, ratings, embeddings=None):
+        if not isinstance(ratings, np.ndarray):
+            ratings = ratings.ratings
+        modified_ratings = np.zeros(ratings.shape)
+        for i in range(ratings.shape[0]):
+            modified_ratings[i] = self.f(ratings[i])
+        self.ratings = ratings
         self._modified_ratings = modified_ratings
-        try:
-            self.n_v = profile.embeddings.n_dim
-        except AttributeError:
 
-            u, s, v = np.linalg.svd(profile.embeddings.positions)
-            n_voters, n_candidates = profile.embeddings.positions.shape
-            s = np.sqrt(s)
-            s /= s.sum()
-            n_v = 0
-            for s_e in s:
-                if s_e >= max(1/n_voters, 1/n_candidates):
-                    n_v += 1
-            self.n_v = n_v
+        if embeddings is None and self.embeddings is None:
+            embedder = CorrelationEmbedder()
+            self.embeddings = embedder(self.ratings)
+            self.n_v = embedder.n_sing_val
+        elif embeddings is not None:
+            self.embeddings = embeddings
+        self.delete_cache()
 
         return self
 
     def _score_(self, candidate):
         try:
-            embeddings = self.profile_.fast_embeddings.positions.copy()
-            for i in range(self.profile_.n_voters):
+            embeddings = self.embeddings.positions.copy()
+            for i in range(self.ratings.shape[0]):
                 s = self._modified_ratings[i, candidate]
                 embeddings[i, :] *= s
                 embeddings[:, i] *= s
         except AttributeError:
-            embeddings = self.profile_.embeddings.positions.copy()
-            for i in range(self.profile_.n_voters):
+            embeddings = self.embeddings.positions.copy()
+            for i in range(self.ratings.shape[0]):
                 s = self._modified_ratings[i, candidate]
                 embeddings[i, :] *= s
             embeddings = np.dot(embeddings, embeddings.T)
@@ -103,6 +96,7 @@ class Fast(ScoringRule):
         s = np.linalg.eigvals(embeddings)
         s = np.maximum(s, np.zeros(len(s)))
         s = np.sqrt(s)
+        s = np.sort(s)[::-1]
         return self.aggregation_rule(s[:self.n_v])
 
 
@@ -114,8 +108,6 @@ class FastNash(Fast):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     f : callable
         The transformation for the scores given by the voters.
         Input : np.ndarray. Output : np.ndarray
@@ -123,17 +115,16 @@ class FastNash(Fast):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> profile = FastProfile(scores)
-    >>> election = FastNash(profile)
+    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> election = FastNash()(ratings)
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
 
     """
-    def __init__(self,  profile=None, f=None):
-        super().__init__(profile=profile, f=f, aggregation_rule=np.prod)
+    def __init__(self,  f=None):
+        super().__init__(f=f, aggregation_rule=np.prod)
 
 
 class FastSum(Fast):
@@ -144,8 +135,6 @@ class FastSum(Fast):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     f : callable
         The transformation for the scores given by the voters.
         Input : np.ndarray. Output : np.ndarray
@@ -153,17 +142,16 @@ class FastSum(Fast):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> profile = FastProfile(scores)
-    >>> election = FastSum(profile)
+    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> election = FastSum()(ratings)
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
 
     """
-    def __init__(self, profile=None, f=None):
-        super().__init__(profile=profile, f=f, aggregation_rule=np.sum)
+    def __init__(self, f=None):
+        super().__init__(f=f, aggregation_rule=np.sum)
 
 
 class FastMin(Fast):
@@ -174,8 +162,6 @@ class FastMin(Fast):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     f : callable
         The transformation for the scores given by the voters.
         Input : np.ndarray. Output : np.ndarray
@@ -183,17 +169,16 @@ class FastMin(Fast):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> profile = FastProfile(scores)
-    >>> election = FastMin(profile)
+    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> election = FastMin()(ratings)
     >>> election.ranking_
-    [2, 0, 1]
+    [0, 2, 1]
     >>> election.winner_
-    2
+    0
 
     """
-    def __init__(self, profile=None, f=None):
-        super().__init__(profile=profile, f=f, aggregation_rule=np.min)
+    def __init__(self,  f=None):
+        super().__init__(f=f, aggregation_rule=np.min)
 
 
 class FastLog(Fast):
@@ -204,8 +189,6 @@ class FastLog(Fast):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     f : callable
         The transformation for the scores given by the voters.
         Input : np.ndarray. Output : np.ndarray
@@ -213,19 +196,18 @@ class FastLog(Fast):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> profile = FastProfile(scores)
-    >>> election = FastLog(profile)
+    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
+    >>> election = FastLog()(ratings)
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
 
     """
-    def __init__(self, profile=None, f=None):
-        super().__init__(profile=profile, f=f)
+    def __init__(self, f=None):
+        super().__init__(f=f)
 
-    def __call__(self, profile):
-        super().__call__(profile)
-        self.aggregation_rule = lambda x: np.sum(np.log(1+x*profile.n_voters))
+    def __call__(self, ratings, embeddings=None):
+        self.aggregation_rule = lambda x: np.sum(np.log(1+x*ratings.shape[0]))
+        super().__call__(ratings, embeddings)
         return self

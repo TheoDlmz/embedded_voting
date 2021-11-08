@@ -9,7 +9,7 @@ import numpy as np
 from embedded_voting.utils.cached import cached_property
 from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.profile import Profile
+from embedded_voting.profile.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 import matplotlib.pyplot as plt
 
@@ -27,18 +27,17 @@ class FeaturesRule(ScoringRule):
 
     Examples
     --------
-    >>> scores = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> embeddings = np.array([[1, 1], [1, 0], [0, 1]])
-    >>> profile = Profile(scores, Embeddings(embeddings).normalize())
-    >>> election = FeaturesRule(profile)
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> election = FeaturesRule()(ratings, embeddings)
     >>> election.scores_
-    [0.44784902576697316, 0.9271320343559639, 0.43356601717798204]
+    [0.44..., 0.92..., 0.43...]
     >>> election.ranking_
     [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_
-    [0.028938395456510148, 1.0, 0.0]
+    [0.0289..., 1.0, 0.0]
     """
 
     @cached_property
@@ -53,9 +52,8 @@ class FeaturesRule(ScoringRule):
             The matrix of features.
             Its shape is :attr:`~embedded_voting.Profile.n_candidates`, :attr:`~embedded_voting.Profile.n_dim`
         """
-        positions = self.profile_.embeddings.positions
-        ratings = self.profile_.ratings
-        return np.dot(np.dot(np.linalg.pinv(np.dot(positions.T, positions)), positions.T), ratings).T
+        positions = self.embeddings.positions
+        return np.dot(np.dot(np.linalg.pinv(np.dot(positions.T, positions)), positions.T), self.ratings).T
 
     def _score_(self, candidate):
         return (self.features_[candidate] ** 2).sum()
@@ -86,18 +84,19 @@ class FeaturesRule(ScoringRule):
             if len(dim) != 3:
                 raise ValueError("The number of dimensions should be 3")
 
-        n_candidate = self.profile_.n_candidates
+        n_candidate = self.ratings.shape[1]
         n_rows = (n_candidate - 1) // row_size + 1
         fig = plt.figure(figsize=(row_size * 5, n_rows * 5))
         plot_position = [n_rows, row_size, 1]
         features = self.features_
         for candidate in range(n_candidate):
-            ax = self.profile_.plot_candidate(candidate,
-                                              plot_kind=plot_kind,
-                                              dim=dim,
-                                              fig=fig,
-                                              plot_position=plot_position,
-                                              show=False)
+            ax = self.embeddings.plot_candidate(self.ratings,
+                                                candidate,
+                                                plot_kind=plot_kind,
+                                                dim=dim,
+                                                fig=fig,
+                                                plot_position=plot_position,
+                                                show=False)
             if plot_kind == "3D":
                 x1 = features[candidate, dim[0]]
                 x2 = features[candidate, dim[1]]

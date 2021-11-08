@@ -1,13 +1,11 @@
 ===============
-Profile classes
+Ratings classes
 ===============
 
 
 .. toctree::
    :caption: Contents:
 
-   profile
+   ratings
    impartial
-   paramprofile
-   moving
-   fast
+   generator
