@@ -8,5 +8,5 @@ Embeddings and Embedders
 
    embeddings
    embedder
-   generator
+   embgenerator
    moving
