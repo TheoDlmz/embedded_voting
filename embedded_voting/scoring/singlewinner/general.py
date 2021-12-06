@@ -7,8 +7,11 @@ This file is part of Embedded Voting.
 """
 
 import numpy as np
+
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.embeddings.embedder import IdentityEmbedder
+from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsIdentity
 
 
 class ScoringRule(DeleteCacheMixin):
@@ -17,36 +20,50 @@ class ScoringRule(DeleteCacheMixin):
     These rules aggregate the scores of every voter to create
     a ranking of the candidates and select a winner.
 
-    Parameters
-    ----------
-    profile : Profile
-        The profile of voters on which we run the election.
-
     Attributes
     ----------
-    ratings : Profile
-        The profile of voters on which we run the election.
-    _score_components : int
+    ratings_ : Ratings
+        The ratings of voters on which we run the election.
+    embeddings_ : Embeddings
+        The embeddings of the voters on which we run the election.
+    embedder: EmbeddingsFromRatings
+        If no embeddings are specified in the call, this embedder is use to generate
+        the embeddings
+    score_components : int
         The number of components in the aggregated
         score of every candidate. If `> 1`, we
         perform a lexical sort to obtain the ranking.
 
     """
 
-    def __init__(self, _score_components=1):
-        self._score_components = _score_components
-        self.ratings = None
-        self.embeddings = None
+    def __init__(self, score_components=1, embedder=None):
+        self.score_components = score_components
+        self.ratings_ = None
+        self.embeddings_ = None
+        if embedder is None:
+            embedder = EmbeddingsFromRatingsIdentity()
+        self.embedder = embedder
 
     def __call__(self, ratings, embeddings=None):
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
-        self.ratings = ratings
-        if embeddings is None and self.embeddings is None:
-            self.embeddings = IdentityEmbedder()(self.ratings)
-        elif embeddings is not None:
-            self.embeddings = embeddings
+        """
+        Parameters
+        ----------
+        ratings : Ratings or list or np.ndarray
+            The ratings of voters on which we run the election.
+        embeddings : Embeddings or list or np.ndarray
+            The embeddings of the voters on which we run the election.
+
+        Return
+        ------
+        ScoringRule
+            The object itself
+        """
         self.delete_cache()
+        self.ratings_ = Ratings(ratings)
+        if embeddings is None:
+            self.embeddings_ = self.embedder(self.ratings_)
+        elif embeddings is not None:
+            self.embeddings_ = Embeddings(embeddings)
         return self
 
     def _score_(self, candidate):
@@ -80,9 +97,9 @@ class ScoringRule(DeleteCacheMixin):
             candidate is a float if :attr:`_score_components` = 1
             and a tuple of length :attr:`_score_components` otherwise.
         """
-        return [self._score_(candidate) for candidate in range(self.ratings.shape[1])]
+        return [self._score_(candidate) for candidate in range(self.ratings_.n_candidates)]
 
-    def score(self, candidate):
+    def score_(self, candidate):
         """
         Return the aggregated score
         of a given candidate. This one is called
@@ -118,7 +135,7 @@ class ScoringRule(DeleteCacheMixin):
         float list
             The scores of every candidates.
         """
-        if self._score_components == 1:
+        if self.score_components == 1:
             return self.scores_
         else:
             max_comp = max(self.scores_)
@@ -136,10 +153,10 @@ class ScoringRule(DeleteCacheMixin):
             The ranking of the candidates.
         """
 
-        if self._score_components == 1:
+        if self.score_components == 1:
             return list(np.argsort(self.scores_)[::-1])
         else:
-            full_scores = [[s[i] for s in self.scores_] for i in range(self._score_components)][::-1]
+            full_scores = [[s[i] for s in self.scores_] for i in range(self.score_components)][::-1]
             return list(np.lexsort(full_scores)[::-1])
 
     @cached_property
@@ -172,7 +189,7 @@ class ScoringRule(DeleteCacheMixin):
         max_score = np.max(scores)
         min_score = np.min(scores)
         if max_score == min_score:
-            return np.ones(self.ratings.shape[0])
+            return np.ones(self.ratings_.n_voters)
         return list((scores - min_score) / (max_score - min_score))
 
     def plot_winner(self, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
@@ -204,13 +221,13 @@ class ScoringRule(DeleteCacheMixin):
 
         """
         winner = self.winner_
-        ax = self.embeddings.plot_candidate(self.ratings,
-                                            winner,
-                                            plot_kind=plot_kind,
-                                            dim=dim,
-                                            fig=fig,
-                                            plot_position=plot_position,
-                                            show=show)
+        ax = self.embeddings_.plot_candidate(self.ratings_,
+                                             winner,
+                                             plot_kind=plot_kind,
+                                             dim=dim,
+                                             fig=fig,
+                                             plot_position=plot_position,
+                                             show=show)
         return ax
 
     def plot_ranking(self, plot_kind="3D", dim=None, row_size=5, show=True):
@@ -234,10 +251,10 @@ class ScoringRule(DeleteCacheMixin):
         """
         ranking = self.ranking_
         titles = ["#%i. Candidate %i" % (i+1, c) for i, c in enumerate(ranking)]
-        self.embeddings.plot_candidates(self.ratings,
-                                        plot_kind=plot_kind,
-                                        dim=dim,
-                                        list_candidates=ranking,
-                                        list_titles=titles,
-                                        row_size=row_size,
-                                        show=show)
+        self.embeddings_.plot_candidates(self.ratings_,
+                                         plot_kind=plot_kind,
+                                         dim=dim,
+                                         list_candidates=ranking,
+                                         list_titles=titles,
+                                         row_size=row_size,
+                                         show=show)

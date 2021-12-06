@@ -3,8 +3,8 @@ import numpy as np
 from embedded_voting.manipulation.coalition.general import ManipulationCoalition
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension, BordaExtension, KApprovalExtension
-from embedded_voting.embeddings.generator import ParametrizedEmbeddings
-from embedded_voting.profile.generator import CorrelatedRatings
+from embedded_voting.embeddings.generator import EmbeddingsGeneratorPolarized
+from embedded_voting.ratings.ratingsFromEmbeddings import RatingsFromEmbeddingsCorrelated
 
 
 class ManipulationCoalitionExtension(ManipulationCoalition):
@@ -42,8 +42,8 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
     --------
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, 0.8)
+    >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, 0.8)
     >>> extension = InstantRunoffExtension()
     >>> manipulation = ManipulationCoalitionExtension(ratings, embeddings, extension, SVDNash())
     >>> manipulation.winner_
@@ -79,8 +79,8 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
     def trivial_manipulation(self, candidate, verbose=False):
 
         voters_interested = []
-        for i in range(self.ratings.shape[0]):
-            score_i = self.ratings[i]
+        for i in range(self.ratings.n_voters):
+            score_i = self.ratings.voter_ratings(i)
             if score_i[self.winner_] < score_i[candidate]:
                 voters_interested.append(i)
 
@@ -119,8 +119,8 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     --------
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, 0.8)
+    >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, 0.8)
     >>> manipulation = ManipulationCoalitionBorda(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1
@@ -156,8 +156,8 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     --------
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, 0.8)
+    >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, 0.8)
     >>> manipulation = ManipulationCoalitionKApp(ratings, embeddings, k=2, rule=SVDNash())
     >>> manipulation.winner_
     1
@@ -191,8 +191,8 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     --------
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, 0.8)
+    >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, 0.8)
     >>> manipulation = ManipulationCoalitionIRV(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1

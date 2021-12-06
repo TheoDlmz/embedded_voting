@@ -1,7 +1,7 @@
 from embedded_voting.scoring.multiwinner.general import IterRule
 import numpy as np
-from embedded_voting.profile.generator import CorrelatedRatings
-from embedded_voting.embeddings.generator import ParametrizedEmbeddings
+from embedded_voting.ratings.ratingsFromEmbeddings import RatingsFromEmbeddingsCorrelated
+from embedded_voting.embeddings.generator import EmbeddingsGeneratorPolarized
 
 
 class IterSVD(IterRule):
@@ -19,7 +19,7 @@ class IterSVD(IterRule):
     square_root : bool
         If True, we take the square root of
         the scores instead of the scores for
-        the :meth:`~embedded_voting.Profile.scored_embeddings`.
+        the :meth:`~embedded_voting.Embeddings.scored_embeddings`.
     quota : str
         The quota used for the re-weighing step.
         Either ``'droop'`` quota `(n/(k+1) +1)` or
@@ -35,8 +35,8 @@ class IterSVD(IterRule):
     >>> np.random.seed(42)
     >>> scores_matrix = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]])
     >>> probability = [3/4, 1/4]
-    >>> embeddings = ParametrizedEmbeddings(100, 2, probability)(1)
-    >>> ratings = CorrelatedRatings(6, 2, scores_matrix)(embeddings, 1)
+    >>> embeddings = EmbeddingsGeneratorPolarized(100, 2, probability)(1)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(6, 2, scores_matrix)(embeddings, 1)
     >>> election = IterSVD(3)(ratings, embeddings)
     >>> election.winners_
     [0, 1, 3]
@@ -46,7 +46,10 @@ class IterSVD(IterRule):
     >>> election.plot_weights(dim=[0, 0, 0], show=False)
     Weight / remaining candidate :  [25.0, 24.999999999999996, 24.999999999999996, 24.999999999999996]
     >>> election.features_vectors
-    [array([1., 0.]), array([1., 0.]), array([0., 1.]), array([1., 0.])]
+    Embeddings([[1., 0.],
+                [1., 0.],
+                [0., 1.],
+                [1., 0.]])
     """
 
     def __init__(self, k=None, aggregation_rule=np.max, square_root=True, quota="classic", take_min=False):
@@ -58,17 +61,17 @@ class IterSVD(IterRule):
         vectors = []
         scores = []
 
-        n_candidates = self.ratings.shape[1]
-        n_dim = self.embeddings.positions.shape[1]
+        n_candidates = self.ratings.n_candidates
+        n_dim = self.embeddings.n_dim
         for candidate in range(n_candidates):
             if candidate in winners:
                 scores.append(0)
                 vectors.append(np.zeros(n_dim))
                 continue
             if self.square_root:
-                embeddings = self.embeddings.scored(np.sqrt(self.ratings[::, candidate]))
+                embeddings = self.embeddings.scored(np.sqrt(self.ratings.candidate_ratings(candidate)))
             else:
-                embeddings = self.embeddings.scored(self.ratings[::, candidate])
+                embeddings = self.embeddings.scored(self.ratings.candidate_ratings(candidate))
 
             weights = self.weights
 

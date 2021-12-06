@@ -9,7 +9,7 @@ This file is part of Embedded Voting.
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
 from embedded_voting.embeddings.embeddings import Embeddings
-from embedded_voting.profile.ratings import Ratings
+from embedded_voting.ratings.ratings import Ratings
 
 
 class SumScores(ScoringRule):
@@ -17,16 +17,6 @@ class SumScores(ScoringRule):
     Voting rule in which the aggregated score of
     a candidate is the sum of the scores given by
     the voters.
-
-    Parameters
-    ----------
-    profile: Profile
-        The profile of voters on which we run the election.
-
-    Attributes
-    ----------
-    profile : Profile
-        The profile of voters on which we run the election.
 
     Examples
     --------
@@ -43,7 +33,7 @@ class SumScores(ScoringRule):
     [0.3333333333333328, 1.0, 0.0]
     """
     def _score_(self, candidate):
-        return self.ratings[::, candidate].sum()
+        return self.ratings_.candidate_ratings(candidate).sum()
 
 
 class ProductScores(ScoringRule):
@@ -51,16 +41,6 @@ class ProductScores(ScoringRule):
     Voting rule in which the aggregated score of
     a candidate is the product of the scores given by
     the voters.
-
-    Parameters
-    ----------
-    profile: Profile
-        The profile of voters on which we run the election.
-
-    Attributes
-    ----------
-    profile : Profile
-        The profile of voters on which we run the election.
 
     Examples
     --------
@@ -78,10 +58,10 @@ class ProductScores(ScoringRule):
     """
 
     def __init__(self):
-        super().__init__(_score_components=2)
+        super().__init__(score_components=2)
 
     def _score_(self, candidate):
-        scores = self.ratings[::, candidate]
+        scores = self.ratings_.candidate_ratings(candidate)
         count = 0
         prod = 1
         for s in scores:

@@ -9,7 +9,7 @@ import numpy as np
 from embedded_voting.utils.cached import cached_property
 from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.ratings import Ratings
+from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 import matplotlib.pyplot as plt
 
@@ -19,11 +19,6 @@ class FeaturesRule(ScoringRule):
     Voting rule in which the aggregated score of
     a candidate is the norm of the feature
     vector of this candidate.
-
-    Parameters
-    ----------
-    profile : Profile
-        The profile of voters on which we run the election.
 
     Examples
     --------
@@ -50,10 +45,11 @@ class FeaturesRule(ScoringRule):
         ------
         np.ndarray
             The matrix of features.
-            Its shape is :attr:`~embedded_voting.Profile.n_candidates`, :attr:`~embedded_voting.Profile.n_dim`
+            Its shape is :attr:`~embedded_voting.Ratings.n_candidates`, :attr:`~embedded_voting.Embeddings.n_dim`
         """
-        positions = self.embeddings.positions
-        return np.dot(np.dot(np.linalg.pinv(np.dot(positions.T, positions)), positions.T), self.ratings).T
+        positions = np.array(self.embeddings_)
+        ratings = np.array(self.ratings_)
+        return np.dot(np.dot(np.linalg.pinv(np.dot(positions.T, positions)), positions.T), ratings).T
 
     def _score_(self, candidate):
         return (self.features_[candidate] ** 2).sum()
@@ -84,19 +80,19 @@ class FeaturesRule(ScoringRule):
             if len(dim) != 3:
                 raise ValueError("The number of dimensions should be 3")
 
-        n_candidate = self.ratings.shape[1]
-        n_rows = (n_candidate - 1) // row_size + 1
+        n_candidates = self.ratings_.n_candidates
+        n_rows = (n_candidates - 1) // row_size + 1
         fig = plt.figure(figsize=(row_size * 5, n_rows * 5))
         plot_position = [n_rows, row_size, 1]
         features = self.features_
-        for candidate in range(n_candidate):
-            ax = self.embeddings.plot_candidate(self.ratings,
-                                                candidate,
-                                                plot_kind=plot_kind,
-                                                dim=dim,
-                                                fig=fig,
-                                                plot_position=plot_position,
-                                                show=False)
+        for candidate in range(n_candidates):
+            ax = self.embeddings_.plot_candidate(self.ratings_,
+                                                 candidate,
+                                                 plot_kind=plot_kind,
+                                                 dim=dim,
+                                                 fig=fig,
+                                                 plot_position=plot_position,
+                                                 show=False)
             if plot_kind == "3D":
                 x1 = features[candidate, dim[0]]
                 x2 = features[candidate, dim[1]]

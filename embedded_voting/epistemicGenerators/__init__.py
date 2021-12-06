@@ -1,0 +1,5 @@
+from embedded_voting.epistemicGenerators.ratingsgeneratorepistemic import *
+from embedded_voting.epistemicGenerators.ratingsgeneratorepistemicgroupedmix import *
+from embedded_voting.epistemicGenerators.ratingsgeneratorepistemicgroupedmean import *
+from embedded_voting.epistemicGenerators.ratingsgeneratorepistemicgroupednoise import *
+from embedded_voting.epistemicGenerators.ratingsgeneratorepistemicmultivariate import *

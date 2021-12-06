@@ -1,7 +1,7 @@
 from embedded_voting.embeddings.embeddings import Embeddings
-from embedded_voting.profile.ratings import Ratings
-from embedded_voting.embeddings.embedder import RandomEmbedder, SelfEmbedder
-from embedded_voting.embeddings.generator import RandomEmbeddings, ParametrizedEmbeddings
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsRandom, EmbeddingsFromRatingsSelf
+from embedded_voting.embeddings.generator import EmbeddingsGeneratorRandom, EmbeddingsGeneratorPolarized
 import numpy as np
 import pytest
 
@@ -45,14 +45,14 @@ def test_embeddings():
 
 def test_embedder():
     ratings = np.array([[1, .8, .5], [.6, .5, .2], [.6, .9, .5]])
-    RandomEmbedder(n_dim=5)(ratings)
-    SelfEmbedder()(ratings)
+    EmbeddingsFromRatingsRandom(n_dim=5)(ratings)
+    EmbeddingsFromRatingsSelf()(ratings)
 
 
 def test_generator():
-    RandomEmbeddings(10, 5)()
+    EmbeddingsGeneratorRandom(10, 5)()
     with pytest.raises(ValueError):
-        ParametrizedEmbeddings(10, 3)(1.5)
+        EmbeddingsGeneratorPolarized(10, 3)(1.5)
     with pytest.raises(ValueError):
-        ParametrizedEmbeddings(10, 3)(-.5)
+        EmbeddingsGeneratorPolarized(10, 3)(-.5)
 

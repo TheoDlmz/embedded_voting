@@ -44,7 +44,7 @@ class EmbeddingsGenerator:
         raise NotImplementedError
 
 
-class RandomEmbeddings(EmbeddingsGenerator):
+class EmbeddingsGeneratorRandom(EmbeddingsGenerator):
     """
     Create random embeddings
     """
@@ -53,7 +53,7 @@ class RandomEmbeddings(EmbeddingsGenerator):
         return Embeddings(embs, norm=True)
 
 
-class ParametrizedEmbeddings(EmbeddingsGenerator):
+class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
     """
     Generates parametrized embeddings with ``n_dim`` groups of voters. This class creates two embeddings: One
     according to uniform distribution, the other one with groups of voters with similar embeddings, and we can
@@ -95,7 +95,7 @@ class ParametrizedEmbeddings(EmbeddingsGenerator):
 
         Return
         ------
-        ParametrizedEmbeddings
+        EmbeddingsGeneratorPolarized
             The object itself.
         """
 
@@ -114,7 +114,7 @@ class ParametrizedEmbeddings(EmbeddingsGenerator):
     def __call__(self, polarisation=0.0):
         """
         Update the parameter of the parametric embeddings
-        and create a new profile.
+        and create a new ratings.
 
         Parameters
         _________
@@ -133,9 +133,9 @@ class ParametrizedEmbeddings(EmbeddingsGenerator):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> generator = ParametrizedEmbeddings(100, 3)
-        >>> profile = generator(.8)
-        >>> profile.positions[0]
+        >>> generator = EmbeddingsGeneratorPolarized(100, 3)
+        >>> embs = generator(.8)
+        >>> embs.voter_embeddings(0)
         array([0.12915167, 0.03595039, 0.99097296])
         """
 

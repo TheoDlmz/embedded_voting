@@ -7,7 +7,7 @@ This file is part of Embedded Voting.
 """
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.ratings import Ratings
+from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.utils.cached import cached_property
 import matplotlib.pyplot as plt
 from embedded_voting.embeddings.embeddings import Embeddings
@@ -19,12 +19,10 @@ class SVDRule(ScoringRule):
     Voting rule in which the aggregated score of
     a candidate is based on singular values
     of his embedding matrix
-    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
+    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     aggregation_rule: callable
         The aggregation rule for the singular values.
         Input : float list. Output : float.
@@ -38,8 +36,6 @@ class SVDRule(ScoringRule):
 
     Attributes
     ----------
-    profile : Profile
-        The profile of voters on which we run the election.
     aggregation_rule : callable
         The aggregation rule for the singular values.
         Input : float list. Output : float.
@@ -70,13 +66,13 @@ class SVDRule(ScoringRule):
         score_components = 1
         if use_rank:
             score_components = 2
-        super().__init__(_score_components=score_components)
+        super().__init__(score_components=score_components)
         self.square_root = square_root
         self.aggregation_rule = aggregation_rule
         self.use_rank = use_rank
 
     def _score_(self, candidate):
-        embeddings = self.embeddings.scored(np.sqrt(self.ratings[::, candidate]))
+        embeddings = self.embeddings_.scored(np.sqrt(self.ratings_.candidate_ratings(candidate)))
 
         if embeddings.shape[0] < embeddings.shape[1]:
             embeddings_matrix = embeddings.dot(embeddings.T)
@@ -131,7 +127,7 @@ class SVDNash(SVDRule):
     Voting rule in which the aggregated score of
     a candidate is the product of the singular values
     of his embedding matrix
-    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
+    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
 
     Parameters
     ----------
@@ -166,7 +162,7 @@ class SVDSum(SVDRule):
     Voting rule in which the aggregated score of
     a candidate is the sum of the singular values
     of his embedding matrix
-    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
+    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
 
     Parameters
     ----------
@@ -201,7 +197,7 @@ class SVDMin(SVDRule):
     Voting rule in which the aggregated score of
     a candidate is the minimum singular value
     of his embedding matrix
-    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
+    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
 
     Parameters
     ----------
@@ -236,12 +232,10 @@ class SVDMax(SVDRule):
     Voting rule in which the aggregated score of
     a candidate is the maximum singular value
     of his embedding matrix
-    (cf :meth:`~embedded_voting.Profile.scored_embeddings`).
+    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     square_root: boolean
         If True, use the square root of score in the matrix.
         By default, it is True.
@@ -285,9 +279,9 @@ class SVDMax(SVDRule):
         ------
         np.ndarray
             The feature vector of the
-            candidate, of length :attr:`~embedded_voting.Profile.n_dim`.
+            candidate, of length :attr:`~embedded_voting.Embeddings.n_dim`.
         """
-        embeddings = self.embeddings.scored(np.sqrt(self.ratings[::, candidate]))
+        embeddings = self.embeddings_.scored(np.sqrt(self.ratings_[::, candidate]))
         _, vp, vec = np.linalg.svd(embeddings)
         vec = vec[0]
         if vec.sum() < 0:
@@ -307,7 +301,7 @@ class SVDMax(SVDRule):
         ------
         np.ndarray
             The feature vectors of all the candidates,
-            of shape :attr:`~embedded_voting.Profile.n_candidates`, :attr:`~embedded_voting.Profile.n_dim`.
+            of shape :attr:`~embedded_voting.Ratings.n_candidates`, :attr:`~embedded_voting.Embeddings.n_dim`.
 
         Examples
         --------
@@ -319,7 +313,7 @@ class SVDMax(SVDRule):
                [0.28947845, 1.04510904],
                [0.22891028, 0.96967952]])
         """
-        return np.array([self._feature(candidate) for candidate in range(self.ratings.shape[1])])
+        return np.array([self._feature(candidate) for candidate in range(self.ratings_.shape[1])])
 
     def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
@@ -347,19 +341,19 @@ class SVDMax(SVDRule):
             if len(dim) != 3:
                 raise ValueError("The number of dimensions should be 3")
 
-        n_candidate = self.ratings.shape[1]
+        n_candidate = self.ratings_.shape[1]
         n_rows = (n_candidate - 1) // row_size + 1
         fig = plt.figure(figsize=(row_size * 5, n_rows * 5))
         plot_position = [n_rows, row_size, 1]
         features = self.features_
         for candidate in range(n_candidate):
-            ax = self.embeddings.plot_candidate(self.ratings,
-                                                candidate,
-                                                plot_kind=plot_kind,
-                                                dim=dim,
-                                                fig=fig,
-                                                plot_position=plot_position,
-                                                show=False)
+            ax = self.embeddings_.plot_candidate(self.ratings_,
+                                                 candidate,
+                                                 plot_kind=plot_kind,
+                                                 dim=dim,
+                                                 fig=fig,
+                                                 plot_position=plot_position,
+                                                 show=False)
             if plot_kind == "3D":
                 x1 = features[candidate, dim[0]]
                 x2 = features[candidate, dim[1]]
@@ -390,8 +384,6 @@ class SVDLog(SVDRule):
 
     Parameters
     ----------
-    profile: Profile
-        The profile of voters on which we run the election.
     const : float
         The constant by which we divide
         the singular values in the log.

@@ -1,6 +1,8 @@
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.embeddings.embedder import CorrelationEmbedder
+from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsCorrelation
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.embeddings.embeddings import Embeddings
 
 
 class Fast(ScoringRule):
@@ -23,9 +25,9 @@ class Fast(ScoringRule):
 
     Attributes
     ----------
-    ratings : np.ndarray
+    ratings_ : np.ndarray
         The ratings given by voters to candidates
-    embeddings: Embeddings
+    embeddings_: Embeddings
         The embeddings of the voters
     n_v: int
         The number of singular values we want to consider when computing the score
@@ -61,34 +63,33 @@ class Fast(ScoringRule):
         self._modified_ratings = None
 
     def __call__(self, ratings, embeddings=None):
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
+        ratings = Ratings(ratings)
         modified_ratings = np.zeros(ratings.shape)
-        for i in range(ratings.shape[0]):
-            modified_ratings[i] = self.f(ratings[i])
-        self.ratings = ratings
+        for i in range(ratings.n_voters):
+            modified_ratings[i] = self.f(ratings.voter_ratings(i))
+        self.ratings_ = ratings
         self._modified_ratings = modified_ratings
 
-        if embeddings is None and self.embeddings is None:
-            embedder = CorrelationEmbedder()
-            self.embeddings = embedder(self.ratings)
-            self.n_v = embedder.n_sing_val
+        if embeddings is None and self.embeddings_ is None:
+            embedder = EmbeddingsFromRatingsCorrelation()
+            self.embeddings_ = embedder(self.ratings_)
+            self.n_v = embedder.n_sing_val_
         elif embeddings is not None:
-            self.embeddings = embeddings
+            self.embeddings_ = Embeddings(embeddings)
         self.delete_cache()
 
         return self
 
     def _score_(self, candidate):
         try:
-            embeddings = self.embeddings.positions.copy()
-            for i in range(self.ratings.shape[0]):
+            embeddings = np.array(self.embeddings_).copy()
+            for i in range(self.ratings_.n_voters):
                 s = self._modified_ratings[i, candidate]
                 embeddings[i, :] *= s
                 embeddings[:, i] *= s
         except AttributeError:
-            embeddings = self.embeddings.positions.copy()
-            for i in range(self.ratings.shape[0]):
+            embeddings = np.array(self.embeddings_).copy()
+            for i in range(self.ratings_.n_voters):
                 s = self._modified_ratings[i, candidate]
                 embeddings[i, :] *= s
             embeddings = np.dot(embeddings, embeddings.T)
@@ -208,6 +209,7 @@ class FastLog(Fast):
         super().__init__(f=f)
 
     def __call__(self, ratings, embeddings=None):
-        self.aggregation_rule = lambda x: np.sum(np.log(1+x*ratings.shape[0]))
+        ratings = Ratings(ratings)
+        self.aggregation_rule = lambda x: np.sum(np.log(1+x*ratings.n_voters))
         super().__call__(ratings, embeddings)
         return self

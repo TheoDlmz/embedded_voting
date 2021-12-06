@@ -8,8 +8,10 @@ This file is part of Embedded Voting.
 import numpy as np
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.utils.miscellaneous import normalize
-from embedded_voting.embeddings.embedder import IdentityEmbedder
+from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsIdentity
 import matplotlib.pyplot as plt
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.embeddings.embeddings import Embeddings
 
 
 class MultiwinnerRule(DeleteCacheMixin):
@@ -17,7 +19,7 @@ class MultiwinnerRule(DeleteCacheMixin):
     A class for multiwinner rules, in other words
     aggregation rules that elect a committee of
     candidates of size :attr:`k_`, given a
-    profile of voters with embeddings.
+    ratings of voters with embeddings.
 
     Parameters
     ----------
@@ -40,13 +42,11 @@ class MultiwinnerRule(DeleteCacheMixin):
         self.k_ = k
 
     def __call__(self, ratings, embeddings=None, k=None):
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
-        self.ratings = ratings
-        if embeddings is None and self.embeddings is None:
-            self.embeddings = IdentityEmbedder()(self.ratings)
-        elif embeddings is not None:
-            self.embeddings = embeddings
+        self.ratings = Ratings(ratings)
+        if embeddings is None:
+            self.embeddings = EmbeddingsFromRatingsIdentity()(self.ratings)
+        else:
+            self.embeddings = Embeddings(embeddings)
         if k is not None:
             self.k_ = k
         self.delete_cache()
@@ -89,7 +89,7 @@ class IterRule(MultiwinnerRule):
     """
     A class for multi-winner rules
     that are adaptations of STV to the
-    embeddings profile model.
+    embeddings ratings model.
 
     Parameters
     ----------
@@ -144,7 +144,7 @@ class IterRule(MultiwinnerRule):
             The `k^th` winner.
         np.ndarray
             The feature vector associated to this candidate.
-            The vector should be of length :attr:`~embedded_voting.Profile.embeddings.n_dim`.
+            The vector should be of length :attr:`~embedded_voting.Embeddings.embeddings.n_dim`.
         """
         raise NotImplementedError
 
@@ -166,11 +166,11 @@ class IterRule(MultiwinnerRule):
         float list
             The list of the voters' satisfactions
             with this candidate. Should be of
-            length :attr:`~embedded_voting.Profile.n_voters`.
+            length :attr:`~embedded_voting.Embeddings.n_voters`.
 
         """
-        temp = [np.dot(self.embeddings.positions[i], features_vector) for i in range(self.ratings.shape[0])]
-        temp = [self.ratings[i, candidate] * temp[i] for i in range(self.ratings.shape[0])]
+        temp = [np.dot(self.embeddings.voter_embeddings(i), features_vector) for i in range(self.ratings.n_voters)]
+        temp = [self.ratings.voter_ratings(i)[candidate] * temp[i] for i in range(self.ratings.n_voters)]
         return temp
 
     def _updateWeight(self, satisfactions):
@@ -184,14 +184,14 @@ class IterRule(MultiwinnerRule):
         satisfactions : float list
             The list of the voters' satisfaction
             with this candidate. Should be of
-            length :attr:`~embedded_voting.Profile.n_voters`.
+            length :attr:`~embedded_voting.Embeddings.n_voters`.
 
         Return
         ------
         IterRule
             The object itself.
         """
-        n_voters = self.ratings.shape[0]
+        n_voters = self.ratings.n_voters
         if self.quota == "classic":
             quota_val = n_voters / self.k_
         elif self.quota in "droop":
@@ -247,7 +247,7 @@ class IterRule(MultiwinnerRule):
             3) ``weights_list`` contains the list of
             voters' weight at each step.
         """
-        n_voters = self.ratings.shape[0]
+        n_voters = self.ratings.n_voters
 
         winners = []
         vectors = []
@@ -265,7 +265,7 @@ class IterRule(MultiwinnerRule):
             ls_weights.append(self.weights)
 
         return {"winners": winners,
-                "vectors": vectors,
+                "vectors": Embeddings(vectors),
                 "weights_list": ls_weights}
 
     @cached_property
@@ -291,7 +291,7 @@ class IterRule(MultiwinnerRule):
         ------
         list
             The list of the features vectors of each candidate.
-            Each vector is of length :attr:`~embedded_voting.Profile.embeddings.n_dim`.
+            Each vector is of length :attr:`~embedded_voting.Embeddings.embeddings.n_dim`.
 
         """
         return self._ruleResults["vectors"]

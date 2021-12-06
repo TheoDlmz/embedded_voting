@@ -1,5 +1,5 @@
 from embedded_voting.scoring.singlewinner.general import ScoringRule
-from embedded_voting.profile.ratings import Ratings
+from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 import numpy as np
 
@@ -27,11 +27,14 @@ class MLEGaussian(ScoringRule):
 
     def __call__(self, ratings, embeddings=None):
         super().__call__(ratings, embeddings)
-        self.inverse_cov = np.linalg.pinv(np.cov(self.embeddings.positions)).sum(axis=0)
+        if embeddings is None:
+            raise ValueError("must specify embeddings")
+        positions = np.array(self.embeddings_)
+        self.inverse_cov = np.linalg.pinv(np.cov(positions)).sum(axis=0)
         return self
 
     def _score_(self, candidate):
-        scores = self.ratings[::, candidate]
+        scores = self.ratings_.candidate_ratings(candidate)
         sum_cov = self.inverse_cov
         score = 0
         for i in range(len(scores)):

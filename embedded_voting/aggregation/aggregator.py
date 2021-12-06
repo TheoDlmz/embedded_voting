@@ -7,7 +7,8 @@ This file is part of Embedded Voting.
 """
 
 from embedded_voting.scoring.singlewinner.fast import FastNash
-from embedded_voting.embeddings.embedder import CorrelationEmbedder
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsCorrelation
 import numpy as np
 
 
@@ -68,7 +69,7 @@ class Aggregator:
             If True, we retrain the :attr:`embedder` before doing the election (using the
             data of the election).
         """
-        ratings = np.array(ratings)
+        ratings = Ratings(ratings)
         if self.ratings_history is None:
             self.ratings_history = ratings
         else:
@@ -91,7 +92,7 @@ class Aggregator:
         Aggregator
             The object
         """
-        embedder = CorrelationEmbedder()
+        embedder = EmbeddingsFromRatingsCorrelation()
         self.embeddings = embedder(self.ratings_history)
-        self.rule.n_v = embedder.n_sing_val
+        self.rule.n_v = embedder.n_sing_val_
         return self

@@ -1,9 +1,10 @@
 import numpy as np
 from embedded_voting.manipulation.voter.general import SingleVoterManipulationExtension
 from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension
-from embedded_voting.profile.generator import CorrelatedRatings
-from embedded_voting.embeddings.generator import ParametrizedEmbeddings
+from embedded_voting.ratings.ratingsFromEmbeddings import RatingsFromEmbeddingsCorrelated
+from embedded_voting.embeddings.generator import EmbeddingsGeneratorPolarized
 from embedded_voting.scoring.singlewinner.svd import SVDNash
+from embedded_voting.ratings.ratings import Ratings
 
 
 class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
@@ -26,8 +27,8 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
     --------
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+    >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
     >>> manipulation = SingleVoterManipulationIRV(ratings, embeddings, SVDNash())
     >>> manipulation.prop_manipulator_
     0.0
@@ -40,13 +41,12 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
     """
 
     def __init__(self, ratings, embeddings, rule=None):
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
-        super().__init__(ratings, embeddings, InstantRunoffExtension(ratings.shape[1]), rule)
+        ratings = Ratings(ratings)
+        super().__init__(ratings, embeddings, InstantRunoffExtension(ratings.n_candidates), rule)
 
     def _create_fake_scores(self, eliminated, scores):
         """
-        This function creates a fake profile for each step of the IRV function
+        This function creates a fake ratings for each step of the IRV function
 
         Parameters
         ----------

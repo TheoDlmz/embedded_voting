@@ -1,7 +1,7 @@
 from embedded_voting.scoring.singlewinner.features import FeaturesRule
 from embedded_voting.scoring.singlewinner.svd import SVDMax
 from embedded_voting.scoring.multiwinner.svd import IterSVD
-from embedded_voting.profile.ratings import Ratings
+from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 import numpy as np
 import pytest

@@ -7,10 +7,9 @@ Reference
    :maxdepth: 2
    :caption: Contents:
 
+   ratings/index
    embeddings/index
-   profile/index
-   singlewinner/index
-   multiwinner/index
-   manipulation/index
-   generator/index
+   edges/index
+   voting/index
+   analysis/index
    aggregation/index

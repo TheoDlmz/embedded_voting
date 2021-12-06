@@ -4,8 +4,10 @@ from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 import matplotlib.pyplot as plt
 from embedded_voting.utils.plots import create_map_plot
-from embedded_voting.embeddings.generator import ParametrizedEmbeddings
-from embedded_voting.profile.generator import CorrelatedRatings
+from embedded_voting.embeddings.generator import EmbeddingsGeneratorPolarized
+from embedded_voting.ratings.ratingsFromEmbeddings import RatingsFromEmbeddingsCorrelated
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.embeddings.embeddings import Embeddings
 
 
 class ManipulationCoalition(DeleteCacheMixin):
@@ -20,7 +22,7 @@ class ManipulationCoalition(DeleteCacheMixin):
     gather every voter who prefers `c` to `w`,
     and ask them to put `c` first and `w` last.
     If `c` is the new winner, then
-    the profile can be manipulated.
+    the ratings can be manipulated.
 
     Parameters
     ----------
@@ -34,7 +36,7 @@ class ManipulationCoalition(DeleteCacheMixin):
     Attributes
     ----------
     ratings : Profile
-        The profile of voter on which we do the analysis.
+        The ratings of voter on which we do the analysis.
     rule : ScoringRule
         The aggregation rule we want to analysis.
     winner_ : int
@@ -48,8 +50,8 @@ class ManipulationCoalition(DeleteCacheMixin):
     --------
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-    >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+    >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
     >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1
@@ -58,10 +60,8 @@ class ManipulationCoalition(DeleteCacheMixin):
 
     """
     def __init__(self, ratings, embeddings, rule=None):
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
-        self.ratings = ratings
-        self.embeddings = embeddings
+        self.ratings = Ratings(ratings)
+        self.embeddings = Embeddings(embeddings)
         self.rule = rule
         if rule is not None:
             global_rule = self.rule(self.ratings, self.embeddings)
@@ -84,10 +84,8 @@ class ManipulationCoalition(DeleteCacheMixin):
 
     def set_profile(self, ratings, embeddings=None):
         if embeddings is not None:
-            self.embeddings = embeddings
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
-        self.ratings = ratings
+            self.embeddings = Embeddings(embeddings)
+        self.ratings = Ratings(ratings)
         global_rule = self.rule(self.ratings, self.embeddings)
         self.winner_ = global_rule.winner_
         self.scores_ = global_rule.scores_
@@ -114,15 +112,15 @@ class ManipulationCoalition(DeleteCacheMixin):
         Return
         ------
         bool
-            If True, the profile is manipulable
+            If True, the ratings is manipulable
             for this candidate.
 
         Examples
         --------
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.trivial_manipulation(0, verbose=True)
         2 voters interested to elect 0 instead of 1
@@ -156,26 +154,26 @@ class ManipulationCoalition(DeleteCacheMixin):
     def is_manipulable_(self):
         """
         A function that quickly computes
-        if the profile is manipulable.
+        if the ratings is manipulable.
 
         Return
         ------
         bool
-            If True, the profile is
+            If True, the ratings is
             manipulable for some candidate.
 
         Examples
         --------
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.is_manipulable_
         True
         """
 
-        for i in range(self.ratings.shape[1]):
+        for i in range(self.ratings.n_candidates):
             if i == self.winner_:
                 continue
             if self.trivial_manipulation(i):
@@ -197,14 +195,14 @@ class ManipulationCoalition(DeleteCacheMixin):
         --------
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-        >>> embeddings = ParametrizedEmbeddings(10, 3)(.8)
-        >>> ratings = CorrelatedRatings(3, 3, scores_matrix)(embeddings, .8)
+        >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.worst_welfare_
         0.0
         """
         worst_welfare = self.welfare_[self.winner_]
-        for i in range(self.ratings.shape[1]):
+        for i in range(self.ratings.n_candidates):
             if i == self.winner_:
                 continue
             if self.trivial_manipulation(i):
@@ -214,7 +212,7 @@ class ManipulationCoalition(DeleteCacheMixin):
     def manipulation_map(self, map_size=20, scores_matrix=None, show=True):
         """
         A function to plot the manipulability
-        of the profile when the
+        of the ratings when the
         ``polarisation`` and the ``coherence`` vary.
 
         Parameters
@@ -246,8 +244,8 @@ class ManipulationCoalition(DeleteCacheMixin):
         Examples
         --------
         >>> np.random.seed(42)
-        >>> emb = ParametrizedEmbeddings(100, 3)(0)
-        >>> rat = CorrelatedRatings(5, 3)(emb)
+        >>> emb = EmbeddingsGeneratorPolarized(100, 3)(0)
+        >>> rat = RatingsFromEmbeddingsCorrelated(5, 3)(emb)
         >>> manipulation = ManipulationCoalition(rat, emb, SVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['worst_welfare']
@@ -264,8 +262,8 @@ class ManipulationCoalition(DeleteCacheMixin):
         n_voters, n_candidates = self.ratings.shape
         n_dim = self.embeddings.n_dim
 
-        embeddings_generator = ParametrizedEmbeddings(n_voters, n_dim)
-        ratings_generator = CorrelatedRatings(n_candidates, n_dim)
+        embeddings_generator = EmbeddingsGeneratorPolarized(n_voters, n_dim)
+        ratings_generator = RatingsFromEmbeddingsCorrelated(n_candidates, n_dim)
 
         if scores_matrix is not None:
             ratings_generator.set_scores(scores_matrix)
@@ -280,7 +278,7 @@ class ManipulationCoalition(DeleteCacheMixin):
 
                 worst_welfare = self.welfare_[self.winner_]
                 is_manipulable = 0
-                for candidate in range(self.ratings.shape[1]):
+                for candidate in range(self.ratings.n_candidates):
                     if candidate == self.winner_:
                         continue
                     if self.trivial_manipulation(candidate):

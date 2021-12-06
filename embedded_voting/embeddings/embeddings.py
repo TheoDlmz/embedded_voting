@@ -11,42 +11,49 @@ from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.utils.plots import create_ternary_plot, create_3D_plot
 
 
-class Embeddings:
+class Embeddings(np.ndarray):
     """
     Embeddings of voters
 
     Parameters
     ----------
-    positions : np.ndarray
+    positions : np.ndarray or list or Embeddings
         The embeddings of the voters. Its dimensions are :attr:`n_voters`, :attr:`n_dim`.
     norm: bool
         If True, normalize the embeddings
 
     Attributes
     ----------
-    positions : np.ndarray
-        The embeddings of the voters. Its dimensions are :attr:`n_voters`, :attr:`n_dim`.
     n_voters : int
-        The number of voters in the profile.
+        The number of voters in the ratings.
     n_dim : int
         The number of dimensions of the voters' embeddings.
 
     Examples
     --------
-    >>> embs = Embeddings(np.array([[1, 0], [0, 1], [0.5, 0.5]]))
+    >>> embs = Embeddings([[1, 0], [0, 1], [0.5, 0.5]])
     >>> embs.n_voters
     3
     >>> embs.n_dim
     2
-    >>> embs.positions[0]
+    >>> embs.voter_embeddings(0)
     array([1., 0.])
     """
 
-    def __init__(self, positions, norm=True):
-        self.positions = positions
-        self.n_voters, self.n_dim = positions.shape
+    def __new__(cls, positions, norm=True):
+        obj = np.asarray(positions).view(cls)
         if norm:
-            self.normalize()
+            obj = (obj.T / np.sqrt((obj ** 2).sum(axis=1))).T
+        return obj
+
+    def __array_finalize__(self, obj):
+        if obj is None:
+            return
+        if len(self.shape) == 2:
+            self.n_dim, self.n_voters = self.shape
+
+    def voter_embeddings(self, i):
+        return np.array(self[i:i + 1, :])[0]
 
     def scored(self, ratings):
         """
@@ -67,15 +74,15 @@ class Embeddings:
         --------
         >>> embs = Embeddings(np.array([[1, 0], [0, 1], [0.5, 0.5]]), norm=False)
         >>> embs.scored(np.array([.8, .5, .4]))
-        array([[0.8, 0. ],
-               [0. , 0.5],
-               [0.2, 0.2]])
+        Embeddings([[0.8, 0. ],
+                   [0. , 0.5],
+                   [0.2, 0.2]])
         """
-        return np.multiply(self.positions, ratings[::, np.newaxis])
+        return np.multiply(self, ratings[::, np.newaxis])
 
     def _get_center(self):
         """
-        Return the center of the profile, computed
+        Return the center of the ratings, computed
         as the center of the :attr:`n_dim`-dimensional
         cube of maximal volume.
 
@@ -85,7 +92,7 @@ class Embeddings:
             The position of the center vector. Should be of length :attr:`n_dim`.
         """
 
-        positions = self.positions
+        positions = np.array(self)
         matrix_rank = np.linalg.matrix_rank(positions)
         volume = 0
         n_voters = self.n_voters
@@ -129,28 +136,28 @@ class Embeddings:
         Examples
         --------
         >>> embs = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]])).normalize()
-        >>> embs.positions
-        array([[0.66226618, 0.52981294, 0.52981294],
-               [0.52981294, 0.52981294, 0.66226618],
-               [0.52981294, 0.66226618, 0.52981294]])
-        >>> embs.dilate().positions
-        array([[0.98559856, 0.11957316, 0.11957316],
-               [0.11957316, 0.11957316, 0.98559856],
-               [0.11957316, 0.98559856, 0.11957316]])
+        >>> embs
+        Embeddings([[0.66226618, 0.52981294, 0.52981294],
+                   [0.52981294, 0.52981294, 0.66226618],
+                   [0.52981294, 0.66226618, 0.52981294]])
+        >>> embs.dilate()
+        Embeddings([[0.98559856, 0.11957316, 0.11957316],
+                   [0.11957316, 0.11957316, 0.98559856],
+                   [0.11957316, 0.98559856, 0.11957316]])
         """
 
-        positions = self.positions
-
         if self.n_voters < 2:
-            raise ValueError("Cannot dilate a profile with less than 2 candidates")
+            raise ValueError("Cannot dilate a ratings with less than 2 candidates")
 
+        positions = np.array(self)
         if approx:
-            center = normalize(self.positions.sum(axis=0))
+            center = normalize(positions.sum(axis=0))
         else:
             center = self._get_center()
-        min_value = np.dot(positions[0], center)
+
+        min_value = np.dot(self.voter_embeddings(0), center)
         for i in range(self.n_voters):
-            val = np.dot(positions[i], center)
+            val = np.dot(self.voter_embeddings(i), center)
             if val < min_value:
                 min_value = val
 
@@ -159,7 +166,7 @@ class Embeddings:
 
         new_positions = np.zeros((self.n_voters, self.n_dim))
         for i in range(self.n_voters):
-            v_i = self.positions[i]
+            v_i = self.voter_embeddings(i)
             theta_i = np.arccos(np.dot(v_i, center))
             if theta_i == 0:
                 new_positions[i] = v_i
@@ -169,9 +176,7 @@ class Embeddings:
                 e_2 = normalize(p_2)
                 new_positions[i] = center * np.cos(k * theta_i) + e_2 * np.sin(k * theta_i)
 
-        self.positions = new_positions
-
-        return self
+        return Embeddings(new_positions, False)
 
     def recenter(self, approx=True):
         """
@@ -194,46 +199,47 @@ class Embeddings:
         Examples
         --------
         >>> embs = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]])).normalize()
-        >>> embs.positions
-        array([[-0.45267873, -0.81482171, -0.36214298],
-               [-0.42163702, -0.73786479, -0.52704628],
-               [-0.66666667, -0.33333333, -0.66666667]])
-        >>> embs.recenter().positions
-        array([[0.40215359, 0.75125134, 0.52334875],
-               [0.56352875, 0.6747875 , 0.47654713],
-               [0.70288844, 0.24253193, 0.66867489]])
+        >>> embs
+        Embeddings([[-0.45267873, -0.81482171, -0.36214298],
+                   [-0.42163702, -0.73786479, -0.52704628],
+                   [-0.66666667, -0.33333333, -0.66666667]])
+        >>> embs.recenter()
+        Embeddings([[0.40215359, 0.75125134, 0.52334875],
+                   [0.56352875, 0.6747875 , 0.47654713],
+                   [0.70288844, 0.24253193, 0.66867489]])
         """
 
         if self.n_voters < 2:
-            raise ValueError("Cannot recenter a profile with less than 2 candidates")
+            raise ValueError("Cannot recenter a ratings with less than 2 candidates")
 
+        positions = np.array(self)
         if approx:
-            center = normalize(self.positions.sum(axis=0))
+            center = normalize(positions.sum(axis=0))
         else:
             center = self._get_center()
+
         target_center = np.ones(self.n_dim)
         target_center = normalize(target_center)
         if np.dot(center, target_center) == -1:
-            self.positions = - self.positions
-            return self
+            new_positions = - self
         elif np.dot(center, target_center) == 1:
-            return self
+            new_positions = self
+        else:
+            orthogonal_center = center - np.dot(center, target_center)*target_center
+            orthogonal_center = normalize(orthogonal_center)
+            theta = -np.arccos(np.dot(center, target_center))
+            rotation_matrix = np.array([[np.cos(theta), - np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+            new_positions = np.zeros((self.n_voters, self.n_dim))
+            for i in range(self.n_voters):
+                position_i = self.voter_embeddings(i)
+                comp_1 = position_i.dot(target_center)
+                comp_2 = position_i.dot(orthogonal_center)
+                vector = [comp_1, comp_2]
+                remainder = position_i - comp_1*target_center - comp_2*orthogonal_center
+                new_vector = rotation_matrix.dot(vector)
+                new_positions[i] = new_vector[0]*target_center + new_vector[1]*orthogonal_center + remainder
 
-        orthogonal_center = center - np.dot(center, target_center)*target_center
-        orthogonal_center = normalize(orthogonal_center)
-        theta = -np.arccos(np.dot(center, target_center))
-        rotation_matrix = np.array([[np.cos(theta), - np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-        new_positions = np.zeros((self.n_voters, self.n_dim))
-        for i in range(self.n_voters):
-            position_i = self.positions[i]
-            comp_1 = position_i.dot(target_center)
-            comp_2 = position_i.dot(orthogonal_center)
-            vector = [comp_1, comp_2]
-            remainder = position_i - comp_1*target_center - comp_2*orthogonal_center
-            new_vector = rotation_matrix.dot(vector)
-            new_positions[i] = new_vector[0]*target_center + new_vector[1]*orthogonal_center + remainder
-        self.positions = new_positions
-        return self
+        return Embeddings(new_positions, False)
 
     def normalize(self):
         """
@@ -248,21 +254,21 @@ class Embeddings:
         Examples
         --------
         >>> embs = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
-        >>> embs.positions
-        array([[-0.5, -0.9, -0.4],
-               [-0.4, -0.7, -0.5],
-               [-0.4, -0.2, -0.4]])
-        >>> embs.normalize().positions
-        array([[-0.45267873, -0.81482171, -0.36214298],
-               [-0.42163702, -0.73786479, -0.52704628],
-               [-0.66666667, -0.33333333, -0.66666667]])
+        >>> embs
+        Embeddings([[-0.5, -0.9, -0.4],
+                   [-0.4, -0.7, -0.5],
+                   [-0.4, -0.2, -0.4]])
+        >>> embs.normalize()
+        Embeddings([[-0.45267873, -0.81482171, -0.36214298],
+                   [-0.42163702, -0.73786479, -0.52704628],
+                   [-0.66666667, -0.33333333, -0.66666667]])
         """
-        self.positions = (self.positions.T / np.sqrt((self.positions ** 2).sum(axis=1))).T
-        return self
+        new_positions = (self.T / np.sqrt((self ** 2).sum(axis=1))).T
+        return Embeddings(new_positions, False)
 
     def _plot_3D(self, fig, dim, plot_position=None):
         """
-        Plot a figure of the profile
+        Plot a figure of the ratings
         on a 3D space using matplotlib.
 
         Parameters
@@ -286,7 +292,7 @@ class Embeddings:
 
         """
         ax = create_3D_plot(fig, plot_position)
-        for i, v in enumerate(self.positions):
+        for i, v in enumerate(self):
             x1 = v[dim[0]]
             x2 = v[dim[1]]
             x3 = v[dim[2]]
@@ -296,7 +302,7 @@ class Embeddings:
 
     def _plot_ternary(self, fig, dim, plot_position=None):
         """
-        Plot a figure of the profile on a 2D space
+        Plot a figure of the ratings on a 2D space
         representing the surface of the unit sphere
         on the non-negative orthant.
 
@@ -319,7 +325,7 @@ class Embeddings:
 
         """
         tax = create_ternary_plot(fig, plot_position)
-        for i, v in enumerate(self.positions):
+        for i, v in enumerate(self):
             x1 = v[dim[0]]
             x2 = v[dim[2]]
             x3 = v[dim[1]]
@@ -330,7 +336,7 @@ class Embeddings:
 
     def plot(self, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
         """
-        Plot the profile of the voters,
+        Plot the ratings of the voters,
         either on a 3D plot, or on a ternary plot.
         Only three dimensions can be represented.
 
@@ -388,7 +394,7 @@ class Embeddings:
 
     def _plot_scores_3D(self, sizes, fig, plot_position, dim):
         """
-        Plot a figure of the profile on a
+        Plot a figure of the ratings on a
         3D space with the embeddings vector
         having the sizes passed as parameters.
 
@@ -414,7 +420,7 @@ class Embeddings:
 
         """
         ax = create_3D_plot(fig, plot_position)
-        for i, (v, s) in enumerate(zip(self.positions, sizes)):
+        for i, (v, s) in enumerate(zip(np.array(self), sizes)):
             x1 = v[dim[0]]
             x2 = v[dim[1]]
             x3 = v[dim[2]]
@@ -424,7 +430,7 @@ class Embeddings:
 
     def _plot_scores_ternary(self, sizes, fig, plot_position, dim):
         """
-        Plot a figure of the profile on a 2D space
+        Plot a figure of the ratings on a 2D space
         representing the sphere in the non-negative orthant,
         with the voters dots having the sizes passed
         as parameters.
@@ -450,10 +456,10 @@ class Embeddings:
 
         """
         tax = create_ternary_plot(fig, plot_position)
-        for i, (v, s) in enumerate(zip(self.positions, sizes)):
+        for i, (v, s) in enumerate(zip(np.array(self), sizes)):
             x1 = v[dim[0]]
-            x2 = v[dim[2]]
-            x3 = v[dim[1]]
+            x2 = v[dim[1]]
+            x3 = v[dim[2]]
             vec = [x1, x2, x3]
             tax.scatter([normalize(vec)**2], color=(x1**2 * 0.8, x3**2 * 0.8, x2**2 * 0.8), alpha=0.7, s=max(s * 50, 1))
 
@@ -461,7 +467,7 @@ class Embeddings:
 
     def plot_scores(self, sizes, title="", plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
         """
-        Plot a figure of the profile on a 3D or 2D space
+        Plot a figure of the ratings on a 3D or 2D space
         with the voters having the `sizes` passed
         as parameters.
 
@@ -519,7 +525,7 @@ class Embeddings:
 
     def plot_candidate(self, ratings, candidate, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
         """
-        Plot a figure of the profile
+        Plot a figure of the ratings
         with the voters having the ratings they give
         to the `candidate` passed as parameters
         as size.
@@ -530,7 +536,7 @@ class Embeddings:
             Matrix of ratings given by voters to candidates
         candidate : int
             The candidate for which we
-            want to show the profile.
+            want to show the ratings.
             Should be lower than :attr:`n_candidates`.
         plot_kind : str
             The kind of plot we want to show.
@@ -565,7 +571,7 @@ class Embeddings:
     def plot_candidates(self, ratings, plot_kind="3D", dim=None, list_candidates=None,
                         list_titles=None, row_size=5, show=True):
         """
-        Plot the profile of the voters
+        Plot the ratings of the voters
         for every candidate or a list of candidates,
         using the ratings given by the voters as size for
         the voters. The plot is either on a 3D plot,
@@ -599,7 +605,7 @@ class Embeddings:
 
         """
         if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
+            ratings = ratings.ratings_
         if list_candidates is None:
             list_candidates = range(ratings.shape[1])
         if list_titles is None:
@@ -637,9 +643,9 @@ class Embeddings:
         --------
         >>> embs = Embeddings(np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
         >>> second_embs = embs.copy()
-        >>> second_embs.positions
-        array([[0.5, 0.9, 0.4],
-               [0.4, 0.7, 0.5],
-               [0.4, 0.2, 0.4]])
+        >>> second_embs
+        Embeddings([[0.5, 0.9, 0.4],
+                   [0.4, 0.7, 0.5],
+                   [0.4, 0.2, 0.4]])
         """
-        return Embeddings(self.positions, norm=False)
+        return Embeddings(self, norm=False)

@@ -8,7 +8,7 @@ This file is part of Embedded Voting.
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
 from embedded_voting.scoring.singlewinner.svd import *
-from embedded_voting.embeddings.embedder import IdentityEmbedder
+from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsIdentity
 
 
 class PositionalRuleExtension(ScoringRule):
@@ -31,7 +31,7 @@ class PositionalRuleExtension(ScoringRule):
 
     Attributes
     ----------
-    fake_ratings : ratings
+    fake_ratings_ : ratings
         The modified ratings of voters (with ordinal scores)
         on which we run the election.
     points : np.ndarray
@@ -55,13 +55,13 @@ class PositionalRuleExtension(ScoringRule):
     Examples
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
-    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> embeddings = Embeddings([[1, 0], [1, 1], [0, 1]])
     >>> election = SVDNash()(ratings, embeddings)
     >>> election.ranking_
     [3, 0, 1, 2]
     >>> election_bis = PositionalRuleExtension([2, 1, 1, 0])(ratings, embeddings)
-    >>> election_bis.fake_ratings
-    array([[0. , 0.5, 0.5, 1. ],
+    >>> election_bis.fake_ratings_
+    Ratings([[0. , 0.5, 0.5, 1. ],
            [0.5, 1. , 0.5, 0. ],
            [1. , 0.5, 0. , 0.5]])
     >>> election_bis.set_rule(SVDNash())(ratings, embeddings).ranking_
@@ -73,20 +73,17 @@ class PositionalRuleExtension(ScoringRule):
         self.points = points
         self.base_rule = rule
         if rule is not None:
-            self._score_components = rule._score_components
+            self.score_components = rule.score_components
         self._rule = None
 
     def __call__(self, ratings, embeddings=None):
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
-        self.ratings = ratings
-        if embeddings is None and self.embeddings is None:
-            self.embeddings = IdentityEmbedder()(self.ratings)
-        elif embeddings is not None:
-            self.embeddings = embeddings
-        self.fake_ratings = self._create_fake_ratings()
+        self.ratings_ = Ratings(ratings)
+        if embeddings is None:
+            embeddings = EmbeddingsFromRatingsIdentity()(self.ratings_)
+        self.embeddings_ = Embeddings(embeddings)
+        self.fake_ratings_ = Ratings(self._create_fake_ratings())
         if self.base_rule is not None:
-            self._rule = self.base_rule(self.fake_ratings, embeddings)
+            self._rule = self.base_rule(self.fake_ratings_, self.embeddings_)
         self.delete_cache()
         return self
 
@@ -105,7 +102,7 @@ class PositionalRuleExtension(ScoringRule):
             The object itself.
         """
         self.base_rule = rule
-        self._score_components = rule._score_components
+        self.score_components = rule.score_components
         self.delete_cache()
         return self
 
@@ -121,9 +118,9 @@ class PositionalRuleExtension(ScoringRule):
             The fake ratings.
         """
         points = np.array(self.points)/np.max(self.points)
-        fake_ratings = np.zeros(self.ratings.shape)
-        for i in range(self.ratings.shape[0]):
-            scores_i = self.ratings[i]
+        fake_ratings = np.zeros(self.ratings_.shape)
+        for i in range(self.ratings_.n_voters):
+            scores_i = self.ratings_.voter_ratings(i)
             ord_i = np.argsort(scores_i)[::-1]
             ord_i = np.argsort(ord_i)
             fake_ratings[i] = points[ord_i]
@@ -164,13 +161,13 @@ class PositionalRuleExtension(ScoringRule):
             at the end of the function.
 
         """
-        self.embeddings.plot_candidates(self.fake_ratings,
-                                        plot_kind=plot_kind,
-                                        dim=dim,
-                                        list_candidates=list_candidates,
-                                        list_titles=list_titles,
-                                        row_size=row_size,
-                                        show=show)
+        self.embeddings_.plot_candidates(self.fake_ratings_,
+                                         plot_kind=plot_kind,
+                                         dim=dim,
+                                         list_candidates=list_candidates,
+                                         list_titles=list_titles,
+                                         row_size=row_size,
+                                         show=show)
 
 
 class PluralityExtension(PositionalRuleExtension):
@@ -191,8 +188,8 @@ class PluralityExtension(PositionalRuleExtension):
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
     >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
     >>> election = PluralityExtension(4, rule=SVDNash(use_rank=True))(ratings, embeddings)
-    >>> election.fake_ratings
-    array([[0., 0., 0., 1.],
+    >>> election.fake_ratings_
+    Ratings([[0., 0., 0., 1.],
            [0., 1., 0., 0.],
            [1., 0., 0., 0.]])
     >>> election.ranking_
@@ -227,12 +224,12 @@ class KApprovalExtension(PositionalRuleExtension):
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
     >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
     >>> election = KApprovalExtension(n_candidates=4, k=2, rule=SVDNash(use_rank=True))(ratings, embeddings)
-    >>> election.fake_ratings
-    array([[0., 0., 1., 1.],
+    >>> election.fake_ratings_
+    Ratings([[0., 0., 1., 1.],
            [0., 1., 1., 0.],
            [1., 1., 0., 0.]])
     >>> election.ranking_
-    [1, 2, 3, 0]
+    [2, 1, 3, 0]
     """
     def __init__(self, n_candidates, k=2, rule=None):
         if k >= n_candidates:
@@ -259,12 +256,12 @@ class VetoExtension(PositionalRuleExtension):
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
     >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
     >>> election = VetoExtension(n_candidates=4, rule=SVDNash())(ratings, embeddings)
-    >>> election.fake_ratings
-    array([[0., 1., 1., 1.],
+    >>> election.fake_ratings_
+    Ratings([[0., 1., 1., 1.],
            [1., 1., 1., 0.],
            [1., 1., 0., 1.]])
     >>> election.ranking_
-    [1, 3, 0, 2]
+    [1, 3, 2, 0]
     """
     def __init__(self, n_candidates, rule=None):
         points = [1]*(n_candidates-1) + [0]
@@ -289,8 +286,8 @@ class BordaExtension(PositionalRuleExtension):
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
     >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
     >>> election = BordaExtension(n_candidates=4, rule=SVDNash())(ratings, embeddings)
-    >>> election.fake_ratings
-    array([[0.        , 0.33333333, 0.66666667, 1.        ],
+    >>> election.fake_ratings_
+    Ratings([[0.        , 0.33333333, 0.66666667, 1.        ],
            [0.33333333, 1.        , 0.66666667, 0.        ],
            [1.        , 0.66666667, 0.        , 0.33333333]])
     >>> election.ranking_
@@ -330,13 +327,11 @@ class InstantRunoffExtension(ScoringRule):
         self.rule = rule
 
     def __call__(self, ratings, embeddings=None):
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings
-        if embeddings is None and self.embeddings is None:
-            self.embeddings = IdentityEmbedder()(ratings)
-        elif embeddings is not None:
-            self.embeddings = embeddings
-        self.ratings = ratings
+        ratings = Ratings(ratings)
+        if embeddings is None:
+            embeddings = EmbeddingsFromRatingsIdentity()(ratings)
+        self.embeddings_ = Embeddings(embeddings)
+        self.ratings_ = ratings
         self.delete_cache()
         return self
 
@@ -350,12 +345,12 @@ class InstantRunoffExtension(ScoringRule):
 
     @cached_property
     def ranking_(self):
-        n_candidates = self.ratings.shape[1]
+        n_candidates = self.ratings_.n_candidates
         ranking = np.zeros(n_candidates, dtype=int)
         eliminated = []
         for i in range(n_candidates):
             fake_ratings = self._create_fake_ratings(eliminated)
-            rule_i = self.rule(fake_ratings, self.embeddings)
+            rule_i = self.rule(fake_ratings, self.embeddings_)
             loser = rule_i.ranking_[n_candidates-1-i]
             ranking[n_candidates-i-1] = loser
             eliminated.append(loser)
@@ -372,12 +367,12 @@ class InstantRunoffExtension(ScoringRule):
         np.ndarray
             The fake ratings.
         """
-        fake_ratings = np.zeros(self.ratings.shape)
-        points = np.zeros(self.ratings.shape[1])
+        fake_ratings = np.zeros(self.ratings_.shape)
+        points = np.zeros(self.ratings_.n_candidates)
         points[0] = 1
 
-        for i in range(self.ratings.shape[0]):
-            scores_i = self.ratings[i].copy()
+        for i in range(self.ratings_.n_voters):
+            scores_i = self.ratings_[i].copy()
             scores_i[eliminated] = 0
             ord_i = np.argsort(scores_i)[::-1]
             ord_i = np.argsort(ord_i)
