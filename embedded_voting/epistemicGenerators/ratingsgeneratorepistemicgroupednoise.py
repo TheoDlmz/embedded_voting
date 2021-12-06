@@ -1,6 +1,6 @@
 import numpy as np
 from embedded_voting.epistemicGenerators.ratingsgeneratorepistemic import RatingsGeneratorEpistemic
-
+from embedded_voting.ratings.ratings import Ratings
 
 class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     """
@@ -34,10 +34,10 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     >>> np.random.seed(42)
     >>> generator = RatingsGeneratorEpistemicGroupedNoise([2, 2])
     >>> generator()
-    (array([13.74540...]), array([[14.03963...],
-           [14.81094...],
-           [13.41737...],
-           [13.44883...]]))
+    (array([13.74540119]), Ratings([[14.03963831],
+             [14.81094637],
+             [13.41737103],
+             [13.44883031]]))
     """
     def __init__(self, groups_sizes, group_noise=1, minimum_score=10, maximum_score=20):
         groups_sizes = np.array(groups_sizes)
@@ -60,4 +60,5 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
                 s += self.groups_sizes[k]
             scores_i = np.random.multivariate_normal(np.ones(self.n_voters)*truth_i, cov)
             scores[:, i] = scores_i
-        return truth, scores
+
+        return truth, Ratings(scores)
