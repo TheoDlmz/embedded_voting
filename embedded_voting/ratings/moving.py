@@ -62,14 +62,14 @@ class MovingVoter:
     0
     >>> moving_profile.embeddings
     Embeddings([[1., 0., 0.],
-               [0., 0., 1.],
-               [0., 1., 0.],
-               [1., 0., 0.]])
+                [0., 0., 1.],
+                [0., 1., 0.],
+                [1., 0., 0.]])
     >>> moving_profile.ratings_
     Ratings([[0.8, 0.8, 0.8, 0.5],
-               [0.1, 0.1, 1. , 0.5],
-               [0.1, 1. , 0.1, 0.5],
-               [1. , 0.1, 0.1, 0.5]])
+             [0.1, 0.1, 1. , 0.5],
+             [0.1, 1. , 0.1, 0.5],
+             [1. , 0.1, 0.1, 0.5]])
     """
     def __init__(self, embeddings=None, moving_voter=0):
         self.rule = None

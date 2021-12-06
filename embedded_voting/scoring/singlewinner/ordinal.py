@@ -62,8 +62,8 @@ class PositionalRuleExtension(ScoringRule):
     >>> election_bis = PositionalRuleExtension([2, 1, 1, 0])(ratings, embeddings)
     >>> election_bis.fake_ratings_
     Ratings([[0. , 0.5, 0.5, 1. ],
-           [0.5, 1. , 0.5, 0. ],
-           [1. , 0.5, 0. , 0.5]])
+             [0.5, 1. , 0.5, 0. ],
+             [1. , 0.5, 0. , 0.5]])
     >>> election_bis.set_rule(SVDNash())(ratings, embeddings).ranking_
     [1, 3, 0, 2]
     """
@@ -190,8 +190,8 @@ class PluralityExtension(PositionalRuleExtension):
     >>> election = PluralityExtension(4, rule=SVDNash(use_rank=True))(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0., 0., 0., 1.],
-           [0., 1., 0., 0.],
-           [1., 0., 0., 0.]])
+             [0., 1., 0., 0.],
+             [1., 0., 0., 0.]])
     >>> election.ranking_
     [3, 1, 0, 2]
     """
@@ -226,8 +226,8 @@ class KApprovalExtension(PositionalRuleExtension):
     >>> election = KApprovalExtension(n_candidates=4, k=2, rule=SVDNash(use_rank=True))(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0., 0., 1., 1.],
-           [0., 1., 1., 0.],
-           [1., 1., 0., 0.]])
+             [0., 1., 1., 0.],
+             [1., 1., 0., 0.]])
     >>> election.ranking_
     [2, 1, 3, 0]
     """
@@ -258,8 +258,8 @@ class VetoExtension(PositionalRuleExtension):
     >>> election = VetoExtension(n_candidates=4, rule=SVDNash())(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0., 1., 1., 1.],
-           [1., 1., 1., 0.],
-           [1., 1., 0., 1.]])
+             [1., 1., 1., 0.],
+             [1., 1., 0., 1.]])
     >>> election.ranking_
     [1, 3, 2, 0]
     """
@@ -288,8 +288,8 @@ class BordaExtension(PositionalRuleExtension):
     >>> election = BordaExtension(n_candidates=4, rule=SVDNash())(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0.        , 0.33333333, 0.66666667, 1.        ],
-           [0.33333333, 1.        , 0.66666667, 0.        ],
-           [1.        , 0.66666667, 0.        , 0.33333333]])
+             [0.33333333, 1.        , 0.66666667, 0.        ],
+             [1.        , 0.66666667, 0.        , 0.33333333]])
     >>> election.ranking_
     [1, 3, 2, 0]
     """

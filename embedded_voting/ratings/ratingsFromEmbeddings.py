@@ -68,8 +68,8 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
     >>> generator = RatingsFromEmbeddingsCorrelated(2, 3, scores_matrix=np.array([[.8,.4],[.1,.7]]))
     >>> generator(embeddings, .5)
     Ratings([[0.23727006, 0.82535715],
-           [0.76599697, 0.49932924],
-           [0.30300932, 0.35299726]])
+             [0.76599697, 0.49932924],
+             [0.30300932, 0.35299726]])
     """
 
     def __init__(self, n_candidates, n_dim, scores_matrix=None):

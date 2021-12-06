@@ -30,7 +30,7 @@ class Ratings(np.ndarray):
     >>> ratings = Ratings([[1, .8, .5], [.3, .5, .9]])
     >>> ratings
     Ratings([[1. , 0.8, 0.5],
-           [0.3, 0.5, 0.9]])
+             [0.3, 0.5, 0.9]])
     >>> ratings.n_voters
     2
     >>> ratings.n_candidates

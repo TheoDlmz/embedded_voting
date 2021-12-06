@@ -47,6 +47,22 @@ class EmbeddingsGenerator:
 class EmbeddingsGeneratorRandom(EmbeddingsGenerator):
     """
     Create random embeddings
+
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> generator = EmbeddingsGeneratorRandom(10, 2)
+    >>> generator()
+    Embeddings([[0.96337365, 0.26816265],
+                [0.39134578, 0.92024371],
+                [0.70713157, 0.70708199],
+                [0.89942118, 0.43708299],
+                [0.65433791, 0.75620229],
+                [0.70534506, 0.70886413],
+                [0.1254653 , 0.99209801],
+                [0.95076   , 0.30992809],
+                [0.95508537, 0.29633078],
+                [0.54080587, 0.84114744]])
     """
     def __call__(self, *args):
         embs = np.abs(np.random.randn(self.n_voters, self.n_dim))
@@ -76,6 +92,44 @@ class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
         Number of dimensions for the embeddings
     prob: list
         The probabilities for each voter to be in each group. Default is uniform distribution
+
+    Examples
+    --------
+    >>> np.random.seed(42)
+    >>> generator = EmbeddingsGeneratorPolarized(10, 2)
+    >>> generator(polarisation=1)
+    Embeddings([[1., 0.],
+                [0., 1.],
+                [1., 0.],
+                [1., 0.],
+                [0., 1.],
+                [0., 1.],
+                [0., 1.],
+                [1., 0.],
+                [1., 0.],
+                [0., 1.]])
+    >>> generator(polarisation=0)
+    Embeddings([[0.96337365, 0.26816265],
+                [0.39134578, 0.92024371],
+                [0.70713157, 0.70708199],
+                [0.89942118, 0.43708299],
+                [0.65433791, 0.75620229],
+                [0.70534506, 0.70886413],
+                [0.1254653 , 0.99209801],
+                [0.95076   , 0.30992809],
+                [0.95508537, 0.29633078],
+                [0.54080587, 0.84114744]])
+    >>> generator(polarisation=0.5)
+    Embeddings([[0.9908011 , 0.13532618],
+                [0.19969513, 0.97985808],
+                [0.92388624, 0.38266724],
+                [0.97453096, 0.224253  ],
+                [0.34914017, 0.93707051],
+                [0.38153366, 0.92435494],
+                [0.06285695, 0.99802255],
+                [0.98761328, 0.15690762],
+                [0.98870758, 0.14985764],
+                [0.28182668, 0.95946533]])
 
     """
     def __init__(self, n_voters, n_dim, prob=None):
