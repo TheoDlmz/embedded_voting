@@ -2,6 +2,11 @@
 History
 =======
 
+0.1.4 (2021-12-06)
+------------------
+
+* New version with new structure for Ratings and Embeddings
+
 0.1.3 (2021-10-27)
 ------------------
 
