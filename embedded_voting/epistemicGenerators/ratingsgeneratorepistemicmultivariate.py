@@ -49,6 +49,7 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
              [13.98058...]]))
 
     """
+
     def __init__(self, covariance_matrix, independent_noise=0, minimum_score=10, maximum_score=20):
         n_voters = len(covariance_matrix)
         super().__init__(n_voters, minimum_score, maximum_score)
