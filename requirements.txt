@@ -1,9 +1,9 @@
-pytest~=4.3.1
-setuptools~=41.4.0
-numpy~=1.16.2
-matplotlib~=3.2.1
-python-ternary~=1.0.7
-nbsphinx>=0.6.1
+pytest
+setuptools
+numpy
+matplotlib
+python-ternary
+nbsphinx
 IPython
 
-scikit-learn~=0.24.1
+scikit-learn
