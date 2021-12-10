@@ -74,6 +74,9 @@ class SVDRule(ScoringRule):
     def _score_(self, candidate):
         embeddings = self.embeddings_.scored(np.sqrt(self.ratings_.candidate_ratings(candidate)))
 
+        if self.embeddings_.shape[1] == 0:
+            return self.aggregation_rule(self.ratings_.candidate_ratings(candidate))
+
         if embeddings.shape[0] < embeddings.shape[1]:
             embeddings_matrix = embeddings.dot(embeddings.T)
         else:

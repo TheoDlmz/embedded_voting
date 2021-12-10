@@ -2,6 +2,7 @@ from embedded_voting.epistemicGenerators.ratingsgeneratorepistemic import Rating
 import numpy as np
 from embedded_voting.ratings.ratings import Ratings
 
+
 class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
     """
     A generator of scores based on a covariance matrix.
@@ -35,18 +36,18 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
     >>> np.random.seed(42)
     >>> generator = RatingsGeneratorEpistemicMultivariate(np.ones((5, 5)))
     >>> generator()
-    (array([13.74540119]), Ratings([[14.85728131],
+    Ratings([[14.85728131],
              [14.85728131],
              [14.85728131],
              [14.85728131],
-             [14.85728131]]))
+             [14.85728131]])
     >>> generator.independent_noise = 0.5
     >>> generator()
-    (array([12.9122914]), Ratings([[13.81223...],
-             [13.95888...],
-             [13.21274...],
-             [13.65293...],
-             [13.98058...]]))
+    Ratings([[13.81223438],
+             [13.95888662],
+             [13.21274843],
+             [13.65293116],
+             [13.98058382]])
 
     """
 
@@ -66,4 +67,5 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
             scores_i += np.random.randn(self.n_voters) * self.independent_noise
             scores[:, i] = scores_i
 
-        return truth, Ratings(scores)
+        self.ground_truth_ = truth
+        return Ratings(scores)

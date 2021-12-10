@@ -48,12 +48,14 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
     >>> features = [[1, 0], [0, 1], [1, 1]]
     >>> generator = RatingsGeneratorEpistemicGroupedMix([2, 2, 2], features)
     >>> generator()
-    (array([13.74540119]), Ratings([[14.81094637],
+    Ratings([[14.81094637],
              [14.81094637],
              [13.41737103],
              [13.41737103],
              [14.1141587 ],
-             [14.1141587 ]]))
+             [14.1141587 ]])
+    >>> generator.ground_truth_
+    array([13.74540119])
     """
     def __init__(self, groups_sizes, groups_features, group_noise=1, independent_noise=0,
                  minimum_score=10, maximum_score=20):
@@ -86,4 +88,5 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
                 s += n_voters_k
             scores[:, i] = scores_i
 
-        return truth, Ratings(scores)
+        self.ground_truth_ = truth
+        return Ratings(scores)

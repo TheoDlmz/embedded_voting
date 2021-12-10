@@ -41,10 +41,12 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemic):
     >>> np.random.seed(44)
     >>> generator = RatingsGeneratorEpistemicGroupedMean([2, 2])
     >>> generator()
-    (array([18.34842149]), Ratings([[19.07101495],
+    Ratings([[19.07101495],
              [19.07101496],
              [19.27467426],
-             [19.27467425]]))
+             [19.27467425]])
+    >>> generator.ground_truth_
+    array([18.34842149])
     """
     def __init__(self, groups_sizes, group_noise=1, independent_noise=0, minimum_score=10, maximum_score=20):
         groups_sizes = np.array(groups_sizes)
@@ -70,4 +72,5 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemic):
             scores_i += np.random.randn(self.n_voters) * self.independent_noise
             scores[:, i] = scores_i
 
-        return truth, Ratings(scores)
+        self.ground_truth_ = truth
+        return Ratings(scores)

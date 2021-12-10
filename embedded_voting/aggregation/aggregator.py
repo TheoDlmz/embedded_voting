@@ -94,5 +94,4 @@ class Aggregator:
         """
         embedder = EmbeddingsFromRatingsCorrelation()
         self.embeddings = embedder(self.ratings_history)
-        self.rule.n_v = embedder.n_sing_val_
         return self

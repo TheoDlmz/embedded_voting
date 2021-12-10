@@ -19,6 +19,9 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
     maximum_score : float or int
         The maximum true value of an alternative.
         By default, it is set to 20.
+    ground_truth_ : np.ndarray
+        The ground truth scores of the candidates corresponding to the
+        last Ratings generated
 
     Attributes
     ----------
@@ -41,6 +44,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         self.minimum_score = minimum_score
         self.maximum_score = maximum_score
         self.groups_sizes = None
+        self.ground_truth_ = None
 
     def generate_true_score(self):
         """
@@ -55,8 +59,8 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
 
     def __call__(self, n_candidates=1, *args):
         """
-        This function computes the true values and the scores given by each voter to
-        different alternative.
+        This function generate the ground truth and the ratings given by each voter to
+        n_candidates candidates.
 
         Parameters
         ----------
@@ -65,8 +69,6 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
 
         Return
         ------
-        np.ndarray
-            A list of length ``n_candidates`` containing the true values of each alternative.
         Ratings
             The ratings given by the voters to the alternatives
         """
@@ -82,7 +84,8 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         show : bool
             If True, displays the plot at the end of the function.
         """
-        true_value, scores = self()
+        scores = self()
+        true_value = self.ground_truth_
         fig, ax = plt.subplots()
         if self.groups_sizes is not None:
             color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
