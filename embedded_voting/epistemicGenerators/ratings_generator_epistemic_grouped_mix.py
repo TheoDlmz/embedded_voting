@@ -52,6 +52,10 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
              [14.1141587 ]])
     >>> generator.ground_truth_
     array([13.74540119])
+
+    >>> features = [[1, 0, 1, 1], [0, 1, 0, 1], [1, 1, 0, 0]]
+    >>> generator = RatingsGeneratorEpistemicGroupedMix([2, 2, 2], features)
+    >>> generator()
     """
     def __init__(self, groups_sizes, groups_features, group_noise=1, independent_noise=0,
                  minimum_value=10, maximum_value=20):
