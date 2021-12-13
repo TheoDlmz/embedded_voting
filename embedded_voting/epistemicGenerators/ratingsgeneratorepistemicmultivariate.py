@@ -24,12 +24,9 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
 
     Attributes
     ----------
-    covariance_matrix : np.ndarray
-        The covariance matrix of the voters.
-        Should be of shape :attr:`~embedded_voting.ScoreGenerator.n_voters`,
-        :attr:`~embedded_voting.ScoreGenerator.n_voters`.
-    independent_noise : float
-        The variance of the independent noise.
+    ground_truth_ : np.ndarray
+        The ground truth scores of the candidates corresponding to the
+        last Ratings generated
 
     Examples
     --------
@@ -53,7 +50,8 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
 
     def __init__(self, covariance_matrix, independent_noise=0, minimum_score=10, maximum_score=20):
         n_voters = len(covariance_matrix)
-        super().__init__(n_voters, minimum_score, maximum_score)
+        super().__init__(n_voters=n_voters, minimum_score=minimum_score,
+                         maximum_score=maximum_score)
         self.covariance_matrix = covariance_matrix
         self.independent_noise = independent_noise
 

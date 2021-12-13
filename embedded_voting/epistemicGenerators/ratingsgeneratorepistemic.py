@@ -7,7 +7,7 @@ from embedded_voting.ratings.ratingsGenerator import RatingsGenerator
 
 class RatingsGeneratorEpistemic(RatingsGenerator):
     """
-    A generator of scores for a group of algorithms.
+    A generator of scores based on a ground truth for each alternative.
 
     Parameters
     ----------
@@ -19,31 +19,27 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
     maximum_score : float or int
         The maximum true value of an alternative.
         By default, it is set to 20.
-    ground_truth_ : np.ndarray
-        The ground truth scores of the candidates corresponding to the
-        last Ratings generated
+    groups_sizes : list
+        The number of voters in each group.
+        If set to None, then there are no "groups".
 
     Attributes
     ----------
-    n_voters : int
-        The number of voters in the generator.
-    minimum_score : float or int
-        The minimum true value of an alternative.
-        By default, it is set to 10.
-    maximum_score : float or int
-        The maximum true value of an alternative.
-        By default, it is set to 20.
-    groups_sizes : list
-        The number of voter in each group.
-        If set to None, then there is no "groups".
-
+    ground_truth_ : np.ndarray
+        The ground truth scores of the candidates corresponding to the
+        last Ratings generated
     """
 
-    def __init__(self, n_voters=1, minimum_score=10, maximum_score=20):
+    def __init__(self, n_voters=None, minimum_score=10, maximum_score=20, groups_sizes=None):
+        if groups_sizes is not None:
+            n_voters_computed = np.sum(groups_sizes)
+            if n_voters is not None and n_voters != n_voters_computed:
+                raise ValueError('n_voters should be equal to the sum of groups_sizes.')
+            n_voters = n_voters_computed
         super().__init__(n_voters)
         self.minimum_score = minimum_score
         self.maximum_score = maximum_score
-        self.groups_sizes = None
+        self.groups_sizes = np.array(groups_sizes)
         self.ground_truth_ = None
 
     def generate_true_score(self):

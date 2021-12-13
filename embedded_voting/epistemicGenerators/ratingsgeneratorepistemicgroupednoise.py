@@ -24,11 +24,9 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
 
     Attributes
     ----------
-    groups_sizes : np.ndarray
-        The number of voters in each groups.
-        The sum is equal to :attr:`~embedded_voting.ScoreGenerator.n_voters`.
-    group_noise : float
-        The variance used to sample the variances of each group.
+    ground_truth_ : np.ndarray
+        The ground truth scores of the candidates corresponding to the
+        last Ratings generated
 
     Examples
     --------
@@ -43,10 +41,8 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     array([13.74540119])
     """
     def __init__(self, groups_sizes, group_noise=1, minimum_score=10, maximum_score=20):
-        groups_sizes = np.array(groups_sizes)
-        n_voters = int(groups_sizes.sum())
-        super().__init__(n_voters, minimum_score, maximum_score)
-        self.groups_sizes = groups_sizes
+        super().__init__(minimum_score=minimum_score, maximum_score=maximum_score,
+                         groups_sizes=groups_sizes)
         self.group_noise = group_noise
 
     def __call__(self, n_candidates=1, *args):
