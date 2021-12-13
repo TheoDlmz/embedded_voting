@@ -60,20 +60,20 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
         self.groups_features = np.array(groups_features)
         self.group_noise = group_noise
         self.independent_noise = independent_noise
+        _, self.n_features = self.groups_features.shape
 
     def __call__(self, n_candidates=1, *args):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
-        n_groups, n_features = self.groups_features.shape
         for i in range(n_candidates):
-            sigma = np.abs(np.random.randn(n_groups) * self.group_noise)
-            cov = np.zeros((n_features, n_features))
-            for k in range(n_features):
+            sigma = np.abs(np.random.randn(self.n_groups) * self.group_noise)
+            cov = np.zeros((self.n_features, self.n_features))
+            for k in range(self.n_features):
                 cov[k, k] = sigma[k]
-            ratings_groups = np.random.multivariate_normal(np.ones(n_features) * self.ground_truth_[i], cov)
+            ratings_groups = np.random.multivariate_normal(np.ones(self.n_features) * self.ground_truth_[i], cov)
             s = 0
             ratings_i = np.zeros(self.n_voters)
-            for k in range(n_groups):
+            for k in range(self.n_groups):
                 n_voters_k = self.groups_sizes[k]
                 cat_val = np.dot(ratings_groups, self.groups_features[k]) / np.sum(self.groups_features[k])
                 ratings_i[s:s + n_voters_k] = cat_val + np.random.randn(n_voters_k) * self.independent_noise
