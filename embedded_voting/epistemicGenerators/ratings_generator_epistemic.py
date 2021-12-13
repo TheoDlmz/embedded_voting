@@ -7,16 +7,16 @@ from embedded_voting.ratings.ratingsGenerator import RatingsGenerator
 
 class RatingsGeneratorEpistemic(RatingsGenerator):
     """
-    A generator of scores based on a ground truth for each alternative.
+    A generator of ratings based on a ground truth ("true value") for each alternative.
 
     Parameters
     ----------
     n_voters : int
         The number of voters in the generator.
-    minimum_score : float or int
+    minimum_value : float or int
         The minimum true value of an alternative.
         By default, it is set to 10.
-    maximum_score : float or int
+    maximum_value : float or int
         The maximum true value of an alternative.
         By default, it is set to 20.
     groups_sizes : list or np.ndarray
@@ -25,12 +25,14 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
 
     Attributes
     ----------
+    n_groups : int
+        The number of groups. If `groups_size` is None, then `n_groups` is None.
     ground_truth_ : np.ndarray
-        The ground truth scores of the candidates corresponding to the
-        last Ratings generated
+        The ground truth ("true value") for each candidate, corresponding to the
+        last ratings generated.
     """
 
-    def __init__(self, n_voters=None, minimum_score=10, maximum_score=20, groups_sizes=None):
+    def __init__(self, n_voters=None, minimum_value=10, maximum_value=20, groups_sizes=None):
         if groups_sizes is not None:
             groups_sizes = np.array(groups_sizes)
             n_voters_computed = np.sum(groups_sizes)
@@ -38,9 +40,10 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
                 raise ValueError('n_voters should be equal to the sum of groups_sizes.')
             n_voters = n_voters_computed
         super().__init__(n_voters)
-        self.minimum_score = minimum_score
-        self.maximum_score = maximum_score
+        self.minimum_value = minimum_value
+        self.maximum_value = maximum_value
         self.groups_sizes = groups_sizes
+        self.n_groups = None if self.groups_sizes is None else len(self.groups_sizes)
         self.ground_truth_ = None
 
     def generate_true_values(self, n_candidates=1):
@@ -53,8 +56,8 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
             The true value for each alternative.
         """
         return (
-            self.minimum_score
-            + np.random.rand(n_candidates) * (self.maximum_score - self.minimum_score)
+            self.minimum_value
+            + np.random.rand(n_candidates) * (self.maximum_value - self.minimum_value)
         )
 
     def __call__(self, n_candidates=1, *args):
@@ -65,7 +68,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         Parameters
         ----------
         n_candidates : int
-            The number of candidates of which we want the score.
+            The number of candidates of which we want the ratings.
 
         Return
         ------
@@ -74,9 +77,9 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         """
         raise NotImplementedError
 
-    def plot_scores(self, show=True):
+    def plot_ratings(self, show=True):
         """
-        This function plots the true value of a candidate and the scores
+        This function plots the true value of a candidate and the ratings
         given by each voter for some candidate randomly selected.
 
         Parameters

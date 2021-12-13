@@ -15,18 +15,18 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
     array_voters_noises: list or np.ndarray
         An array of size `n_voters` * `n_noises`, where `n_noises` is the number of elementary
         gaussian noises.
-    minimum_score : float or int
+    minimum_value : float or int
         The minimum true value of an alternative.
         By default, it is set to 10.
-    maximum_score : float or int
+    maximum_value : float or int
         The maximum true value of an alternative.
         By default, it is set to 20.
 
     Attributes
     ----------
     ground_truth_ : np.ndarray
-        The ground truth scores of the candidates corresponding to the
-        last Ratings generated
+        The ground truth ("true value") for each candidate, corresponding to the
+        last ratings generated.
 
     Examples
     --------
@@ -45,13 +45,13 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
     array([16.11852895, 11.39493861])
     """
 
-    def __init__(self, array_voters_noises, minimum_score=10, maximum_score=20):
+    def __init__(self, array_voters_noises, minimum_value=10, maximum_value=20):
         self.array_voters_noises = np.array(array_voters_noises)
         self.n_voters, self.n_noises = array_voters_noises.shape
         super().__init__(
             n_voters=self.n_voters,
-            minimum_score=minimum_score,
-            maximum_score=maximum_score
+            minimum_value=minimum_value,
+            maximum_value=maximum_value
         )
 
     def __call__(self, n_candidates=1, *args):
