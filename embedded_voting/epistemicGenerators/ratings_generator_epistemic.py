@@ -95,7 +95,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
                 ax.plot([ratings[i_voter]] * 2, [0, 1], color="k")
         else:
             # noinspection PyUnresolvedReferences
-            color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
+            color = cm.rainbow(np.linspace(0, 0.8, self.n_groups))
             sum_previous_groups_sizes = 0
             for i_group, group_size in enumerate(self.groups_sizes):
                 for i_voter_in_group in range(group_size):
