@@ -49,12 +49,9 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
-            sigma = np.abs(np.random.randn(self.n_groups) * self.group_noise)
-            cov = np.zeros((self.n_voters, self.n_voters))
-            s = 0
-            for k in range(self.n_groups):
-                cov[s:s + self.groups_sizes[k], s:s + self.groups_sizes[k]] = np.eye(self.groups_sizes[k]) * sigma[k]
-                s += self.groups_sizes[k]
-            ratings_i = np.random.multivariate_normal(np.ones(self.n_voters)*self.ground_truth_[i], cov)
-            ratings[:, i] = ratings_i
+            sigma = np.abs(np.random.normal(loc=0, scale=self.group_noise, size=self.n_groups))
+            sigma_voters = self.m_voter_group @ sigma
+            v_noise = np.random.multivariate_normal(
+                mean=np.zeros(self.n_voters), cov=np.diag(sigma_voters))
+            ratings[:, i] = self.ground_truth_[i] + v_noise
         return Ratings(ratings)
