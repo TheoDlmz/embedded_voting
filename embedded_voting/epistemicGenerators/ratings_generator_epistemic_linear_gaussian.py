@@ -8,11 +8,11 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
 
     For each candidate `c`, a vector of "elementary noises" is drawn i.i.d. following a normal
     Gaussian distribution. Then the ratings for candidate `c` are computed as
-    `ratings[:, c] = array_voters_noises @ noises_c`.
+    `ratings[:, c] = m_voters_noises @ noises_c`.
 
     Parameters
     ----------
-    array_voters_noises: list or np.ndarray
+    m_voters_noises: list or np.ndarray
         An array of size `n_voters` * `n_noises`, where `n_noises` is the number of elementary
         gaussian noises.
     minimum_value : float or int
@@ -33,8 +33,8 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
     >>> np.random.seed(42)
     >>> n_voters = 5
     >>> n_noises = 3
-    >>> array_voters_noises = np.random.randn(n_voters, n_noises)
-    >>> ratings_generator = RatingsGeneratorEpistemicLinearGaussian(array_voters_noises)
+    >>> m_voters_noises = np.random.randn(n_voters, n_noises)
+    >>> ratings_generator = RatingsGeneratorEpistemicLinearGaussian(m_voters_noises)
     >>> ratings_generator(n_candidates=2)
     Ratings([[15.88827124, 10.78500054],
              [15.64570651,  9.65299338],
@@ -45,9 +45,9 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
     array([16.11852895, 11.39493861])
     """
 
-    def __init__(self, array_voters_noises, minimum_value=10, maximum_value=20):
-        self.array_voters_noises = np.array(array_voters_noises)
-        self.n_voters, self.n_noises = array_voters_noises.shape
+    def __init__(self, m_voters_noises, minimum_value=10, maximum_value=20):
+        self.m_voters_noises = np.array(m_voters_noises)
+        self.n_voters, self.n_noises = m_voters_noises.shape
         super().__init__(
             n_voters=self.n_voters,
             minimum_value=minimum_value,
@@ -56,9 +56,8 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
 
     def __call__(self, n_candidates=1, *args):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
-        array_noises_candidates = np.random.randn(self.n_noises, n_candidates)
-        ratings = Ratings(
+        m_noises_candidates = np.random.randn(self.n_noises, n_candidates)
+        return Ratings(
             self.ground_truth_[np.newaxis, :]
-            + self.array_voters_noises @ array_noises_candidates
+            + self.m_voters_noises @ m_noises_candidates
         )
-        return ratings
