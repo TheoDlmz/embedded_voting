@@ -37,10 +37,10 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemic):
     >>> np.random.seed(44)
     >>> generator = RatingsGeneratorEpistemicGroupedMean([2, 2])
     >>> generator()
-    Ratings([[19.07101495],
-             [19.07101496],
-             [19.27467426],
-             [19.27467425]])
+    Ratings([[17.62582802],
+             [17.62582802],
+             [17.42216872],
+             [17.42216872]])
     >>> generator.ground_truth_
     array([18.34842149])
     """
@@ -55,13 +55,10 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemic):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
-            sigma = np.abs(np.random.randn(self.n_groups) * self.group_noise)
-            cov = np.zeros((self.n_voters, self.n_voters))
-            s = 0
-            for k in range(self.n_groups):
-                cov[s:s + self.groups_sizes[k], s:s + self.groups_sizes[k]] = np.ones(self.groups_sizes[k]) * sigma[k]
-                s += self.groups_sizes[k]
-            ratings_i = np.random.multivariate_normal(np.ones(self.n_voters) * self.ground_truth_[i], cov)
-            ratings_i += np.random.randn(self.n_voters) * self.independent_noise
-            ratings[:, i] = ratings_i
+            sigma = np.abs(np.random.normal(loc=0, scale=self.group_noise, size=self.n_groups))
+            v_group_noise = self.m_voter_group @ np.random.multivariate_normal(
+                mean=np.zeros(self.n_groups), cov=np.diag(sigma))
+            v_independent_noise = np.random.normal(
+                loc=0, scale=self.independent_noise, size=self.n_voters)
+            ratings[:, i] = self.ground_truth_[i] + v_group_noise + v_independent_noise
         return Ratings(ratings)

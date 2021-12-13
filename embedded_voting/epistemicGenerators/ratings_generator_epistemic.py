@@ -27,6 +27,11 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
     ----------
     n_groups : int
         The number of groups. If `groups_size` is None, then `n_groups` is None.
+    m_voter_group : np.ndarray
+        Incidence matrix between voters and groups: `m_voter_group[v, g]` is 1 if
+        and only if voter `v` is in group `g`, and 0 otherwise.
+        Size `n_voters` * `n_groups`.
+        If `groups_size` is None, then `m_voter_group` is None.
     ground_truth_ : np.ndarray
         The ground truth ("true value") for each candidate, corresponding to the
         last ratings generated.
@@ -39,11 +44,22 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
             if n_voters is not None and n_voters != n_voters_computed:
                 raise ValueError('n_voters should be equal to the sum of groups_sizes.')
             n_voters = n_voters_computed
+            self.n_groups = len(groups_sizes)
+            self.m_voter_group = np.vstack([
+                np.hstack((
+                    np.zeros((group_size, i_group)),
+                    np.ones((group_size, 1)),
+                    np.zeros((group_size, self.n_groups - i_group - 1))
+                ))
+                for i_group, group_size in enumerate(groups_sizes)
+            ])
+        else:
+            self.n_groups = None
+            self.m_voter_group = None
         super().__init__(n_voters)
         self.minimum_value = minimum_value
         self.maximum_value = maximum_value
         self.groups_sizes = groups_sizes
-        self.n_groups = None if self.groups_sizes is None else len(self.groups_sizes)
         self.ground_truth_ = None
 
     def generate_true_values(self, n_candidates=1):
