@@ -22,6 +22,12 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
         The maximum true value of an alternative.
         By default, it is set to 20.
 
+    Attributes
+    ----------
+    ground_truth_ : np.ndarray
+        The ground truth scores of the candidates corresponding to the
+        last Ratings generated
+
     Examples
     --------
     >>> np.random.seed(42)
@@ -29,15 +35,14 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
     >>> n_noises = 3
     >>> array_voters_noises = np.random.randn(n_voters, n_noises)
     >>> ratings_generator = RatingsGeneratorEpistemicLinearGaussian(array_voters_noises)
-    >>> truth, ratings = ratings_generator(n_candidates=2)
-    >>> truth
-    array([16.11852895, 11.39493861])
-    >>> ratings
+    >>> ratings_generator(n_candidates=2)
     Ratings([[15.88827124, 10.78500054],
              [15.64570651,  9.65299338],
              [14.25270256, 11.05406235],
              [16.57309146, 10.19162356],
              [19.07405492,  8.2545536 ]])
+    >>> ratings_generator.ground_truth_
+    array([16.11852895, 11.39493861])
     """
 
     def __init__(self, array_voters_noises, minimum_score=10, maximum_score=20):
