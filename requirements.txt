@@ -1,9 +1,11 @@
 pytest~=4.3.1
 setuptools~=41.4.0
-numpy~=1.16.2
+numpy~=1.20.1
 matplotlib~=3.2.1
 python-ternary~=1.0.7
 nbsphinx>=0.6.1
 IPython
 
 scikit-learn~=0.24.1
+
+tqdm~=4.54.0

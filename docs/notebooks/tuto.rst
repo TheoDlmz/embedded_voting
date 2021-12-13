@@ -11,3 +11,4 @@ Tutorials
     ordinal
     manipulation
     multiwinner
+    onlinelearning
