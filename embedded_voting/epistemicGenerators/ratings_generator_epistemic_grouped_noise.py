@@ -9,6 +9,14 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     A generator of ratings such that voters are separated into different groups and for each
     alternative the variance of each voter of the same group is the same.
 
+    For each candidate `i`:
+
+    * For each group, a `sigma_group` is drawn (absolute part of a normal variable, scaled by
+      `group_noise`).
+    * For each voter, her `sigma_voter` is equal to the `sigma_group` of her group. Her
+      `noise_voter` is drawn (normal variable scaled by `sigma_voter`).
+    * For each voter, the rating is computed as `ground_truth[i] + noise_voter`.
+
     Parameters
     ----------
     groups_sizes : list or np.ndarray
@@ -50,8 +58,8 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
-            sigma = np.abs(np.random.normal(loc=0, scale=self.group_noise, size=self.n_groups))
-            sigma_voters = self.m_voter_group @ sigma
+            sigma_groups = np.abs(np.random.normal(loc=0, scale=self.group_noise, size=self.n_groups))
+            sigma_voters = self.m_voter_group @ sigma_groups
             v_noise = np.random.multivariate_normal(
                 mean=np.zeros(self.n_voters), cov=np.diag(sigma_voters))
             ratings[:, i] = self.ground_truth_[i] + v_noise

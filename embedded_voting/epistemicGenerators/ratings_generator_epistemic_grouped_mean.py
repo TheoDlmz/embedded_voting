@@ -10,6 +10,19 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemicGroupedMix):
     an voter on an alternative is equal to the noise
     of his group plus his own independent noise.
 
+    This is a particular case of :class:`RatingsGeneratorEpistemicGroupedMix`
+    when `groups_features` is the identity matrix, i.e. each group has its own
+    exclusive feature.
+
+    As a result, for each candidate `i`:
+
+    * For each group, a `sigma_group` is drawn (absolute part of a normal variable, scaled by
+      `group_noise`). Then a `noise_group` is drawn (normal variable scaled by `sigma_group`).
+    * For each voter, `noise_dependent` is equal to the `noise_group` of her group.
+    * For each voter, `noise_independent` is drawn (normal variable scaled by `independent_noise`).
+    * For each voter of each group, the rating is computed as
+      `ground_truth[i] + noise_dependent + noise_independent`.
+
     Parameters
     ----------
     groups_sizes : list or np.ndarray

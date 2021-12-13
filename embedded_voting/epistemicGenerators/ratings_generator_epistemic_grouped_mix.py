@@ -13,6 +13,17 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
     The noise of different groups can be correlated due
     to the group features.
 
+    For each candidate `i`:
+
+    * For each feature, a `sigma_feature` is drawn (absolute part of a normal variable, scaled by
+      `group_noise`). Then a `noise_feature` is drawn (normal variable scaled by `sigma_feature`).
+    * For each group, `noise_group` is the barycenter of the values of `noise_feature`, with the
+      weights for each feature given by `groups_features`.
+    * For each voter, `noise_dependent` is equal to the `noise_group` of her group.
+    * For each voter, `noise_independent` is drawn (normal variable scaled by `independent_noise`).
+    * For each voter of each group, the rating is computed as
+      `ground_truth[i] + noise_dependent + noise_independent`.
+
     Parameters
     ----------
     groups_sizes : list or np.ndarray
@@ -82,15 +93,17 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
-            sigma = np.abs(np.random.normal(loc=0, scale=self.group_noise, size=self.n_features))
-            noises_features = np.random.multivariate_normal(
-                mean=np.zeros(self.n_features), cov=np.diag(sigma))
-            v_dependent_noise = (
+            sigma_features = np.abs(
+                np.random.normal(loc=0, scale=self.group_noise, size=self.n_features)
+            )
+            noise_features = np.random.multivariate_normal(
+                mean=np.zeros(self.n_features), cov=np.diag(sigma_features))
+            v_noise_dependent = (
                 self.m_voter_group
                 @ self.groups_features_normalized
-                @ noises_features
+                @ noise_features
             )
-            v_independent_noise = np.random.normal(
+            v_noise_independent = np.random.normal(
                 loc=0, scale=self.independent_noise, size=self.n_voters)
-            ratings[:, i] = self.ground_truth_[i] + v_dependent_noise + v_independent_noise
+            ratings[:, i] = self.ground_truth_[i] + v_noise_dependent + v_noise_independent
         return Ratings(ratings)
