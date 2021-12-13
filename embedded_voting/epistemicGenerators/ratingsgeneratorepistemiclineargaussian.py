@@ -50,7 +50,10 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
         )
 
     def __call__(self, n_candidates=1, *args):
-        truth = np.array([self.generate_true_score() for _ in range(n_candidates)])
+        self.ground_truth_ = np.array([self.generate_true_score() for _ in range(n_candidates)])
         array_noises_candidates = np.random.randn(self.n_noises, n_candidates)
-        ratings = truth[np.newaxis, :] + self.array_voters_noises @ array_noises_candidates
-        return truth, Ratings(ratings)
+        ratings = Ratings(
+            self.ground_truth_[np.newaxis, :]
+            + self.array_voters_noises @ array_noises_candidates
+        )
+        return ratings
