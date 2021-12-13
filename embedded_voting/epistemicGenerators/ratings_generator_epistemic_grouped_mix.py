@@ -44,18 +44,25 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
     >>> features = [[1, 0], [0, 1], [1, 1]]
     >>> generator = RatingsGeneratorEpistemicGroupedMix([2, 2, 2], features)
     >>> generator()
-    Ratings([[14.81094637],
-             [14.81094637],
-             [13.41737103],
-             [13.41737103],
-             [14.1141587 ],
-             [14.1141587 ]])
+    Ratings([[14.03963831],
+             [14.03963831],
+             [14.31605357],
+             [14.31605357],
+             [14.17784594],
+             [14.17784594]])
     >>> generator.ground_truth_
     array([13.74540119])
 
+    >>> np.random.seed(42)
     >>> features = [[1, 0, 1, 1], [0, 1, 0, 1], [1, 1, 0, 0]]
     >>> generator = RatingsGeneratorEpistemicGroupedMix([2, 2, 2], features)
     >>> generator()
+    Ratings([[13.20254261],
+             [13.20254261],
+             [13.32010606],
+             [13.32010606],
+             [13.27781234],
+             [13.27781234]])
     """
     def __init__(self, groups_sizes, groups_features, group_noise=1, independent_noise=0,
                  minimum_value=10, maximum_value=20):
@@ -70,7 +77,7 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
-            sigma = np.abs(np.random.randn(self.n_groups) * self.group_noise)
+            sigma = np.abs(np.random.randn(self.n_features) * self.group_noise)
             cov = np.zeros((self.n_features, self.n_features))
             for k in range(self.n_features):
                 cov[k, k] = sigma[k]
