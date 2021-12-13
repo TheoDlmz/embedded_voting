@@ -1,10 +1,9 @@
 import numpy as np
-from embedded_voting.epistemicGenerators.ratings_generator_epistemic \
-    import RatingsGeneratorEpistemic
-from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.epistemicGenerators.ratings_generator_epistemic_grouped_mix \
+    import RatingsGeneratorEpistemicGroupedMix
 
 
-class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemic):
+class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemicGroupedMix):
     """
     A generator of ratings such that voters are
     separated into different groups and the noise of
@@ -47,19 +46,8 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemic):
     """
     def __init__(self, groups_sizes, group_noise=1, independent_noise=0, minimum_value=10,
                  maximum_value=20):
-        super().__init__(minimum_value=minimum_value, maximum_value=maximum_value,
-                         groups_sizes=groups_sizes)
-        self.group_noise = group_noise
-        self.independent_noise = independent_noise
-
-    def __call__(self, n_candidates=1, *args):
-        self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
-        ratings = np.zeros((self.n_voters, n_candidates))
-        for i in range(n_candidates):
-            sigma = np.abs(np.random.normal(loc=0, scale=self.group_noise, size=self.n_groups))
-            v_group_noise = self.m_voter_group @ np.random.multivariate_normal(
-                mean=np.zeros(self.n_groups), cov=np.diag(sigma))
-            v_independent_noise = np.random.normal(
-                loc=0, scale=self.independent_noise, size=self.n_voters)
-            ratings[:, i] = self.ground_truth_[i] + v_group_noise + v_independent_noise
-        return Ratings(ratings)
+        n_groups = len(groups_sizes)
+        group_features = np.eye(n_groups)
+        super().__init__(groups_sizes=groups_sizes, groups_features=group_features,
+                         group_noise=group_noise, independent_noise=independent_noise,
+                         minimum_value=minimum_value, maximum_value=maximum_value)
