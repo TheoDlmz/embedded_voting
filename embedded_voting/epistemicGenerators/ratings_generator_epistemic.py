@@ -32,6 +32,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
 
     def __init__(self, n_voters=None, minimum_score=10, maximum_score=20, groups_sizes=None):
         if groups_sizes is not None:
+            groups_sizes = np.array(groups_sizes)
             n_voters_computed = np.sum(groups_sizes)
             if n_voters is not None and n_voters != n_voters_computed:
                 raise ValueError('n_voters should be equal to the sum of groups_sizes.')
@@ -39,7 +40,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         super().__init__(n_voters)
         self.minimum_score = minimum_score
         self.maximum_score = maximum_score
-        self.groups_sizes = np.array(groups_sizes)
+        self.groups_sizes = groups_sizes
         self.ground_truth_ = None
 
     def generate_true_values(self, n_candidates=1):
@@ -83,25 +84,25 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         show : bool
             If True, displays the plot at the end of the function.
         """
-        scores = self()
+        ratings = self()
         fig, ax = plt.subplots()
-        if self.groups_sizes is not None:
+        ax.plot([self.ground_truth_[0]] * 2, [0, 1], color="red", label="True value")
+        if self.groups_sizes is None:
+            for i_voter in range(self.n_voters):
+                ax.plot([ratings[i_voter]] * 2, [0, 1], color="k")
+        else:
             # noinspection PyUnresolvedReferences
             color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
-            count = 0
-            n_group = -1
-        else:
-            color = ["k"]
-            count = self.n_voters
-            n_group = 0
-        ax.plot([self.ground_truth_[0]]*2, [0, 1], color="red", label="True value")
-        for i in range(self.n_voters):
-            if i >= count:
-                count += self.groups_sizes[n_group+1]
-                n_group += 1
-                ax.plot([scores[i]]*2, [0, 1], color=color[n_group], label="group %i" % (n_group+1))
-            else:
-                ax.plot([scores[i]]*2, [0, 1], color=color[n_group])
+            sum_previous_groups_sizes = 0
+            for i_group, group_size in enumerate(self.groups_sizes):
+                for i_voter_in_group in range(group_size):
+                    i_voter = sum_previous_groups_sizes + i_voter_in_group
+                    if i_voter_in_group == 0:
+                        ax.plot([ratings[i_voter]] * 2, [0, 1], color=color[i_group],
+                                label="group %i" % (i_group + 1))
+                    else:
+                        ax.plot([ratings[i_voter]] * 2, [0, 1], color=color[i_group])
+                sum_previous_groups_sizes += group_size
         ax.set_ylim(0, 1)
         ax.set_title("Distribution of voters' guesses")
         plt.legend()
