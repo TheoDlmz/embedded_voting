@@ -51,20 +51,16 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemic):
         self.independent_noise = independent_noise
 
     def __call__(self, n_candidates=1, *args):
+        self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         scores = np.zeros((self.n_voters, n_candidates))
-        truth = np.zeros(n_candidates)
         for i in range(n_candidates):
-            truth_i = self.generate_true_score()
-            truth[i] = truth_i
             sigma = np.abs(np.random.randn(len(self.groups_sizes)) * self.group_noise)
             cov = np.zeros((self.n_voters, self.n_voters))
             s = 0
             for k in range(len(self.groups_sizes)):
                 cov[s:s + self.groups_sizes[k], s:s + self.groups_sizes[k]] = np.ones(self.groups_sizes[k]) * sigma[k]
                 s += self.groups_sizes[k]
-            scores_i = np.random.multivariate_normal(np.ones(self.n_voters) * truth_i, cov)
+            scores_i = np.random.multivariate_normal(np.ones(self.n_voters) * self.ground_truth_[i], cov)
             scores_i += np.random.randn(self.n_voters) * self.independent_noise
             scores[:, i] = scores_i
-
-        self.ground_truth_ = truth
         return Ratings(scores)

@@ -19,7 +19,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
     maximum_score : float or int
         The maximum true value of an alternative.
         By default, it is set to 20.
-    groups_sizes : list
+    groups_sizes : list or np.ndarray
         The number of voters in each group.
         If set to None, then there are no "groups".
 
@@ -42,16 +42,19 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         self.groups_sizes = np.array(groups_sizes)
         self.ground_truth_ = None
 
-    def generate_true_score(self):
+    def generate_true_values(self, n_candidates=1):
         """
-        This function generate a true value for some alternative.
+        This function generate a true value for each alternative.
 
         Return
         ------
-        float
-            The true value of an alternative
+        np.ndarray
+            The true value for each alternative.
         """
-        return self.minimum_score + np.random.rand()*(self.maximum_score-self.minimum_score)
+        return (
+            self.minimum_score
+            + np.random.rand(n_candidates) * (self.maximum_score - self.minimum_score)
+        )
 
     def __call__(self, n_candidates=1, *args):
         """
@@ -81,9 +84,9 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
             If True, displays the plot at the end of the function.
         """
         scores = self()
-        true_value = self.ground_truth_
         fig, ax = plt.subplots()
         if self.groups_sizes is not None:
+            # noinspection PyUnresolvedReferences
             color = cm.rainbow(np.linspace(0, 0.8, len(self.groups_sizes)))
             count = 0
             n_group = -1
@@ -91,7 +94,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
             color = ["k"]
             count = self.n_voters
             n_group = 0
-        ax.plot([true_value[0]]*2, [0, 1], color="red", label="True value")
+        ax.plot([self.ground_truth_[0]]*2, [0, 1], color="red", label="True value")
         for i in range(self.n_voters):
             if i >= count:
                 count += self.groups_sizes[n_group+1]
@@ -104,4 +107,3 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         plt.legend()
         if show:
             plt.show()  # pragma: no cover
-

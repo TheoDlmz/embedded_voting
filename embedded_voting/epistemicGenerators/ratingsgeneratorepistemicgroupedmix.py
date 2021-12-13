@@ -62,17 +62,15 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
         self.independent_noise = independent_noise
 
     def __call__(self, n_candidates=1, *args):
+        self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         scores = np.zeros((self.n_voters, n_candidates))
-        truth = np.zeros(n_candidates)
         n_groups, n_features = self.groups_features.shape
         for i in range(n_candidates):
-            truth_i = self.generate_true_score()
-            truth[i] = truth_i
             sigma = np.abs(np.random.randn(n_groups) * self.group_noise)
             cov = np.zeros((n_features, n_features))
             for k in range(n_features):
                 cov[k, k] = sigma[k]
-            scores_groups = np.random.multivariate_normal(np.ones(n_features) * truth_i, cov)
+            scores_groups = np.random.multivariate_normal(np.ones(n_features) * self.ground_truth_[i], cov)
             s = 0
             scores_i = np.zeros(self.n_voters)
             for k in range(n_groups):
@@ -81,6 +79,4 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
                 scores_i[s:s + n_voters_k] = cat_val + np.random.randn(n_voters_k) * self.independent_noise
                 s += n_voters_k
             scores[:, i] = scores_i
-
-        self.ground_truth_ = truth
         return Ratings(scores)
