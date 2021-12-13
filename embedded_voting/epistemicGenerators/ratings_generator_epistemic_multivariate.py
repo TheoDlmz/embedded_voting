@@ -59,7 +59,9 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
-            ratings_i = np.random.multivariate_normal(np.ones(self.n_voters)*self.ground_truth_[i], self.covariance_matrix)
-            ratings_i += np.random.randn(self.n_voters) * self.independent_noise
-            ratings[:, i] = ratings_i
+            v_dependent_noise = np.random.multivariate_normal(
+                mean=np.zeros(self.n_voters), cov=self.covariance_matrix)
+            v_independent_noise = np.random.normal(
+                loc=0, scale=self.independent_noise, size=self.n_voters)
+            ratings[:, i] = self.ground_truth_[i] + v_dependent_noise + v_independent_noise
         return Ratings(ratings)
