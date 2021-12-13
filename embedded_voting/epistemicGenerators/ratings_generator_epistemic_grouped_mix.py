@@ -69,6 +69,10 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
         super().__init__(minimum_value=minimum_value, maximum_value=maximum_value,
                          groups_sizes=groups_sizes)
         self.groups_features = np.array(groups_features)
+        self.groups_features_normalized = (
+            self.groups_features
+            / self.groups_features.sum(1)[:, np.newaxis]
+        )
         self.group_noise = group_noise
         self.independent_noise = independent_noise
         _, self.n_features = self.groups_features.shape
@@ -77,17 +81,15 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
-            sigma = np.abs(np.random.randn(self.n_features) * self.group_noise)
-            cov = np.zeros((self.n_features, self.n_features))
-            for k in range(self.n_features):
-                cov[k, k] = sigma[k]
-            ratings_groups = np.random.multivariate_normal(np.ones(self.n_features) * self.ground_truth_[i], cov)
-            s = 0
-            ratings_i = np.zeros(self.n_voters)
-            for k in range(self.n_groups):
-                n_voters_k = self.groups_sizes[k]
-                cat_val = np.dot(ratings_groups, self.groups_features[k]) / np.sum(self.groups_features[k])
-                ratings_i[s:s + n_voters_k] = cat_val + np.random.randn(n_voters_k) * self.independent_noise
-                s += n_voters_k
-            ratings[:, i] = ratings_i
+            sigma = np.abs(np.random.normal(loc=0, scale=self.group_noise, size=self.n_features))
+            noises_features = np.random.multivariate_normal(
+                mean=np.zeros(self.n_features), cov=np.diag(sigma))
+            v_dependent_noise = (
+                self.m_voter_group
+                @ self.groups_features_normalized
+                @ noises_features
+            )
+            v_independent_noise = np.random.normal(
+                loc=0, scale=self.independent_noise, size=self.n_voters)
+            ratings[:, i] = self.ground_truth_[i] + v_dependent_noise + v_independent_noise
         return Ratings(ratings)
