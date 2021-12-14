@@ -48,14 +48,20 @@ class Aggregator:
     [2, 0, 1]
     """
 
-    def __init__(self, rule=None):
+    def __init__(self, rule=None, embedder=None, default_train=False, name="aggregator"):
         if rule is None:
             rule = FastNash()
         self.rule = rule
         self.embeddings = None
         self.ratings_history = None
+        if embedder is None:
+            self.embedder = EmbeddingsFromRatingsCorrelation()
+        else:
+            self.embedder = embedder
+        self.default_train = default_train
+        self.name = name
 
-    def __call__(self, ratings, train=False):
+    def __call__(self, ratings, train=None):
         """
         This function run an election using the :attr:`embedder` and the scores.
 
@@ -75,7 +81,7 @@ class Aggregator:
         else:
             self.ratings_history = np.concatenate([self.ratings_history, ratings], axis=1)
 
-        if self.embeddings is None or train:
+        if self.embeddings is None or (train is None and self.default_train) or train:
             self.train()
 
         self.rule.delete_cache()
@@ -92,7 +98,12 @@ class Aggregator:
         Aggregator
             The object
         """
-        embedder = EmbeddingsFromRatingsCorrelation()
-        self.embeddings = embedder(self.ratings_history)
-        self.rule.n_v = embedder.n_sing_val_
+        self.embeddings = self.embedder(self.ratings_history)
         return self
+
+    def reset(self):
+        """
+        This function reset the embeddings and ratings history of the aggregator
+        """
+        self.embeddings = None
+        self.ratings_history = None

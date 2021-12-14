@@ -13,23 +13,23 @@ class MLEGaussian(ScoringRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
-    >>> election = MLEGaussian()(ratings, embeddings)
+    >>> election = MLEGaussian()(ratings)
     >>> election.scores_
-    [-0.29999999999999993, 2.0, 1.4000000000000001]
+    [0.5075102864187252, 0.6067354028914043, 0.2757584732873313]
     >>> election.ranking_
-    [1, 2, 0]
+    [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_
-    [0.0, 1.0, 0.7391304347826089]
+    [0.70..., 1.0, 0.0]
     """
 
     def __call__(self, ratings, embeddings=None):
         super().__call__(ratings, embeddings)
         if embeddings is None:
-            raise ValueError("must specify embeddings")
-        positions = np.array(self.embeddings_)
+            positions = np.array(ratings)
+        else:
+            positions = np.array(self.embeddings_)
         self.inverse_cov = np.linalg.pinv(np.cov(positions)).sum(axis=0)
         return self
 

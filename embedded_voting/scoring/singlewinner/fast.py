@@ -21,6 +21,9 @@ class Fast(ScoringRule):
         The aggregation rule for the singular values.
         Input : float list. Output : float.
         By default, it is the product of the singular values.
+    embeddings_as_history: bool
+        If true, the embeddings are considered as rating history and used to
+        compute the real embeddings
 
 
     Attributes
@@ -40,6 +43,9 @@ class Fast(ScoringRule):
         The aggregation rule for the singular values.
         Input : float list. Output : float.
         By default, it is the product of the singular values.
+    embeddings_as_history: bool
+        If true, the embeddings are considered as rating history and used to
+        compute the real embeddings
 
 
     Examples
@@ -52,7 +58,7 @@ class Fast(ScoringRule):
     0
 
     """
-    def __init__(self,  f=None, aggregation_rule=np.prod):
+    def __init__(self,  f=None, aggregation_rule=np.prod, embeddings_as_history=False):
         super().__init__()
         self.aggregation_rule = aggregation_rule
         if f is None:
@@ -61,6 +67,7 @@ class Fast(ScoringRule):
             self.f = f
 
         self._modified_ratings = None
+        self.embeddings_as_history = embeddings_as_history
 
     def __call__(self, ratings, embeddings=None):
         ratings = Ratings(ratings)
@@ -70,12 +77,17 @@ class Fast(ScoringRule):
         self.ratings_ = ratings
         self._modified_ratings = modified_ratings
 
-        if embeddings is None and self.embeddings_ is None:
+        if self.embeddings_as_history or embeddings is None:
             embedder = EmbeddingsFromRatingsCorrelation()
-            self.embeddings_ = embedder(self.ratings_)
-            self.n_v = embedder.n_sing_val_
-        elif embeddings is not None:
+            if embeddings is None:
+                self.embeddings_ = embedder(self.ratings_)
+            else:
+                self.embeddings_ = embedder(np.concatenate([embeddings, self.ratings_], axis=1))
+        else:
             self.embeddings_ = Embeddings(embeddings)
+            self.embeddings_.n_sing_val_ = embeddings.n_sing_val_
+
+        self.n_v = self.embeddings_.n_sing_val_ #embedder.n_sing_val_
         self.delete_cache()
 
         return self
@@ -124,8 +136,8 @@ class FastNash(Fast):
     0
 
     """
-    def __init__(self,  f=None):
-        super().__init__(f=f, aggregation_rule=np.prod)
+    def __init__(self,  f=None, embeddings_as_history=False):
+        super().__init__(f=f, aggregation_rule=np.prod, embeddings_as_history=embeddings_as_history)
 
 
 class FastSum(Fast):
@@ -151,8 +163,8 @@ class FastSum(Fast):
     0
 
     """
-    def __init__(self, f=None):
-        super().__init__(f=f, aggregation_rule=np.sum)
+    def __init__(self, f=None, embeddings_as_history=False):
+        super().__init__(f=f, aggregation_rule=np.sum, embeddings_as_history=embeddings_as_history)
 
 
 class FastMin(Fast):
@@ -178,8 +190,8 @@ class FastMin(Fast):
     0
 
     """
-    def __init__(self,  f=None):
-        super().__init__(f=f, aggregation_rule=np.min)
+    def __init__(self,  f=None, embeddings_as_history=False):
+        super().__init__(f=f, aggregation_rule=np.min, embeddings_as_history=embeddings_as_history)
 
 
 class FastLog(Fast):
@@ -205,8 +217,8 @@ class FastLog(Fast):
     0
 
     """
-    def __init__(self, f=None):
-        super().__init__(f=f)
+    def __init__(self, f=None, embeddings_as_history=False):
+        super().__init__(f=f, embeddings_as_history=embeddings_as_history)
 
     def __call__(self, ratings, embeddings=None):
         ratings = Ratings(ratings)

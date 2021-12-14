@@ -12,3 +12,4 @@ from embedded_voting.utils.plots import *
 from embedded_voting.embeddings import *
 from embedded_voting.aggregation import *
 from embedded_voting.epistemicGenerators import *
+from embedded_voting.experiments import *
