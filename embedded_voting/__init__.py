@@ -2,7 +2,7 @@
 
 __author__ = """Théo Delemazure"""
 __email__ = 'theo.delemazure@ens.fr'
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 
 from embedded_voting.ratings import *
