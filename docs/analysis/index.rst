@@ -8,3 +8,4 @@ Voting Rules
 
    moving
    manipulation/index
+   aggregation/index
