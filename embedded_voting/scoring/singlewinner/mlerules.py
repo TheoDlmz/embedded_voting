@@ -15,7 +15,7 @@ class MLEGaussian(ScoringRule):
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
     >>> election = MLEGaussian()(ratings)
     >>> election.scores_
-    [0.5075102864187252, 0.6067354028914043, 0.2757584732873313]
+    [0.507..., 0.606..., 0.275...]
     >>> election.ranking_
     [1, 0, 2]
     >>> election.winner_

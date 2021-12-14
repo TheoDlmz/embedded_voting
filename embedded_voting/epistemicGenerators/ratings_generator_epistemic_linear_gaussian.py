@@ -37,13 +37,13 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
     >>> m_voters_noises = np.random.randn(n_voters, n_noises)
     >>> ratings_generator = RatingsGeneratorEpistemicLinearGaussian(m_voters_noises)
     >>> ratings_generator(n_candidates=2)
-    Ratings([[15.88827124, 10.78500054],
-             [15.64570651,  9.65299338],
-             [14.25270256, 11.05406235],
-             [16.57309146, 10.19162356],
-             [19.07405492,  8.2545536 ]])
+    Ratings([[15.888..., 10.7850...],
+             [15.645...,  9.6529...],
+             [14.252..., 11.0540...],
+             [16.573..., 10.1916...],
+             [19.074...,  8.254... ]])
     >>> ratings_generator.ground_truth_
-    array([16.11852895, 11.39493861])
+    array([16.118..., 11.394...])
     """
 
     def __init__(self, m_voters_noises, minimum_value=10, maximum_value=20):

@@ -56,14 +56,14 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
     >>> features = [[1, 0], [0, 1], [1, 1]]
     >>> generator = RatingsGeneratorEpistemicGroupedMix([2, 2, 2], features)
     >>> generator()
-    Ratings([[14.03963831],
-             [14.03963831],
-             [14.31605357],
-             [14.31605357],
-             [14.17784594],
-             [14.17784594]])
+    Ratings([[14.039...],
+             [14.039...],
+             [14.316...],
+             [14.316...],
+             [14.177...],
+             [14.177...]])
     >>> generator.ground_truth_
-    array([13.74540119])
+    array([13.745...])
 
     >>> np.random.seed(42)
     >>> features = [[1, 0, 1, 1], [0, 1, 0, 1], [1, 1, 0, 0]]
