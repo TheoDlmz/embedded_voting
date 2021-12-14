@@ -33,18 +33,18 @@ class IterSVD(IterRule):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores_matrix = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]])
+    >>> scores_matrix = np.array([[1, 0.8, 0.5, 0, 0, 0], [0, 0, 0, 0.5, 0.8, 1]])
     >>> probability = [3/4, 1/4]
     >>> embeddings = EmbeddingsGeneratorPolarized(100, 2, probability)(1)
     >>> ratings = RatingsFromEmbeddingsCorrelated(6, 2, scores_matrix)(embeddings, 1)
     >>> election = IterSVD(3)(ratings, embeddings)
     >>> election.winners_
-    [0, 1, 3]
+    [0, 1, 5]
     >>> _ = election.set_k(4)
     >>> election.winners_
-    [0, 1, 3, 2]
+    [0, 1, 5, 2]
     >>> election.plot_weights(dim=[0, 0, 0], show=False)
-    Weight / remaining candidate :  [25.0, 24.999999999999996, 24.999999999999996, 24.999999999999996]
+    Weight / remaining candidate :  [25.0, 24.99999..., 24.999999..., 24.999999...]
     >>> election.features_vectors
     Embeddings([[1., 0.],
                 [1., 0.],
