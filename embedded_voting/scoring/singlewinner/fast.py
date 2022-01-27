@@ -110,6 +110,7 @@ class Fast(ScoringRule):
         s = np.maximum(s, np.zeros(len(s)))
         s = np.sqrt(s)
         s = np.sort(s)[::-1]
+        print(s)
         return self.aggregation_rule(s[:self.n_v])
 
 
