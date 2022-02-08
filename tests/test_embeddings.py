@@ -45,6 +45,19 @@ def test_embeddings():
     Embeddings(np.array([[0, -1], [-1, 0]]), norm=True).recenter()
 
 
+# noinspection PyProtectedMember
+def test_embeddings_get_center():
+    """
+    >>> embeddings = Embeddings([[1, 0], [.7, .7], [0, 1]], norm=False)
+    >>> embeddings._get_center()
+    array([0.9246781 , 0.38074981])
+    >>> embeddings = Embeddings([[1, 0], [0, 1], [.7, .7]], norm=False)
+    >>> embeddings._get_center()
+    array([0.70710678, 0.70710678])
+    """
+    pass
+
+
 def test_embedder():
     ratings = np.array([[1, .8, .5], [.6, .5, .2], [.6, .9, .5]])
     EmbeddingsFromRatingsRandom(n_dim=5)(ratings)
