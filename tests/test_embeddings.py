@@ -10,17 +10,17 @@ import pytest
 
 def test_embeddings():
     emb = Embeddings(np.array([[.2, .5, .3], [.3, .2, .2], [.6, .2, .3]]), norm=True)
-    emb.dilate(approx=False)
+    emb.dilated(approx=False)
     emb.recenter(approx=False)
 
     emb = Embeddings(np.array([[1, 1, 1], [1, 1, 1]]), norm=True)
-    emb.dilate()
+    emb.dilated()
 
     emb = Embeddings(np.array([[1, 1]]), norm=True)
     with pytest.raises(ValueError):
         emb.recenter()
     with pytest.raises(ValueError):
-        emb.dilate()
+        emb.dilated()
 
     emb = Embeddings(np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]]), norm=True)
     emb.recenter()
@@ -49,10 +49,10 @@ def test_embeddings():
 def test_embeddings_get_center():
     """
     >>> embeddings = Embeddings([[1, 0], [.7, .7], [0, 1]], norm=True)
-    >>> embeddings._get_center()
+    >>> embeddings.get_center()
     array([0.70710678, 0.70710678])
     >>> embeddings = Embeddings([[1, 0], [0, 1], [.7, .7]], norm=True)
-    >>> embeddings._get_center()
+    >>> embeddings.get_center()
     array([0.70710678, 0.70710678])
     """
     pass

@@ -82,14 +82,23 @@ class Embeddings(np.ndarray):
         """
         return np.multiply(self, ratings[::, np.newaxis])
 
-    def _get_center(self):
+    def get_center(self, approx=True):
         """
         Return the center of the embeddings.
 
+        With `approx` set to False, we use an exponential algorithm in `n_dim.`
         If `r` is the rank of the embedding matrix, we first find the `r` voters with
         maximal determinant, i.e. whose associated parallelepiped has the maximal volume.
         Then the result is the mean of the embeddings of these voters, normalized in the
         sense of the Euclidean norm.
+
+        With `approx` set to True, we use a polynomial algorithm: we simply take the mean
+        of the embeddings of all the voters, normalized in the sens of the Euclidean norm.
+
+        Parameters
+        ----------
+        approx : bool
+            Whether the computation is approximate.
 
         Return
         ------
@@ -99,35 +108,39 @@ class Embeddings(np.ndarray):
         Examples
         --------
         >>> embeddings = Embeddings([[1, 0], [0, 1], [.5, .5], [.7, .3]], norm=True)
-        >>> embeddings._get_center()
+        >>> embeddings.get_center(approx=False)
         array([0.70710678, 0.70710678])
+        >>> embeddings = Embeddings([[1, 0], [0, 1], [.5, .5], [.7, .3]], norm=True)
+        >>> embeddings.get_center(approx=True)
+        array([0.78086524, 0.62469951])
         """
-        matrix_rank = np.linalg.matrix_rank(self)
-        subset_of_voters = max(
-            combinations(range(self.n_voters), matrix_rank),
-            key=lambda subset: np.abs(np.linalg.det(self[subset, :]))
-        )
-        embeddings_subset = self[subset_of_voters, :]
-        mean = normalize(np.array(embeddings_subset.sum(axis=0)))
-        return mean
+        if approx:
+            return normalize(np.array(self.sum(axis=0)))
+        else:
+            matrix_rank = np.linalg.matrix_rank(self)
+            subset_of_voters = max(
+                combinations(range(self.n_voters), matrix_rank),
+                key=lambda subset: np.abs(np.linalg.det(self[subset, :]))
+            )
+            embeddings_subset = self[subset_of_voters, :]
+            mean = normalize(np.array(embeddings_subset.sum(axis=0)))
+            return mean
 
-    def dilate(self, approx=True):
+    def dilated(self, approx=True):
         """
-        Dilate the embeddings of the
-        voters so that they take all
-        the space possible in the non-negative orthant.
+        Dilate the embeddings of the voters so that they take more space
+        in the non-negative orthant.
 
         Parameters
         ----------
         approx : bool
-            If True, we compute the center of the population
-            with a polynomial time algorithm. If False, we use
-            an algorithm exponential in :attr:`n_dim`.
+            Passed to :meth:`get_center` in order to compute the center
+            of the voters' embeddings.
 
         Return
         ------
         Embeddings
-            The embeddings itself.
+            A new Embedding object with the dilated embeddings.
 
         Examples
         --------
@@ -136,28 +149,20 @@ class Embeddings(np.ndarray):
         Embeddings([[0.66226618, 0.52981294, 0.52981294],
                     [0.52981294, 0.52981294, 0.66226618],
                     [0.52981294, 0.66226618, 0.52981294]])
-        >>> embeddings.dilate()
+        >>> embeddings.dilated()
         Embeddings([[0.98559856, 0.11957316, 0.11957316],
                     [0.11957316, 0.11957316, 0.98559856],
                     [0.11957316, 0.98559856, 0.11957316]])
         """
 
         if self.n_voters < 2:
-            raise ValueError("Cannot dilate a ratings with less than 2 candidates")
-
-        positions = np.array(self)
-        if approx:
-            center = normalize(positions.sum(axis=0))
-        else:
-            center = self._get_center()
-
-        min_value = np.dot(self.voter_embeddings(0), center)
-        for i in range(self.n_voters):
-            val = np.dot(self.voter_embeddings(i), center)
-            if val < min_value:
-                min_value = val
-
-        theta_max = np.arccos(min_value)
+            raise ValueError("Cannot dilate embeddings with less than 2 voters.")
+        center = self.get_center(approx=approx)
+        min_scalar_product = min([
+            np.dot(normalize(self.voter_embeddings(i)), center)
+            for i in range(self.n_voters)
+        ])
+        theta_max = np.arccos(min_scalar_product)
         k = np.pi / (4 * theta_max)
 
         new_positions = np.zeros((self.n_voters, self.n_dim))
@@ -208,11 +213,7 @@ class Embeddings(np.ndarray):
         if self.n_voters < 2:
             raise ValueError("Cannot recenter a ratings with less than 2 candidates")
 
-        positions = np.array(self)
-        if approx:
-            center = normalize(positions.sum(axis=0))
-        else:
-            center = self._get_center()
+        center = self.get_center(approx=approx)
 
         target_center = np.ones(self.n_dim)
         target_center = normalize(target_center)
