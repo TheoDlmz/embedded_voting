@@ -48,10 +48,10 @@ def test_embeddings():
 # noinspection PyProtectedMember
 def test_embeddings_get_center():
     """
-    >>> embeddings = Embeddings([[1, 0], [.7, .7], [0, 1]], norm=False)
+    >>> embeddings = Embeddings([[1, 0], [.7, .7], [0, 1]], norm=True)
     >>> embeddings._get_center()
-    array([0.9246781 , 0.38074981])
-    >>> embeddings = Embeddings([[1, 0], [0, 1], [.7, .7]], norm=False)
+    array([0.70710678, 0.70710678])
+    >>> embeddings = Embeddings([[1, 0], [0, 1], [.7, .7]], norm=True)
     >>> embeddings._get_center()
     array([0.70710678, 0.70710678])
     """

@@ -5,6 +5,7 @@ theo.delemazure@ens.fr
 
 This file is part of Embedded Voting.
 """
+from itertools import combinations
 import numpy as np
 import matplotlib.pyplot as plt
 from embedded_voting.utils.miscellaneous import normalize
@@ -101,26 +102,13 @@ class Embeddings(np.ndarray):
         >>> embeddings._get_center()
         array([0.70710678, 0.70710678])
         """
-        positions = np.array(self)
-        matrix_rank = np.linalg.matrix_rank(positions)
-        volume = 0
-        n_voters = self.n_voters
-        current_subset = list(np.arange(matrix_rank))
-        mean = np.zeros(self.n_dim)
-        while current_subset[0] <= n_voters - matrix_rank:
-            current_embeddings = positions[current_subset, ...]
-            new_volume = np.sqrt(np.linalg.det(np.dot(current_embeddings, current_embeddings.T)))
-            if new_volume > volume:
-                volume = new_volume
-                mean = normalize(current_embeddings.sum(axis=0))
-            x = 1
-            while current_subset[matrix_rank - x] == n_voters - x:
-                x += 1
-            val = current_subset[matrix_rank - x] + 1
-            while x > 0:
-                current_subset[matrix_rank - x] = val
-                val += 1
-                x -= 1
+        matrix_rank = np.linalg.matrix_rank(self)
+        subset_of_voters = max(
+            combinations(range(self.n_voters), matrix_rank),
+            key=lambda subset: np.abs(np.linalg.det(self[subset, :]))
+        )
+        embeddings_subset = self[subset_of_voters, :]
+        mean = normalize(np.array(embeddings_subset.sum(axis=0)))
         return mean
 
     def dilate(self, approx=True):
