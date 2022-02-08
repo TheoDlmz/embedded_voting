@@ -11,16 +11,17 @@ from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.utils.plots import create_ternary_plot, create_3d_plot
 
 
+# noinspection PyUnresolvedReferences
 class Embeddings(np.ndarray):
     """
-    Embeddings of voters
+    Embeddings of the voters.
 
     Parameters
     ----------
     positions : np.ndarray or list or Embeddings
         The embeddings of the voters. Its dimensions are :attr:`n_voters`, :attr:`n_dim`.
     norm: bool
-        If True, normalize the embeddings
+        If True, normalize the embeddings.
 
     Attributes
     ----------
@@ -31,12 +32,12 @@ class Embeddings(np.ndarray):
 
     Examples
     --------
-    >>> embs = Embeddings([[1, 0], [0, 1], [0.5, 0.5]])
-    >>> embs.n_voters
+    >>> embeddings = Embeddings([[1, 0], [0, 1], [0.5, 0.5]])
+    >>> embeddings.n_voters
     3
-    >>> embs.n_dim
+    >>> embeddings.n_dim
     2
-    >>> embs.voter_embeddings(0)
+    >>> embeddings.voter_embeddings(0)
     array([1., 0.])
     """
 
@@ -72,8 +73,8 @@ class Embeddings(np.ndarray):
 
         Examples
         --------
-        >>> embs = Embeddings(np.array([[1, 0], [0, 1], [0.5, 0.5]]), norm=False)
-        >>> embs.scored(np.array([.8, .5, .4]))
+        >>> embeddings = Embeddings(np.array([[1, 0], [0, 1], [0.5, 0.5]]), norm=False)
+        >>> embeddings.scored(np.array([.8, .5, .4]))
         Embeddings([[0.8, 0. ],
                     [0. , 0.5],
                     [0.2, 0.2]])
@@ -135,12 +136,12 @@ class Embeddings(np.ndarray):
 
         Examples
         --------
-        >>> embs = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]])).normalize()
-        >>> embs
+        >>> embeddings = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]])).normalize()
+        >>> embeddings
         Embeddings([[0.66226618, 0.52981294, 0.52981294],
                     [0.52981294, 0.52981294, 0.66226618],
                     [0.52981294, 0.66226618, 0.52981294]])
-        >>> embs.dilate()
+        >>> embeddings.dilate()
         Embeddings([[0.98559856, 0.11957316, 0.11957316],
                     [0.11957316, 0.11957316, 0.98559856],
                     [0.11957316, 0.98559856, 0.11957316]])
@@ -198,12 +199,12 @@ class Embeddings(np.ndarray):
 
         Examples
         --------
-        >>> embs = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]])).normalize()
-        >>> embs
+        >>> embeddings = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]])).normalize()
+        >>> embeddings
         Embeddings([[-0.45267873, -0.81482171, -0.36214298],
                     [-0.42163702, -0.73786479, -0.52704628],
                     [-0.66666667, -0.33333333, -0.66666667]])
-        >>> embs.recenter()
+        >>> embeddings.recenter()
         Embeddings([[0.40215359, 0.75125134, 0.52334875],
                     [0.56352875, 0.6747875 , 0.47654713],
                     [0.70288844, 0.24253193, 0.66867489]])
@@ -253,12 +254,12 @@ class Embeddings(np.ndarray):
 
         Examples
         --------
-        >>> embs = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
-        >>> embs
+        >>> embeddings = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
+        >>> embeddings
         Embeddings([[-0.5, -0.9, -0.4],
                     [-0.4, -0.7, -0.5],
                     [-0.4, -0.2, -0.4]])
-        >>> embs.normalize()
+        >>> embeddings.normalize()
         Embeddings([[-0.45267873, -0.81482171, -0.36214298],
                     [-0.42163702, -0.73786479, -0.52704628],
                     [-0.66666667, -0.33333333, -0.66666667]])
@@ -266,7 +267,7 @@ class Embeddings(np.ndarray):
         new_positions = (self.T / np.sqrt((self ** 2).sum(axis=1))).T
         return Embeddings(new_positions, False)
 
-    def _plot_3D(self, fig, dim, plot_position=None):
+    def _plot_3d(self, fig, dim, plot_position=None):
         """
         Plot a figure of the ratings
         on a 3D space using matplotlib.
@@ -334,7 +335,7 @@ class Embeddings(np.ndarray):
 
         return tax
 
-    def plot(self, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
+    def plot(self, plot_kind="3D", dim: list = None, fig=None, plot_position=None, show=True):
         """
         Plot the ratings of the voters,
         either on a 3D plot, or on a ternary plot.
@@ -382,7 +383,7 @@ class Embeddings(np.ndarray):
             fig = plt.figure(figsize=(8, 8))
 
         if plot_kind == "3D":
-            ax = self._plot_3D(fig, dim, plot_position)
+            ax = self._plot_3d(fig, dim, plot_position)
         elif plot_kind == "ternary":
             ax = self._plot_ternary(fig, dim, plot_position)
         else:
@@ -392,7 +393,7 @@ class Embeddings(np.ndarray):
             plt.show()  # pragma: no cover
         return ax
 
-    def _plot_scores_3D(self, sizes, fig, plot_position, dim):
+    def _plot_scores_3d(self, sizes, fig, plot_position, dim):
         """
         Plot a figure of the ratings on a
         3D space with the embeddings vector
@@ -504,6 +505,7 @@ class Embeddings(np.ndarray):
         if dim is None:
             dim = [0, 1, 2]
         else:
+            # noinspection PyTypeChecker
             if len(dim) != 3:
                 raise ValueError("The number of dimensions should be 3")
 
@@ -511,7 +513,7 @@ class Embeddings(np.ndarray):
             fig = plt.figure(figsize=(8, 8))
 
         if plot_kind == "3D":
-            ax = self._plot_scores_3D(sizes, fig, plot_position, dim)
+            ax = self._plot_scores_3d(sizes, fig, plot_position, dim)
         elif plot_kind == "ternary":
             ax = self._plot_scores_ternary(sizes, fig, plot_position, dim)
         else:
@@ -630,6 +632,7 @@ class Embeddings(np.ndarray):
         if show:
             plt.show()  # pragma: no cover
 
+    # noinspection PyMethodOverriding
     def copy(self):
         """
         Return a copy of the embeddings.
@@ -641,9 +644,9 @@ class Embeddings(np.ndarray):
 
         Examples
         --------
-        >>> embs = Embeddings(np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
-        >>> second_embs = embs.copy()
-        >>> second_embs
+        >>> embeddings = Embeddings(np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
+        >>> second_embeddings = embeddings.copy()
+        >>> second_embeddings
         Embeddings([[0.5, 0.9, 0.4],
                     [0.4, 0.7, 0.5],
                     [0.4, 0.2, 0.4]])
