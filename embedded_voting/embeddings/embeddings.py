@@ -56,25 +56,25 @@ class Embeddings(np.ndarray):
     def voter_embeddings(self, i):
         return np.array(self[i:i + 1, :])[0]
 
-    def scored(self, ratings):
+    def times_ratings(self, ratings):
         """
-        This method compute the embeddings multiplied by ratings given by the voter. For each voter, its
-        embeddings are multiplied by the given rating
+        This method computes the embeddings multiplied by the ratings given by the voters to a given candidate.
+        For each voter, its embeddings are multiplied by the given rating.
 
         Parameters
         ----------
         ratings: np.ndarray
-            The vector of ratings given by the voters
+            The vector of ratings given by the voters to a given candidate.
 
         Return
         ------
         np.ndarray
-            The scored embeddings
+            The scored embeddings.
 
         Examples
         --------
         >>> embeddings = Embeddings(np.array([[1, 0], [0, 1], [0.5, 0.5]]), norm=False)
-        >>> embeddings.scored(np.array([.8, .5, .4]))
+        >>> embeddings.times_ratings(np.array([.8, .5, .4]))
         Embeddings([[0.8, 0. ],
                     [0. , 0.5],
                     [0.2, 0.2]])
@@ -83,16 +83,24 @@ class Embeddings(np.ndarray):
 
     def _get_center(self):
         """
-        Return the center of the ratings, computed
-        as the center of the :attr:`n_dim`-dimensional
-        cube of maximal volume.
+        Return the center of the embeddings.
+
+        If `r` is the rank of the embedding matrix, we first find the `r` voters with
+        maximal determinant, i.e. whose associated parallelepiped has the maximal volume.
+        Then the result is the mean of the embeddings of these voters, normalized in the
+        sense of the Euclidean norm.
 
         Return
         ------
         np.ndarray
-            The position of the center vector. Should be of length :attr:`n_dim`.
-        """
+            The normalized position of the center vector. Size: :attr:`n_dim`.
 
+        Examples
+        --------
+        >>> embeddings = Embeddings([[1, 0], [0, 1], [.5, .5], [.7, .3]], norm=True)
+        >>> embeddings._get_center()
+        array([0.70710678, 0.70710678])
+        """
         positions = np.array(self)
         matrix_rank = np.linalg.matrix_rank(positions)
         volume = 0
@@ -113,7 +121,6 @@ class Embeddings(np.ndarray):
                 current_subset[matrix_rank - x] = val
                 val += 1
                 x -= 1
-
         return mean
 
     def dilate(self, approx=True):

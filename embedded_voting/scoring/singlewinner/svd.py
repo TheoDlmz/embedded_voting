@@ -72,7 +72,7 @@ class SVDRule(ScoringRule):
         self.use_rank = use_rank
 
     def _score_(self, candidate):
-        embeddings = self.embeddings_.scored(np.sqrt(self.ratings_.candidate_ratings(candidate)))
+        embeddings = self.embeddings_.times_ratings(np.sqrt(self.ratings_.candidate_ratings(candidate)))
 
         if self.embeddings_.shape[1] == 0:
             return self.aggregation_rule(self.ratings_.candidate_ratings(candidate))
@@ -284,7 +284,7 @@ class SVDMax(SVDRule):
             The feature vector of the
             candidate, of length :attr:`~embedded_voting.Embeddings.n_dim`.
         """
-        embeddings = self.embeddings_.scored(np.sqrt(self.ratings_[::, candidate]))
+        embeddings = self.embeddings_.times_ratings(np.sqrt(self.ratings_[::, candidate]))
         _, vp, vec = np.linalg.svd(embeddings)
         vec = vec[0]
         if vec.sum() < 0:
