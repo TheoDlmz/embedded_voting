@@ -117,13 +117,14 @@ class EmbeddingsFromRatingsCorrelation(EmbeddingsFromRatings):
     >>> np.random.seed(42)
     >>> ratings = np.ones((5, 3))
     >>> generator = EmbeddingsFromRatingsCorrelation()
-    >>> generator(ratings)
+    >>> embeddings = generator(ratings)
+    >>> embeddings
     Embeddings([[0.4472136, 0.4472136, 0.4472136, 0.4472136, 0.4472136],
                 [0.4472136, 0.4472136, 0.4472136, 0.4472136, 0.4472136],
                 [0.4472136, 0.4472136, 0.4472136, 0.4472136, 0.4472136],
                 [0.4472136, 0.4472136, 0.4472136, 0.4472136, 0.4472136],
                 [0.4472136, 0.4472136, 0.4472136, 0.4472136, 0.4472136]])
-    >>> generator.n_sing_val_
+    >>> embeddings.n_sing_val_
     1
 
     """
@@ -147,5 +148,6 @@ class EmbeddingsFromRatingsCorrelation(EmbeddingsFromRatings):
             if s_e >= max(1 / n_voters, 1 / n_candidates):
                 n_v += 1
 
-        self.n_sing_val_ = n_v
-        return Embeddings(np.dot(positions, positions.T))
+        embeddings = Embeddings(np.dot(positions, positions.T))
+        embeddings.n_sing_val_ = n_v
+        return embeddings

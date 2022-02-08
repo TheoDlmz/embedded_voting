@@ -7,3 +7,4 @@ nbsphinx
 IPython
 
 scikit-learn
+tqdm
