@@ -153,6 +153,10 @@ class Embeddings(np.ndarray):
         Embeddings([[0.98559856, 0.11957316, 0.11957316],
                     [0.11957316, 0.11957316, 0.98559856],
                     [0.11957316, 0.98559856, 0.11957316]])
+        >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True).normalize()
+        >>> embeddings.dilated()
+        Embeddings([[ 0.92387953, -0.38268343],
+                    [ 0.38268343,  0.92387953]])
         """
 
         if self.n_voters < 2:
