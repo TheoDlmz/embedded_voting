@@ -8,7 +8,7 @@ This file is part of Embedded Voting.
 import numpy as np
 from embedded_voting.scoring.singlewinner.general import ScoringRule
 from embedded_voting.scoring.singlewinner.svd import *
-from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsIdentity
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_identity import EmbeddingsFromRatingsIdentity
 
 
 class PositionalRuleExtension(ScoringRule):

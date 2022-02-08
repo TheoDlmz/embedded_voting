@@ -2,7 +2,7 @@ from embedded_voting.aggregation.aggregator import Aggregator
 from embedded_voting.scoring.singlewinner.fast import FastNash, FastSum
 from embedded_voting.scoring.singlewinner.trivialRules import SumScores, ProductScores
 from embedded_voting.scoring.singlewinner.mlerules import MLEGaussian
-from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsCorrelation, EmbeddingsFromRatingsSelf
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
 
 
 class AggregatorFastNash(Aggregator):

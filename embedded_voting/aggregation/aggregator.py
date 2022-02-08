@@ -8,7 +8,7 @@ This file is part of Embedded Voting.
 
 from embedded_voting.scoring.singlewinner.fast import FastNash
 from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsCorrelation
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation import EmbeddingsFromRatingsCorrelation
 import numpy as np
 
 

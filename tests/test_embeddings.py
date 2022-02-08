@@ -1,7 +1,9 @@
 from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsRandom, EmbeddingsFromRatingsSelf
-from embedded_voting.embeddings.generator import EmbeddingsGeneratorRandom, EmbeddingsGeneratorPolarized
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_random import EmbeddingsFromRatingsRandom
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
+from embedded_voting.embeddings.embeddings_generator_random import EmbeddingsGeneratorRandom
+from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 import numpy as np
 import pytest
 

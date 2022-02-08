@@ -1,72 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Copyright Théo Delemazure
-theo.delemazure@ens.fr
-
-This file is part of Embedded Voting.
-"""
 import numpy as np
-from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.utils.miscellaneous import normalize
-
-
-class EmbeddingsGenerator:
-    """
-    This abstract class creates Embeddings from scratch using some function
-
-    Parameters
-    __________
-    n_voters: int
-        Number of voters in the embeddings
-    n_dim: int
-        Number of dimensions for the embeddings
-
-    Attributes
-    ----------
-    n_voters: int
-        Number of voters in the embeddings
-    n_dim: int
-        Number of dimensions for the embeddings
-
-    """
-    def __init__(self, n_voters, n_dim):
-        self.n_dim = n_dim
-        self.n_voters = n_voters
-
-    def __call__(self, *args):
-        """
-        This function creates embeddings
-
-        Return
-        ------
-        Embeddings
-        """
-        raise NotImplementedError
-
-
-class EmbeddingsGeneratorRandom(EmbeddingsGenerator):
-    """
-    Create random embeddings
-
-    Examples
-    --------
-    >>> np.random.seed(42)
-    >>> generator = EmbeddingsGeneratorRandom(10, 2)
-    >>> generator()
-    Embeddings([[0.96337365, 0.26816265],
-                [0.39134578, 0.92024371],
-                [0.70713157, 0.70708199],
-                [0.89942118, 0.43708299],
-                [0.65433791, 0.75620229],
-                [0.70534506, 0.70886413],
-                [0.1254653 , 0.99209801],
-                [0.95076   , 0.30992809],
-                [0.95508537, 0.29633078],
-                [0.54080587, 0.84114744]])
-    """
-    def __call__(self, *args):
-        embs = np.abs(np.random.randn(self.n_voters, self.n_dim))
-        return Embeddings(embs, norm=True)
+from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.embeddings.embeddings_generator import EmbeddingsGenerator
 
 
 class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
@@ -206,4 +141,3 @@ class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
                 self._thetas[i] * (1 - polarisation))
 
         return Embeddings(positions)
-

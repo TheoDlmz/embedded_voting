@@ -11,7 +11,7 @@ import numpy as np
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsIdentity
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_identity import EmbeddingsFromRatingsIdentity
 
 
 class ScoringRule(DeleteCacheMixin):
