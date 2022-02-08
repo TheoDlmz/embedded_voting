@@ -56,8 +56,8 @@ class MovingVoter:
     Examples
     --------
     >>> moving_profile = MovingVoter()
-    >>> moving_profile(SumScores())
-    <embedded_voting.ratings.moving.MovingVoter object at ...>
+    >>> moving_profile(SumScores())  # DOCTEST: +ELLIPSIS
+    <embedded_voting.experiments.moving.MovingVoter object at ...>
     >>> moving_profile.moving_voter
     0
     >>> moving_profile.embeddings
