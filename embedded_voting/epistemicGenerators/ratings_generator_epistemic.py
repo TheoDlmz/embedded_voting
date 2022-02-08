@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
-from embedded_voting.ratings.ratingsGenerator import RatingsGenerator
+from embedded_voting.ratings.ratings_generator import RatingsGenerator
 
 
 class RatingsGeneratorEpistemic(RatingsGenerator):
