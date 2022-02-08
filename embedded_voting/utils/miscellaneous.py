@@ -11,7 +11,7 @@ import numpy as np
 
 def normalize(x):
     """
-    Normalize the input vector
+    Normalize the input vector.
 
     Parameters
     ----------
@@ -20,7 +20,7 @@ def normalize(x):
     Return
     ------
     np.ndarray
-        The normalized vector of x
+        `x` divided by its Euclidean norm.
 
     Examples
     --------
@@ -28,5 +28,8 @@ def normalize(x):
     >>> normalize(my_vector)
     array([0.        , 0.4472136 , 0.89442719])
 
+    >>> my_vector = [0, 1, 2]
+    >>> normalize(my_vector)
+    array([0.        , 0.4472136 , 0.89442719])
     """
     return x / np.linalg.norm(x)

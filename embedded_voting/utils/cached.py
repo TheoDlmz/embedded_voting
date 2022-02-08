@@ -71,4 +71,5 @@ class DeleteCacheMixin:
     """
 
     def delete_cache(self) -> None:
+        # noinspection PyAttributeOutsideInit
         self._cached_properties = dict()

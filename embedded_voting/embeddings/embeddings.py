@@ -8,7 +8,7 @@ This file is part of Embedded Voting.
 import numpy as np
 import matplotlib.pyplot as plt
 from embedded_voting.utils.miscellaneous import normalize
-from embedded_voting.utils.plots import create_ternary_plot, create_3D_plot
+from embedded_voting.utils.plots import create_ternary_plot, create_3d_plot
 
 
 class Embeddings(np.ndarray):
@@ -291,7 +291,7 @@ class Embeddings(np.ndarray):
             something to it.
 
         """
-        ax = create_3D_plot(fig, plot_position)
+        ax = create_3d_plot(fig, plot_position)
         for i, v in enumerate(self):
             x1 = v[dim[0]]
             x2 = v[dim[1]]
@@ -419,7 +419,7 @@ class Embeddings(np.ndarray):
             if you want to add something to it.
 
         """
-        ax = create_3D_plot(fig, plot_position)
+        ax = create_3d_plot(fig, plot_position)
         for i, (v, s) in enumerate(zip(np.array(self), sizes)):
             x1 = v[dim[0]]
             x2 = v[dim[1]]

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.utils.miscellaneous import normalize
-from embedded_voting.utils.plots import create_3D_plot, create_ternary_plot
+from embedded_voting.utils.plots import create_3d_plot, create_ternary_plot
 from embedded_voting.scoring.singlewinner.trivialRules import SumScores
 from embedded_voting.scoring.singlewinner.svd import SVDMax, SVDNash
 from embedded_voting.embeddings.embeddings import Embeddings
@@ -166,7 +166,7 @@ class MovingVoter:
 
         fig = plt.figure(figsize=(10, 5))
 
-        ax = create_3D_plot(fig, position=[1, 2, 1])
+        ax = create_3d_plot(fig, position=[1, 2, 1])
         name = ["Start", "End", "Orthogonal", "Consensus"]
         for i in range(self.ratings_.n_candidates):
             vec_init = normalize(tab_y[0, i])**2
