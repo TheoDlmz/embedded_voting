@@ -52,14 +52,14 @@ class SVDRule(ScoringRule):
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
     >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
     >>> election = SVDRule()(ratings, embeddings)
-    >>> election.scores_
-    [0.6041522986797286, 0.547722557505166, 0.5567764362830023]
+    >>> election.scores_  # DOCTEST: +ELLIPSIS
+    [0.6041522986797..., 0.547722557505..., 0.5567764362830...]
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
-    >>> election.welfare_
-    [1.0, 0.0, 0.16044515869439538]
+    >>> election.welfare_  # DOCTEST: +ELLIPSIS
+    [1.0, 0.0, 0.16044515869439...]
 
     """
     def __init__(self, aggregation_rule=np.prod, square_root=True, use_rank=False):
@@ -146,14 +146,14 @@ class SVDNash(SVDRule):
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
     >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
     >>> election = SVDNash()(ratings, embeddings)
-    >>> election.scores_
-    [0.6041522986797286, 0.547722557505166, 0.5567764362830023]
+    >>> election.scores_   # DOCTEST: +ELLIPSIS
+    [0.6041522986797..., 0.547722557505..., 0.5567764362830...]
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
     0
-    >>> election.welfare_
-    [1.0, 0.0, 0.16044515869439538]
+    >>> election.welfare_  # DOCTEST: +ELLIPSIS
+    [1.0, 0.0, 0.16044515869439...]
 
     """
     def __init__(self, square_root=True, use_rank=False):
@@ -181,14 +181,14 @@ class SVDSum(SVDRule):
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
     >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
     >>> election = SVDSum()(ratings, embeddings)
-    >>> election.scores_
-    [1.6150246429573318, 1.6417810801109665, 1.5535613514007114]
+    >>> election.scores_  # DOCTEST: +ELLIPSIS
+    [1.6150246429573..., 1.6417810801109..., 1.5535613514007...]
     >>> election.ranking_
     [1, 0, 2]
     >>> election.winner_
     1
-    >>> election.welfare_
-    [0.6967068756070167, 1.0, 0.0]
+    >>> election.welfare_  # DOCTEST: +ELLIPSIS
+    [0.6967068756070..., 1.0, 0.0]
 
     """
     def __init__(self, square_root=True, use_rank=False):
@@ -251,14 +251,14 @@ class SVDMax(SVDRule):
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
     >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
     >>> election = SVDMax()(ratings, embeddings)
-    >>> election.scores_
-    [1.0264274892038276, 1.1760506747094404, 0.9926782946277048]
+    >>> election.scores_  # DOCTEST: +ELLIPSIS
+    [1.0264274892038..., 1.1760506747094..., 0.9926782946277...]
     >>> election.ranking_
     [1, 0, 2]
     >>> election.winner_
     1
-    >>> election.welfare_
-    [0.18404731705548893, 1.0, 0.0]
+    >>> election.welfare_  # DOCTEST: +ELLIPSIS
+    [0.184047317055..., 1.0, 0.0]
 
     """
     def __init__(self, square_root=True, use_rank=False):
