@@ -1,39 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Copyright Théo Delemazure
-theo.delemazure@ens.fr
-
-This file is part of Embedded Voting.
-"""
-
 import numpy as np
-from embedded_voting.embeddings.embeddings import Embeddings
+
 from embedded_voting.ratings.ratings import Ratings
-
-
-class RatingsFromEmbeddings:
-    """
-    This abstract class is used to generate ratings from embeddings
-
-    Parameters
-    ----------
-    n_candidates: int
-        The number of candidates wanted in the ratings
-
-    Attributes
-    ----------
-    n_candidates: int
-        The number of candidates wanted in the ratings
-    """
-
-    def __init__(self, n_candidates):
-        self.n_candidates = n_candidates
-
-    def __call__(self, embeddings, *args):
-        """
-        This method generate ratings from the embeddings
-        """
-        raise NotImplementedError
+from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.ratings_from_embeddings import RatingsFromEmbeddings
 
 
 class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
@@ -128,7 +97,7 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
         --------
         >>> generator = RatingsFromEmbeddingsCorrelated(2, 3)
         >>> generator.set_scores(np.array([[.8,.4],[.1,.7]]))
-        <embedded_voting.ratings.ratingsFromEmbeddings.RatingsFromEmbeddingsCorrelated object at ...>
+        <embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated.RatingsFromEmbeddingsCorrelated object at ...>
         >>> generator.scores_matrix
         array([[0.8, 0.4],
                [0.1, 0.7]])

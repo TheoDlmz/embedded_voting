@@ -1,5 +1,6 @@
 import numpy as np
-from embedded_voting import RatingsGenerator, Ratings
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.ratings.ratings_generator import RatingsGenerator
 
 
 class RatingsGeneratorUniform(RatingsGenerator):

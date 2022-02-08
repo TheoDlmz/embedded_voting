@@ -1,0 +1,1 @@
+from embedded_voting.ratings_from_embeddings.ratings_from_embeddings import RatingsFromEmbeddings

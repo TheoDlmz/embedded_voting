@@ -5,7 +5,7 @@ from embedded_voting.scoring.singlewinner.svd import SVDNash
 import matplotlib.pyplot as plt
 from embedded_voting.utils.plots import create_map_plot
 from embedded_voting.embeddings.generator import EmbeddingsGeneratorPolarized
-from embedded_voting.ratings.ratingsFromEmbeddings import RatingsFromEmbeddingsCorrelated
+from embedded_voting import RatingsFromEmbeddingsCorrelated
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 

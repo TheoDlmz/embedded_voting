@@ -1,6 +1,6 @@
 from embedded_voting.scoring.multiwinner.general import IterRule
 import numpy as np
-from embedded_voting.ratings.ratingsFromEmbeddings import RatingsFromEmbeddingsCorrelated
+from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.generator import EmbeddingsGeneratorPolarized
 
 

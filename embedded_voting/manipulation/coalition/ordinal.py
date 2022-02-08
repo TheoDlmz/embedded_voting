@@ -4,7 +4,7 @@ from embedded_voting.manipulation.coalition.general import ManipulationCoalition
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension, BordaExtension, KApprovalExtension
 from embedded_voting.embeddings.generator import EmbeddingsGeneratorPolarized
-from embedded_voting.ratings.ratingsFromEmbeddings import RatingsFromEmbeddingsCorrelated
+from embedded_voting import RatingsFromEmbeddingsCorrelated
 
 
 class ManipulationCoalitionExtension(ManipulationCoalition):

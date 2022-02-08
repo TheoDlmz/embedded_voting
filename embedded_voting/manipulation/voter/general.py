@@ -1,6 +1,6 @@
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.embeddings.generator import EmbeddingsGeneratorPolarized
-from embedded_voting.ratings.ratingsFromEmbeddings import RatingsFromEmbeddingsCorrelated
+from embedded_voting import RatingsFromEmbeddingsCorrelated
 from embedded_voting.scoring.singlewinner.svd import SVDNash
 from embedded_voting.scoring.singlewinner.ordinal import BordaExtension
 import numpy as np
