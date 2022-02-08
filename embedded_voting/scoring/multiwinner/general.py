@@ -330,13 +330,13 @@ class IterRule(MultiwinnerRule):
         if dim is None:
             dim = [0, 1, 2]
         for i in range(n_candidates):
-            ax = self.embeddings.plot_ratings(ls_weight[i],
-                                              plot_kind=plot_kind,
-                                              title="Step %i" % i,
-                                              dim=dim,
-                                              fig=fig,
-                                              plot_position=plot_position,
-                                              show=False)
+            ax = self.embeddings.plot_scores(ls_weight[i],
+                                             plot_kind=plot_kind,
+                                             title="Step %i" % i,
+                                             dim=dim,
+                                             fig=fig,
+                                             plot_position=plot_position,
+                                             show=False)
 
             if i < n_candidates - 1:
                 x1 = vectors[i][dim[0]]

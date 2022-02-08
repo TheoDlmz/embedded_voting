@@ -42,12 +42,12 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     >>> np.random.seed(42)
     >>> generator = RatingsGeneratorEpistemicGroupedNoise([2, 2])
     >>> generator()
-    Ratings([[14.03963831],
-             [14.81094637],
-             [13.41737103],
-             [13.44883031]])
+    Ratings([[14.0396...],
+             [14.8109...],
+             [13.4173...],
+             [13.4488...]])
     >>> generator.ground_truth_
-    array([13.74540119])
+    array([13.7454...])
     """
     def __init__(self, groups_sizes, group_noise=1, minimum_value=10, maximum_value=20):
         super().__init__(minimum_value=minimum_value, maximum_value=maximum_value,

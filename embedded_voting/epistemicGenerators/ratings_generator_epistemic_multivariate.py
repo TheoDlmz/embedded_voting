@@ -34,18 +34,18 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
     >>> np.random.seed(42)
     >>> generator = RatingsGeneratorEpistemicMultivariate(np.ones((5, 5)))
     >>> generator()
-    Ratings([[14.85728131],
-             [14.85728131],
-             [14.85728131],
-             [14.85728131],
-             [14.85728131]])
+    Ratings([[14.857...],
+             [14.857...],
+             [14.857...],
+             [14.857...],
+             [14.857...]])
     >>> generator.independent_noise = 0.5
     >>> generator()
-    Ratings([[13.81223438],
-             [13.95888662],
-             [13.21274843],
-             [13.65293116],
-             [13.98058382]])
+    Ratings([[13.812...],
+             [13.958...],
+             [13.212...],
+             [13.652...],
+             [13.980...]])
 
     """
 
