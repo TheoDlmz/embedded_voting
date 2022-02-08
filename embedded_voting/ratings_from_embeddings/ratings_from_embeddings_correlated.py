@@ -66,7 +66,7 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
         ------
         Ratings
         """
-        embeddings = Embeddings(embeddings)
+        embeddings = Embeddings(embeddings, norm=True)
         positions = np.array(embeddings)
         n_voters = embeddings.n_voters
         ratings = coherence * (positions ** 2).dot(self.scores_matrix)

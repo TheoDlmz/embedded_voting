@@ -50,7 +50,7 @@ class SVDRule(ScoringRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = SVDRule()(ratings, embeddings)
     >>> election.scores_  # DOCTEST: +ELLIPSIS
     [0.6041522986797..., 0.547722557505..., 0.5567764362830...]
@@ -111,7 +111,7 @@ class SVDRule(ScoringRule):
         Examples
         --------
         >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-        >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+        >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
         >>> election = SVDRule()(ratings, embeddings)
         >>> election.ranking_
         [0, 2, 1]
@@ -144,7 +144,7 @@ class SVDNash(SVDRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = SVDNash()(ratings, embeddings)
     >>> election.scores_   # DOCTEST: +ELLIPSIS
     [0.6041522986797..., 0.547722557505..., 0.5567764362830...]
@@ -179,7 +179,7 @@ class SVDSum(SVDRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = SVDSum()(ratings, embeddings)
     >>> election.scores_  # DOCTEST: +ELLIPSIS
     [1.6150246429573..., 1.6417810801109..., 1.5535613514007...]
@@ -214,7 +214,7 @@ class SVDMin(SVDRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = SVDMin()(ratings, embeddings)
     >>> election.scores_
     [0.5885971537535042, 0.4657304054015261, 0.5608830567730065]
@@ -249,7 +249,7 @@ class SVDMax(SVDRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = SVDMax()(ratings, embeddings)
     >>> election.scores_  # DOCTEST: +ELLIPSIS
     [1.0264274892038..., 1.1760506747094..., 0.9926782946277...]
@@ -309,7 +309,7 @@ class SVDMax(SVDRule):
         Examples
         --------
         >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-        >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+        >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
         >>> election = SVDMax()(ratings, embeddings)
         >>> election.features_
         array([[0.93600783, 0.38770714],
@@ -400,7 +400,7 @@ class SVDLog(SVDRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = SVDLog()(ratings, embeddings)
     >>> election.scores_
     [1.169125718695728, 1.1598653051965206, 1.1347313336962574]

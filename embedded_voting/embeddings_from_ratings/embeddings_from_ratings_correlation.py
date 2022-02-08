@@ -50,6 +50,6 @@ class EmbeddingsFromRatingsCorrelation(EmbeddingsFromRatings):
             if s_e >= max(1 / n_voters, 1 / n_candidates):
                 n_v += 1
 
-        embeddings = Embeddings(np.dot(positions, positions.T))
+        embeddings = Embeddings(np.dot(positions, positions.T), norm=True)
         embeddings.n_sing_val_ = n_v
         return embeddings

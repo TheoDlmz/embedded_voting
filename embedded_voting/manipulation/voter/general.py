@@ -58,7 +58,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
     def __init__(self, ratings, embeddings, rule=None):
         self.ratings = Ratings(ratings)
-        self.embeddings = Embeddings(embeddings)
+        self.embeddings = Embeddings(embeddings, norm=True)
         self.rule = rule
         if rule is not None:
             global_rule = self.rule(self.ratings, self.embeddings)
@@ -95,7 +95,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
             The object itself.
         """
         if embeddings is not None:
-            self.embeddings = Embeddings(embeddings)
+            self.embeddings = Embeddings(embeddings, norm=True)
         self.ratings = Ratings(ratings)
         global_rule = self.rule(self.ratings, self.embeddings)
         self.winner_ = global_rule.winner_

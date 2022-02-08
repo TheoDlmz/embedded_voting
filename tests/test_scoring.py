@@ -9,7 +9,7 @@ import pytest
 
 def test_features():
     ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    embeddings = Embeddings(np.array([[1, 1, 0], [1, 0, 1], [0, 1, 0]]))
+    embeddings = Embeddings(np.array([[1, 1, 0], [1, 0, 1], [0, 1, 0]]), norm=True)
     election = FeaturesRule()(ratings, embeddings)
     election.plot_features("3D", show=False)
     election.plot_features("ternary", show=False)
@@ -19,20 +19,20 @@ def test_features():
 
 def test_svd():
     ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    embeddings = Embeddings(np.array([[1, 1, 0], [1, 0, 1], [0, 1, 0]]))
+    embeddings = Embeddings(np.array([[1, 1, 0], [1, 0, 1], [0, 1, 0]]), norm=True)
     election = SVDMax()(ratings, embeddings)
     election.plot_features("3D", show=False)
     election.plot_features("ternary", show=False)
     with pytest.raises(ValueError):
         election.plot_features("3D", dim=[0, 1], show=False)
 
-    embeddings = Embeddings(np.array(([[1, 1, 2], [0, 1, 1]])))
+    embeddings = Embeddings(np.array(([[1, 1, 2], [0, 1, 1]])), norm=True)
     SVDMax()(ratings, embeddings)
 
 
 def test_multi():
     ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    embeddings = Embeddings(np.array([[1, 1, 0], [1, 0, 1], [0, 1, 0]]))
+    embeddings = Embeddings(np.array([[1, 1, 0], [1, 0, 1], [0, 1, 0]]), norm=True)
     election = IterSVD(k=2)(ratings, embeddings)
     election.plot_weights("3D", show=False)
     election.plot_weights("ternary", show=False)

@@ -21,7 +21,7 @@ class SumScores(ScoringRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = SumScores()(ratings, embeddings)
     >>> election.scores_
     [1.4, 1.6, 1.3]
@@ -45,7 +45,7 @@ class ProductScores(ScoringRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = ProductScores()(ratings, embeddings)
     >>> election.scores_
     [(3, 0.06999999999999999), (2, 0.6), (3, 0.048)]

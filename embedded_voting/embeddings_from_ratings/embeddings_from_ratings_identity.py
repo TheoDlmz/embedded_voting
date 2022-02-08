@@ -23,4 +23,4 @@ class EmbeddingsFromRatingsIdentity(EmbeddingsFromRatings):
     def __call__(self, ratings):
         ratings = Ratings(ratings)
         n_dim = ratings.shape[0]
-        return Embeddings(np.eye(n_dim))
+        return Embeddings(np.eye(n_dim), norm=True)

@@ -55,7 +55,7 @@ class PositionalRuleExtension(ScoringRule):
     Examples
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
-    >>> embeddings = Embeddings([[1, 0], [1, 1], [0, 1]])
+    >>> embeddings = Embeddings([[1, 0], [1, 1], [0, 1]], norm=True)
     >>> election = SVDNash()(ratings, embeddings)
     >>> election.ranking_
     [3, 0, 1, 2]
@@ -80,7 +80,7 @@ class PositionalRuleExtension(ScoringRule):
         self.ratings_ = Ratings(ratings)
         if embeddings is None:
             embeddings = EmbeddingsFromRatingsIdentity()(self.ratings_)
-        self.embeddings_ = Embeddings(embeddings)
+        self.embeddings_ = Embeddings(embeddings, norm=True)
         self.fake_ratings_ = Ratings(self._create_fake_ratings())
         if self.base_rule is not None:
             self._rule = self.base_rule(self.fake_ratings_, self.embeddings_)
@@ -186,7 +186,7 @@ class PluralityExtension(PositionalRuleExtension):
     Examples
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
-    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
     >>> election = PluralityExtension(4, rule=SVDNash(use_rank=True))(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0., 0., 0., 1.],
@@ -222,7 +222,7 @@ class KApprovalExtension(PositionalRuleExtension):
     Examples
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
-    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
     >>> election = KApprovalExtension(n_candidates=4, k=2, rule=SVDNash(use_rank=True))(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0., 0., 1., 1.],
@@ -254,7 +254,7 @@ class VetoExtension(PositionalRuleExtension):
     Examples
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
-    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
     >>> election = VetoExtension(n_candidates=4, rule=SVDNash())(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0., 1., 1., 1.],
@@ -284,7 +284,7 @@ class BordaExtension(PositionalRuleExtension):
     Examples
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
-    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
     >>> election = BordaExtension(n_candidates=4, rule=SVDNash())(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0.        , 0.33333333, 0.66666667, 1.        ],
@@ -316,7 +316,7 @@ class InstantRunoffExtension(ScoringRule):
     Examples
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
-    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
     >>> election = InstantRunoffExtension(SVDNash())(ratings, embeddings)
     >>> election.ranking_
     [1, 3, 2, 0]
@@ -330,7 +330,7 @@ class InstantRunoffExtension(ScoringRule):
         ratings = Ratings(ratings)
         if embeddings is None:
             embeddings = EmbeddingsFromRatingsIdentity()(ratings)
-        self.embeddings_ = Embeddings(embeddings)
+        self.embeddings_ = Embeddings(embeddings, norm=True)
         self.ratings_ = ratings
         self.delete_cache()
         return self

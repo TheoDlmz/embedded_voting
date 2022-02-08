@@ -140,4 +140,4 @@ class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
             positions[i] = self._orthogonal_profile[i] * np.cos(self._thetas[i] * (1 - polarisation)) + e_2 * np.sin(
                 self._thetas[i] * (1 - polarisation))
 
-        return Embeddings(positions)
+        return Embeddings(positions, norm=True)

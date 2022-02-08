@@ -32,7 +32,7 @@ class Embeddings(np.ndarray):
 
     Examples
     --------
-    >>> embeddings = Embeddings([[1, 0], [0, 1], [0.5, 0.5]])
+    >>> embeddings = Embeddings([[1, 0], [0, 1], [0.5, 0.5]], norm=True)
     >>> embeddings.n_voters
     3
     >>> embeddings.n_dim
@@ -41,7 +41,7 @@ class Embeddings(np.ndarray):
     array([1., 0.])
     """
 
-    def __new__(cls, positions, norm=True):
+    def __new__(cls, positions, norm):
         obj = np.asarray(positions).view(cls)
         if norm:
             obj = (obj.T / np.sqrt((obj ** 2).sum(axis=1))).T
@@ -136,7 +136,7 @@ class Embeddings(np.ndarray):
 
         Examples
         --------
-        >>> embeddings = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]])).normalize()
+        >>> embeddings = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]]), norm=True).normalize()
         >>> embeddings
         Embeddings([[0.66226618, 0.52981294, 0.52981294],
                     [0.52981294, 0.52981294, 0.66226618],
@@ -199,7 +199,7 @@ class Embeddings(np.ndarray):
 
         Examples
         --------
-        >>> embeddings = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]])).normalize()
+        >>> embeddings = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=True).normalize()
         >>> embeddings
         Embeddings([[-0.45267873, -0.81482171, -0.36214298],
                     [-0.42163702, -0.73786479, -0.52704628],

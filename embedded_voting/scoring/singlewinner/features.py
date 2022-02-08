@@ -23,7 +23,7 @@ class FeaturesRule(ScoringRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = FeaturesRule()(ratings, embeddings)
     >>> election.scores_
     [0.44..., 0.92..., 0.43...]

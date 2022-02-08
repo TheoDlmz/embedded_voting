@@ -75,7 +75,7 @@ class MovingVoter:
         self.rule = None
         if embeddings is None:
             embeddings = np.array([[1., 0., 0.], [0., 0., 1.], [0., 1., 0.], [1., 0., 0.]])
-        self.embeddings = Embeddings(embeddings)
+        self.embeddings = Embeddings(embeddings, norm=True)
         self.moving_voter = moving_voter
         self.ratings_ = None
 

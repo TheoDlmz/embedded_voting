@@ -46,7 +46,7 @@ class MultiwinnerRule(DeleteCacheMixin):
         if embeddings is None:
             self.embeddings = EmbeddingsFromRatingsIdentity()(self.ratings)
         else:
-            self.embeddings = Embeddings(embeddings)
+            self.embeddings = Embeddings(embeddings, norm=True)
         if k is not None:
             self.k_ = k
         self.delete_cache()
@@ -265,7 +265,7 @@ class IterRule(MultiwinnerRule):
             ls_weights.append(self.weights)
 
         return {"winners": winners,
-                "vectors": Embeddings(vectors),
+                "vectors": Embeddings(vectors, norm=True),
                 "weights_list": ls_weights}
 
     @cached_property

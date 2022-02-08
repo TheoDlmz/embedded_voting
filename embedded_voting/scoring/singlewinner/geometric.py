@@ -21,7 +21,7 @@ class ZonotopeRule(ScoringRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]))
+    >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = ZonotopeRule()(ratings, embeddings)
     >>> election.scores_
     [(2, 0.458...), (2, 0.424...), (2, 0.372...)]

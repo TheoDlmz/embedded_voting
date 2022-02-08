@@ -84,7 +84,7 @@ class Fast(ScoringRule):
             else:
                 self.embeddings_ = embedder(np.concatenate([embeddings, self.ratings_], axis=1))
         else:
-            self.embeddings_ = Embeddings(embeddings)
+            self.embeddings_ = Embeddings(embeddings, norm=True)
             self.embeddings_.n_sing_val_ = embeddings.n_sing_val_
 
         self.n_v = self.embeddings_.n_sing_val_ #embedder.n_sing_val_

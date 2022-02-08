@@ -63,7 +63,7 @@ class ScoringRule(DeleteCacheMixin):
         if embeddings is None:
             self.embeddings_ = self.embedder(self.ratings_)
         elif embeddings is not None:
-            self.embeddings_ = Embeddings(embeddings)
+            self.embeddings_ = Embeddings(embeddings, norm=True)
         return self
 
     def _score_(self, candidate):
