@@ -8,7 +8,7 @@ This file is part of Embedded Voting.
 from itertools import combinations
 import numpy as np
 import matplotlib.pyplot as plt
-from embedded_voting.utils.miscellaneous import normalize
+from embedded_voting.utils.miscellaneous import normalize, max_angular_dilatation_factor
 from embedded_voting.utils.plots import create_ternary_plot, create_3d_plot
 
 
@@ -95,6 +95,8 @@ class Embeddings(np.ndarray):
         With `approx` set to True, we use a polynomial algorithm: we simply take the mean
         of the embeddings of all the voters, normalized in the sens of the Euclidean norm.
 
+        Caution: this method has not beed tested for non-normalized embeddings.
+
         Parameters
         ----------
         approx : bool
@@ -126,10 +128,58 @@ class Embeddings(np.ndarray):
             mean = normalize(np.array(embeddings_subset.sum(axis=0)))
             return mean
 
+    def dilated_aux(self, center, k):
+        """
+        Dilate the embeddings of the voters.
+
+        For each `vector` of the embedding, we apply a "spherical dilatation" that moves `vector`
+        by multiplying the angle between `center` and `vector` by a given dilatation factor.
+
+        More formally, for each `vector` of the embedding, there exists a unit vector `unit_orthogonal` and
+        an angle `theta in [0, pi/2]` such that `vector = cos(theta) * center + sin(theta) * unit_orthogonal`.
+        Then the image of `vector` is `cos(k * theta) * center + sin(k * theta) * unit_orthogonal`.
+
+        Parameters
+        ----------
+        center: np.ndarray
+            Unit vector: center of the dilatation.
+        k: float
+            Angular dilatation factor.
+
+        Return
+        ------
+        Embeddings
+            A new Embedding object with the dilated embeddings.
+
+        Examples
+        --------
+        >>> embeddings = Embeddings([[1, 0], [1, 1]], norm=True)
+        >>> dilated_embeddings = embeddings.dilated_aux(center=np.array([1, 0]), k=2)
+        >>> np.round(dilated_embeddings, 4)
+        array([[ 1.,  0.],
+               [-0.,  1.]])
+        """
+        new_positions = np.zeros((self.n_voters, self.n_dim))
+        for i in range(self.n_voters):
+            vector = self.voter_embeddings(i)
+            scalar_product = vector @ center
+            theta = np.arccos(scalar_product)
+            if theta == 0:
+                new_positions[i] = vector
+            else:
+                vector_collinear = scalar_product * center
+                vector_orthogonal = vector - vector_collinear
+                unit_orthogonal = normalize(vector_orthogonal)
+                new_positions[i] = center * np.cos(k * theta) + unit_orthogonal * np.sin(k * theta)
+        return Embeddings(new_positions, norm=False)
+
     def dilated(self, approx=True):
         """
-        Dilate the embeddings of the voters so that they take more space
-        in the non-negative orthant.
+        Dilate the embeddings of the voters so that they take more space.
+
+        The `center` is computed with :meth:`get_center`. The angular dilatation
+        factor is such that after transformation, the maximum angle between
+        the center and an embedding vector will be pi / 4.
 
         Parameters
         ----------
@@ -153,12 +203,15 @@ class Embeddings(np.ndarray):
         Embeddings([[0.98559856, 0.11957316, 0.11957316],
                     [0.11957316, 0.11957316, 0.98559856],
                     [0.11957316, 0.98559856, 0.11957316]])
+
+        Note that the resulting embedding may not be in the positive orthant,
+        even if the original embedding is:
+
         >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True).normalize()
         >>> embeddings.dilated()
         Embeddings([[ 0.92387953, -0.38268343],
                     [ 0.38268343,  0.92387953]])
         """
-
         if self.n_voters < 2:
             raise ValueError("Cannot dilate embeddings with less than 2 voters.")
         center = self.get_center(approx=approx)
@@ -168,20 +221,51 @@ class Embeddings(np.ndarray):
         ])
         theta_max = np.arccos(min_scalar_product)
         k = np.pi / (4 * theta_max)
+        return self.dilated_aux(center=center, k=k)
 
-        new_positions = np.zeros((self.n_voters, self.n_dim))
-        for i in range(self.n_voters):
-            v_i = self.voter_embeddings(i)
-            theta_i = np.arccos(np.dot(v_i, center))
-            if theta_i == 0:
-                new_positions[i] = v_i
-            else:
-                p_1 = np.dot(center, v_i) * center
-                p_2 = v_i - p_1
-                e_2 = normalize(p_2)
-                new_positions[i] = center * np.cos(k * theta_i) + e_2 * np.sin(k * theta_i)
+    def dilated_new(self, approx=True):
+        """
+        Dilate the embeddings of the voters so that they take more space in the positive orthant.
 
-        return Embeddings(new_positions, False)
+        The `center` is computed with :meth:`get_center`. The angular dilatation
+        factor the largest possible so that all vectors stay in the positive orthant.
+
+        Parameters
+        ----------
+        approx : bool
+            Passed to :meth:`get_center` in order to compute the center
+            of the voters' embeddings.
+
+        Return
+        ------
+        Embeddings
+            A new Embedding object with the dilated embeddings.
+
+        Examples
+        --------
+        >>> embeddings = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]]), norm=True).normalize()
+        >>> embeddings
+        Embeddings([[0.66226618, 0.52981294, 0.52981294],
+                    [0.52981294, 0.52981294, 0.66226618],
+                    [0.52981294, 0.66226618, 0.52981294]])
+        >>> dilated_embeddings = embeddings.dilated_new()
+        >>> np.round(dilated_embeddings, 4)
+        array([[ 1., -0.,  0.],
+               [ 0., -0.,  1.],
+               [ 0.,  1.,  0.]])
+
+        >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True).normalize()
+        >>> dilated_embeddings = embeddings.dilated_new()
+        >>> np.round(dilated_embeddings, 4)
+        array([[1.    , 0.    ],
+               [0.7071, 0.7071]])
+        """
+        center = self.get_center(approx=approx)
+        k = min([
+            max_angular_dilatation_factor(vector=vector, center=center)
+            for vector in self
+        ])
+        return self.dilated_aux(center=center, k=k)
 
     def recenter(self, approx=True):
         """
