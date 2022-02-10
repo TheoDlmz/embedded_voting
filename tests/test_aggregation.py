@@ -1,4 +1,4 @@
-from embedded_voting.epistemicGenerators import *
+from embedded_voting.ratings import *
 import matplotlib.pyplot as plt
 import numpy as np
 

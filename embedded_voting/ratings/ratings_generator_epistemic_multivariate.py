@@ -1,4 +1,4 @@
-from embedded_voting.epistemicGenerators.ratings_generator_epistemic \
+from embedded_voting.ratings.ratings_generator_epistemic \
     import RatingsGeneratorEpistemic
 import numpy as np
 from embedded_voting.ratings.ratings import Ratings
