@@ -416,8 +416,7 @@ class Embeddings(np.ndarray):
 
     def _plot_3d(self, fig, dim, plot_position=None):
         """
-        Plot a figure of the ratings
-        on a 3D space using matplotlib.
+        Plot a figure of the embeddings on a 3D space using matplotlib.
 
         Parameters
         ----------
@@ -433,14 +432,11 @@ class Embeddings(np.ndarray):
         Return
         ------
         matplotlib.ax
-            The matplotlib ax
-            with the figure, if
-            you want to add
-            something to it.
-
+            The matplotlib ax with the figure, if
+            you want to add something to it.
         """
         ax = create_3d_plot(fig, plot_position)
-        for i, v in enumerate(self):
+        for v in self:
             x1 = v[dim[0]]
             x2 = v[dim[1]]
             x3 = v[dim[2]]
@@ -450,7 +446,7 @@ class Embeddings(np.ndarray):
 
     def _plot_ternary(self, fig, dim, plot_position=None):
         """
-        Plot a figure of the ratings on a 2D space
+        Plot a figure of the embeddings on a 2D space
         representing the surface of the unit sphere
         on the non-negative orthant.
 
@@ -470,21 +466,19 @@ class Embeddings(np.ndarray):
         matplotlib ax
             The matplotlib ax with the figure,
             if you want to add something to it.
-
         """
         tax = create_ternary_plot(fig, plot_position)
-        for i, v in enumerate(self):
+        for v in self:
             x1 = v[dim[0]]
             x2 = v[dim[2]]
             x3 = v[dim[1]]
             vec = [x1, x2, x3]
             tax.scatter([normalize(vec)**2], color=(x1**2 * 0.8, x3**2 * 0.8, x2**2 * 0.8), alpha=0.9, s=30)
-
         return tax
 
     def plot(self, plot_kind="3D", dim: list = None, fig=None, plot_position=None, show=True):
         """
-        Plot the ratings of the voters,
+        Plot the embeddings of the voters,
         either on a 3D plot, or on a ternary plot.
         Only three dimensions can be represented.
 
@@ -503,7 +497,7 @@ class Embeddings(np.ndarray):
         fig : matplotlib figure
             The figure on which we add the plot.
             The default figure is a
-            `10 x 10` matplotlib figure.
+            `8 x 8` matplotlib figure.
         plot_position : list
             List of length 3 containing the
             matplotlib position ``[n_rows, n_columns, position]``.
@@ -517,39 +511,34 @@ class Embeddings(np.ndarray):
         matplotlib ax
             The matplotlib ax with the figure,
             if you want to add something to it.
-
         """
-
         if dim is None:
             dim = [0, 1, 2]
-        else:
-            if len(dim) != 3:
-                raise ValueError("The number of dimensions should be 3")
-
+        elif len(dim) != 3:
+            raise ValueError("The number of dimensions should be 3")
         if fig is None:
             fig = plt.figure(figsize=(8, 8))
-
         if plot_kind == "3D":
             ax = self._plot_3d(fig, dim, plot_position)
         elif plot_kind == "ternary":
             ax = self._plot_ternary(fig, dim, plot_position)
         else:
             raise ValueError("plot_kind should '3D' or 'ternary'")
-        ax.set_title("Profile of voters (%i,%i,%i)" % (dim[0], dim[1], dim[2]), fontsize=24)
+        ax.set_title("Embeddings of voters on dimensions (%i,%i,%i)" % (dim[0], dim[1], dim[2]), fontsize=24)
         if show:
             plt.show()  # pragma: no cover
         return ax
 
-    def _plot_scores_3d(self, sizes, fig, plot_position, dim):
+    def _plot_ratings_candidate_3d(self, ratings_candidate, fig, plot_position, dim):
         """
-        Plot a figure of the ratings on a
-        3D space with the embeddings vector
-        having the sizes passed as parameters.
+        Plot the matrix associated to a candidate in a 3D space.
+
+        The embedding of each voter is multiplied by the rating she assigned to the candidate.
 
         Parameters
         ----------
-        sizes : np.ndarray
-            The norm of the vectors.
+        ratings_candidate : np.ndarray
+            The rating each voters assigned to the given candidate.
             Should be of length :attr:`n_voters`.
         fig : matplotlib figure
             The figure on which we add the plot.
@@ -565,28 +554,25 @@ class Embeddings(np.ndarray):
         matplotlib ax
             The matplotlib ax with the figure,
             if you want to add something to it.
-
         """
         ax = create_3d_plot(fig, plot_position)
-        for i, (v, s) in enumerate(zip(np.array(self), sizes)):
+        for (v, s) in zip(np.array(self), ratings_candidate):
             x1 = v[dim[0]]
             x2 = v[dim[1]]
             x3 = v[dim[2]]
             ax.plot([0, s * x1], [0, s * x2], [0, s * x3], color=(x1**2 * 0.8, x2**2 * 0.8, x3**2 * 0.8), alpha=0.4)
-
         return ax
 
-    def _plot_scores_ternary(self, sizes, fig, plot_position, dim):
+    def _plot_ratings_candidate_ternary(self, ratings_candidate, fig, plot_position, dim):
         """
-        Plot a figure of the ratings on a 2D space
-        representing the sphere in the non-negative orthant,
-        with the voters dots having the sizes passed
-        as parameters.
+        Plot the matrix associated to a candidate on a 2D space representing the sphere in the non-negative orthant.
+
+        The embedding of each voter is multiplied by the rating she assigned to the candidate.
 
         Parameters
         ----------
-        sizes : np.ndarray
-            The size of the dots.
+        ratings_candidate : np.ndarray
+            The rating each voters assigned to the given candidate.
             Should be of length :attr:`n_voters`.
         fig : matplotlib figure
             The figure on which we add the plot.
@@ -601,28 +587,27 @@ class Embeddings(np.ndarray):
         matplotlib ax
             The matplotlib ax with the figure,
             if you want to add something to it.
-
         """
         tax = create_ternary_plot(fig, plot_position)
-        for i, (v, s) in enumerate(zip(np.array(self), sizes)):
+        for (v, s) in zip(np.array(self), ratings_candidate):
             x1 = v[dim[0]]
             x2 = v[dim[1]]
             x3 = v[dim[2]]
             vec = [x1, x2, x3]
             tax.scatter([normalize(vec)**2], color=(x1**2 * 0.8, x3**2 * 0.8, x2**2 * 0.8), alpha=0.7, s=max(s * 50, 1))
-
         return tax
 
-    def plot_scores(self, sizes, title="", plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
+    def plot_ratings_candidate(self, ratings_candidate, title="", plot_kind="3D", dim: list = None, fig=None,
+                               plot_position=None, show=True):
         """
-        Plot a figure of the ratings on a 3D or 2D space
-        with the voters having the `sizes` passed
-        as parameters.
+        Plot the matrix associated to a candidate.
+
+        The embedding of each voter is multiplied by the rating she assigned to the candidate.
 
         Parameters
         ----------
-        sizes : np.ndarray
-            The score given by each voter.
+        ratings_candidate : np.ndarray
+            The rating each voters assigned to the given candidate.
             Should be of length :attr:`n_voters`.
         title : str
             Title of the figure.
@@ -647,45 +632,37 @@ class Embeddings(np.ndarray):
         matplotlib ax
             The matplotlib ax with the figure,
             if you want to add something to it.
-
         """
         if dim is None:
             dim = [0, 1, 2]
-        else:
-            # noinspection PyTypeChecker
-            if len(dim) != 3:
-                raise ValueError("The number of dimensions should be 3")
-
+        elif len(dim) != 3:
+            raise ValueError("The number of dimensions should be 3")
         if fig is None:
             fig = plt.figure(figsize=(8, 8))
-
         if plot_kind == "3D":
-            ax = self._plot_scores_3d(sizes, fig, plot_position, dim)
+            ax = self._plot_ratings_candidate_3d(ratings_candidate, fig, plot_position, dim)
         elif plot_kind == "ternary":
-            ax = self._plot_scores_ternary(sizes, fig, plot_position, dim)
+            ax = self._plot_ratings_candidate_ternary(ratings_candidate, fig, plot_position, dim)
         else:
             raise ValueError("plot_kind should '3D' or 'ternary'")
-
         ax.set_title(title, fontsize=16)
         if show:
             plt.show()  # pragma: no cover
-
         return ax
 
-    def plot_candidate(self, ratings, candidate, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
+    def plot_candidate(self, ratings, candidate, plot_kind="3D", dim: list = None, fig=None, plot_position=None,
+                       show=True):
         """
-        Plot a figure of the ratings
-        with the voters having the ratings they give
-        to the `candidate` passed as parameters
-        as size.
+        Plot the matrix associated to a candidate.
+
+        The embedding of each voter is multiplied by the rating she assigned to the candidate.
 
         Parameters
         ----------
         ratings: np.ndarray
-            Matrix of ratings given by voters to candidates
+            Matrix of ratings given by voters to the candidates.
         candidate : int
-            The candidate for which we
-            want to show the ratings.
+            The candidate for which we want to show the ratings.
             Should be lower than :attr:`n_candidates`.
         plot_kind : str
             The kind of plot we want to show.
@@ -709,28 +686,23 @@ class Embeddings(np.ndarray):
             The matplotlib ax with the figure,
             if you want to add something to it.
         """
-        return self.plot_scores(ratings[::, candidate],
-                                title="Candidate %i" % (candidate + 1),
-                                plot_kind=plot_kind,
-                                dim=dim,
-                                fig=fig,
-                                plot_position=plot_position,
-                                show=show)
+        return self.plot_ratings_candidate(ratings[::, candidate],
+                                           title="Candidate %i" % (candidate + 1),
+                                           plot_kind=plot_kind,
+                                           dim=dim,
+                                           fig=fig,
+                                           plot_position=plot_position,
+                                           show=show)
 
-    def plot_candidates(self, ratings, plot_kind="3D", dim=None, list_candidates=None,
+    def plot_candidates(self, ratings, plot_kind="3D", dim: list = None, list_candidates=None,
                         list_titles=None, row_size=5, show=True):
         """
-        Plot the ratings of the voters
-        for every candidate or a list of candidates,
-        using the ratings given by the voters as size for
-        the voters. The plot is either on a 3D plot,
-        or on a ternary plot.
-        Only three dimensions can be represented.
+        Plot the matrix associated to a candidate for every candidate in a list of candidates.
 
         Parameters
         ----------
         ratings: Ratings
-            Ratings given by voters to candidates
+            Ratings given by voters to candidates.
         plot_kind : str
             The kind of plot we want to show.
             Can be ``'3D'`` or ``'ternary'``.
@@ -751,30 +723,25 @@ class Embeddings(np.ndarray):
         show : bool
             If True, display the figure
             at the end of the function.
-
         """
-        if not isinstance(ratings, np.ndarray):
-            ratings = ratings.ratings_
         if list_candidates is None:
             list_candidates = range(ratings.shape[1])
         if list_titles is None:
             list_titles = ["Candidate %i" % c for c in list_candidates]
         else:
             list_titles = ["%s " % t for t in list_titles]
-
         n_candidates = len(list_candidates)
         n_rows = (n_candidates - 1) // row_size + 1
         fig = plt.figure(figsize=(5 * row_size, n_rows * 5))
         position = [n_rows, row_size, 1]
         for candidate, title in (zip(list_candidates, list_titles)):
-            self.plot_scores(ratings[::, candidate],
-                             title=title,
-                             plot_kind=plot_kind,
-                             dim=dim,
-                             fig=fig,
-                             plot_position=position,
-                             show=False)
+            self.plot_ratings_candidate(ratings[::, candidate],
+                                        title=title,
+                                        plot_kind=plot_kind,
+                                        dim=dim,
+                                        fig=fig,
+                                        plot_position=position,
+                                        show=False)
             position[2] += 1
-
         if show:
             plt.show()  # pragma: no cover
