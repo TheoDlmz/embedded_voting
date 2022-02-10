@@ -1,32 +1,24 @@
 import numpy as np
-from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.embeddings.embeddings_generator import EmbeddingsGenerator
+from embedded_voting.embeddings.embeddings_generator_uniform import EmbeddingsGeneratorUniform
+from embedded_voting.embeddings.embeddings_generator_fully_polarized import EmbeddingsGeneratorFullyPolarized
 
 
 class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
     """
-    Generates parametrized embeddings with ``n_dim`` groups of voters. This class creates two embeddings: One
-    according to uniform distribution, the other one with groups of voters with similar embeddings, and we can
-    parametrize the embeddings to get one distribution between these two extremes.
+    Generates parametrized embeddings with ``n_dim`` groups of voters. This class creates two embeddings: one
+    according to uniform distribution, the other one fully polarized (with groups of voters on the canonical basis),
+    and we can parametrize the embeddings to get one distribution between these two extremes.
 
     Parameters
     __________
     n_voters: int
-        Number of voters in the embeddings
+        Number of voters in the embeddings.
     n_dim: int
-        Number of dimensions for the embeddings
+        Number of dimensions for the embeddings.
     prob: list
-        The probabilities for each voter to be in each group. Default is uniform distribution
-
-    Attributes
-    ----------
-    n_voters: int
-        Number of voters in the embeddings
-    n_dim: int
-        Number of dimensions for the embeddings
-    prob: list
-        The probabilities for each voter to be in each group. Default is uniform distribution
+        The probabilities for each voter to be in each group. Default is uniform distribution.
 
     Examples
     --------
@@ -36,9 +28,9 @@ class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
     Embeddings([[1., 0.],
                 [0., 1.],
                 [1., 0.],
+                [0., 1.],
+                [0., 1.],
                 [1., 0.],
-                [0., 1.],
-                [0., 1.],
                 [0., 1.],
                 [1., 0.],
                 [1., 0.],
@@ -58,47 +50,23 @@ class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
     Embeddings([[0.9908011 , 0.13532618],
                 [0.19969513, 0.97985808],
                 [0.92388624, 0.38266724],
-                [0.97453096, 0.224253  ],
+                [0.53052663, 0.84766827],
                 [0.34914017, 0.93707051],
-                [0.38153366, 0.92435494],
+                [0.92340269, 0.38383261],
                 [0.06285695, 0.99802255],
                 [0.98761328, 0.15690762],
                 [0.98870758, 0.14985764],
                 [0.28182668, 0.95946533]])
-
     """
     def __init__(self, n_voters, n_dim, prob=None):
         super().__init__(n_voters, n_dim)
         if prob is None:
-            prob = np.ones(self.n_dim)/self.n_dim
-        self.prob = list(prob)
-        self._orthogonal_profile = np.zeros((n_voters, self.n_dim))
-        self._random_profile = np.zeros((n_voters, self.n_dim))
-        self._thetas = np.zeros(n_voters)
-        self._build_profiles()
-
-    def _build_profiles(self):
-        """
-        This function build the two embeddings
-        of the parametrized embeddings (uniform and orthogonal).
-
-        Return
-        ------
-        EmbeddingsGeneratorPolarized
-            The object itself.
-        """
-
-        for i in range(self.n_voters):
-            new_vec = np.abs(np.random.randn(self.n_dim))
-            r = np.argmax(new_vec * self.prob)
-            new_vec = normalize(new_vec)
-            self._orthogonal_profile[i, r] = 1
-            self._random_profile[i] = new_vec
-
-            theta = np.arccos(np.dot(self._random_profile[i], self._orthogonal_profile[i]))
-            self._thetas[i] = theta
-
-        return self
+            prob = np.ones(self.n_dim)
+        self.prob = np.array(prob) / np.sum(prob)
+        # Two basic embeddings
+        self._random_profile = EmbeddingsGeneratorUniform(n_voters=self.n_voters, n_dim=self.n_dim)()
+        self._fully_polarized_profile = EmbeddingsGeneratorFullyPolarized(
+            n_voters=self.n_voters, n_dim=n_dim, prob=prob)()
 
     def __call__(self, polarisation=0.0):
         """
@@ -123,21 +91,8 @@ class EmbeddingsGeneratorPolarized(EmbeddingsGenerator):
         --------
         >>> np.random.seed(42)
         >>> generator = EmbeddingsGeneratorPolarized(100, 3)
-        >>> embs = generator(.8)
-        >>> embs.voter_embeddings(0)
-        array([0.12915167, 0.03595039, 0.99097296])
+        >>> embeddings = generator(.8)
+        >>> embeddings.voter_embeddings(0)
+        array([0.9828518 , 0.03849652, 0.18033401])
         """
-
-        if polarisation > 1 or polarisation < 0:
-            raise ValueError("Polarisation should be between 0 and 1")
-
-        n = len(self._thetas)
-        positions = np.zeros((n, self.n_dim))
-        for i in range(n):
-            p_1 = np.dot(self._orthogonal_profile[i], self._random_profile[i]) * self._orthogonal_profile[i]
-            p_2 = self._random_profile[i] - p_1
-            e_2 = normalize(p_2)
-            positions[i] = self._orthogonal_profile[i] * np.cos(self._thetas[i] * (1 - polarisation)) + e_2 * np.sin(
-                self._thetas[i] * (1 - polarisation))
-
-        return Embeddings(positions, norm=True)
+        return self._fully_polarized_profile.mixed_with(self._random_profile, intensity=1 - polarisation)

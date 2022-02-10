@@ -44,7 +44,7 @@ class IterSVD(IterRule):
     >>> election.winners_
     [0, 1, 5, 2]
     >>> election.plot_weights(dim=[0, 0, 0], show=False)
-    Weight / remaining candidate :  [25.0, 24.99999..., 24.999999..., 24.999999...]
+    Weight / remaining candidate :  [25.0, 24.99999999999999, 24.999999999999996, 30.999999999999993]
     >>> election.features_vectors
     Embeddings([[1., 0.],
                 [1., 0.],

@@ -3,14 +3,17 @@ from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.embeddings.embeddings_generator import EmbeddingsGenerator
 
 
-class EmbeddingsGeneratorRandom(EmbeddingsGenerator):
+class EmbeddingsGeneratorUniform(EmbeddingsGenerator):
     """
-    Create random embeddings
+    Create random embeddings uniformly on the non-negative orthant.
+
+    The embedding of each voter is a unit vector that is uniformly drawn on the intersection
+    of the unit sphere with the non-negative orthant.
 
     Examples
     --------
     >>> np.random.seed(42)
-    >>> generator = EmbeddingsGeneratorRandom(10, 2)
+    >>> generator = EmbeddingsGeneratorUniform(10, 2)
     >>> generator()
     Embeddings([[0.96337365, 0.26816265],
                 [0.39134578, 0.92024371],
@@ -24,5 +27,7 @@ class EmbeddingsGeneratorRandom(EmbeddingsGenerator):
                 [0.54080587, 0.84114744]])
     """
     def __call__(self, *args):
-        embs = np.abs(np.random.randn(self.n_voters, self.n_dim))
-        return Embeddings(embs, norm=True)
+        return Embeddings(
+            np.abs(np.random.randn(self.n_voters, self.n_dim)),
+            norm=True
+        )

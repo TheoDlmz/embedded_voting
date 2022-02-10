@@ -414,6 +414,58 @@ class Embeddings(np.ndarray):
         """
         return self.recentered(approx=approx).dilated_new(approx=approx)
 
+    def mixed_with(self, other, intensity):
+        """
+        Mix this embedding with another one.
+
+        Parameters
+        ----------
+        other : Embeddings
+            Another embedding with the name number of voters and same number of dimensions.
+        intensity : float
+            Must be in [0, 1].
+
+        Returns
+        -------
+        Embeddings
+            A new Embeddings object with the mixed embeddings.
+
+        Examples
+        --------
+        For a given voter, the direction of the final embedding is an "angular barycenter" between
+        the original direction and the direction in `other`, with mixing parameter `intensity`:
+
+        >>> embeddings = Embeddings([[1, 0]], norm=True)
+        >>> other_embeddings = Embeddings([[0, 1]], norm=True)
+        >>> embeddings.mixed_with(other_embeddings, intensity=1/3)
+        Embeddings([[0.8660254, 0.5      ]])
+
+        For a given voter, the norm of the final embedding is a barycenter between the original
+        norm and the norm in `other`, with mixing parameter `intensity`:
+
+        >>> embeddings = Embeddings([[1, 0]], norm=False)
+        >>> other_embeddings = Embeddings([[5, 0]], norm=False)
+        >>> embeddings.mixed_with(other_embeddings, intensity=1/4)
+        Embeddings([[2., 0.]])
+        """
+        norms_self = np.linalg.norm(self, axis=1)
+        norms_other = np.linalg.norm(other, axis=1)
+        self_normalized = self / norms_self[:, np.newaxis]
+        other_dot_products_self_normalized = np.sum(other * self_normalized, axis=1)
+        other_collinear = other_dot_products_self_normalized[:, np.newaxis] * self_normalized
+        other_orthogonal = other - other_collinear
+        norms_other_orthogonal = np.linalg.norm(other_orthogonal, axis=1)
+        unit_orthogonal = other_orthogonal / np.where(
+            norms_other_orthogonal > 0, norms_other_orthogonal, 1
+        )[:, np.newaxis]
+        thetas = np.arccos(other_dot_products_self_normalized / norms_other)
+        norms = (1 - intensity) * norms_self + intensity * norms_other
+        directions = (
+            np.cos(intensity * thetas)[:, np.newaxis] * self_normalized
+            + np.sin(intensity * thetas)[:, np.newaxis] * unit_orthogonal
+        )
+        return norms[:, np.newaxis] * directions
+
     def _plot_3d(self, fig, dim, plot_position=None):
         """
         Plot a figure of the embeddings on a 3D space using matplotlib.

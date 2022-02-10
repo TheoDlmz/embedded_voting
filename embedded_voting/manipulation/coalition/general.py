@@ -56,7 +56,7 @@ class ManipulationCoalition(DeleteCacheMixin):
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
-    [0.89..., 1.0, 0.0]
+    [0.6651173304239312, 1.0, 0.0]
 
     """
     def __init__(self, ratings, embeddings, rule=None):
@@ -123,7 +123,7 @@ class ManipulationCoalition(DeleteCacheMixin):
         >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.trivial_manipulation(0, verbose=True)
-        2 voters interested to elect 0 instead of 1
+        1 voters interested to elect 0 instead of 1
         Winner is 0
         True
         """
@@ -199,7 +199,7 @@ class ManipulationCoalition(DeleteCacheMixin):
         >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.worst_welfare_
-        0.0
+        0.6651173304239312
         """
         worst_welfare = self.welfare_[self.winner_]
         for i in range(self.ratings.n_candidates):
@@ -249,11 +249,11 @@ class ManipulationCoalition(DeleteCacheMixin):
         >>> manipulation = ManipulationCoalition(rat, emb, SVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['worst_welfare']
-        array([[1.        , 0.98024051, 1.        , 1.        , 1.        ],
-               [1.        , 1.        , 1.        , 1.        , 1.        ],
-               [0.87833419, 1.        , 1.        , 0.97819913, 1.        ],
-               [0.80173984, 0.74016286, 1.        , 1.        , 1.        ],
-               [0.81466796, 1.        , 1.        , 0.92431457, 1.        ]])
+        array([[0.79493479, 1.        , 1.        , 1.        , 0.98005073],
+               [0.81768758, 1.        , 1.        , 1.        , 1.        ],
+               [0.7783178 , 1.        , 1.        , 1.        , 1.        ],
+               [0.64757801, 1.        , 1.        , 0.91875917, 1.        ],
+               [0.70227919, 1.        , 1.        , 1.        , 1.        ]])
         """
 
         manipulator_map = np.zeros((map_size, map_size))

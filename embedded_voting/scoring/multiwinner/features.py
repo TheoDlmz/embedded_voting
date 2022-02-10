@@ -25,7 +25,7 @@ class IterFeatures(IterRule):
     >>> election.winners_
     [0, 5, 1, 2]
     >>> election.plot_weights(dim=[0, 0, 0], show=False)
-    Weight / remaining candidate :  [25.0, 24.9999..., 25.0000..., 24.999999...]
+    Weight / remaining candidate :  [25.0, 24.999999999999986, 27.999999999999993, 30.999999999999986]
     >>> election.features_vectors
     Embeddings([[1., 0.],
                 [0., 1.],

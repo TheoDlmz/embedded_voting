@@ -31,13 +31,13 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
     >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
     >>> manipulation = SingleVoterManipulationIRV(ratings, embeddings, SVDNash())
     >>> manipulation.prop_manipulator_
-    0.0
+    0.4
     >>> manipulation.avg_welfare_
-    1.0
+    0.4
     >>> manipulation.worst_welfare_
-    1.0
+    0.0
     >>> manipulation.manipulation_global_
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [2, 2, 1, 2, 1, 2, 1, 2, 1, 2]
     """
 
     def __init__(self, ratings, embeddings, rule=None):

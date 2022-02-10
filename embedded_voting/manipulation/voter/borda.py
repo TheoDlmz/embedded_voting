@@ -30,13 +30,13 @@ class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
     >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
     >>> manipulation = SingleVoterManipulationBorda(ratings, embeddings, SVDNash())
     >>> manipulation.prop_manipulator_
-    0.3
-    >>> manipulation.avg_welfare_
-    0.7
-    >>> manipulation.worst_welfare_
     0.0
+    >>> manipulation.avg_welfare_
+    1.0
+    >>> manipulation.worst_welfare_
+    1.0
     >>> manipulation.manipulation_global_
-    [1, 2, 1, 1, 2, 2, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     """
     def __init__(self, ratings, embeddings, rule=None):
         ratings = Ratings(ratings)

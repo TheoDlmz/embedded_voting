@@ -53,7 +53,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
-    [0.89..., 1.0, 0.0]
+    [0.6651173304239312, 1.0, 0.0]
     """
 
     def __init__(self, ratings, embeddings, rule=None):
@@ -174,7 +174,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.manipulation_global_
-        [1, 0, 0, 0, 1, 1, 1, 1, 1, 0]
+        [1, 1, 0, 1, 1, 1, 1, 1, 0, 1]
         """
         return [self.manipulation_voter(i) for i in range(self.ratings.n_voters)]
 
@@ -198,7 +198,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.prop_manipulator_
-        0.4
+        0.2
         """
         return len([x for x in self.manipulation_global_ if x != self.winner_]) / self.ratings.n_voters
 
@@ -221,7 +221,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.avg_welfare_
-        0.956...
+        0.933...
         """
         return np.mean([self.welfare_[x] for x in self.manipulation_global_])
 
@@ -244,7 +244,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.worst_welfare_
-        0.891...
+        0.665...
         """
         return np.min([self.welfare_[x] for x in self.manipulation_global_])
 
@@ -316,11 +316,11 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> manipulation = SingleVoterManipulation(rat, emb, rule=SVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['manipulator']
-        array([[0.02, 0.49, 0.  , 0.  , 0.  ],
-               [0.  , 0.  , 0.  , 0.  , 0.  ],
-               [0.54, 0.  , 0.  , 0.4 , 0.  ],
-               [0.01, 0.51, 0.  , 0.  , 0.  ],
-               [0.  , 0.  , 0.  , 0.36, 0.  ]])
+        array([[0.02, 0.  , 0.  , 0.  , 0.58],
+               [0.08, 0.03, 0.  , 0.  , 0.  ],
+               [0.74, 0.  , 0.  , 0.  , 0.  ],
+               [0.24, 0.  , 0.  , 0.  , 0.  ],
+               [0.17, 0.  , 0.  , 0.  , 0.  ]])
         """
 
         manipulator = np.zeros((map_size, map_size))
@@ -397,11 +397,11 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
     >>> extension = BordaExtension(3)
     >>> manipulation = SingleVoterManipulationExtension(ratings, embeddings, extension, SVDNash())
     >>> manipulation.prop_manipulator_
-    0.3
+    0.0
     >>> manipulation.manipulation_global_
-    [1, 2, 1, 1, 2, 2, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     >>> manipulation.avg_welfare_
-    0.7
+    1.0
     """
 
     def __init__(self, ratings, embeddings, extension, rule=None):

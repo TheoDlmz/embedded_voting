@@ -31,13 +31,13 @@ class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
     >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
     >>> manipulation = SingleVoterManipulationKApp(ratings, embeddings, 2, SVDNash())
     >>> manipulation.prop_manipulator_
-    0.2
-    >>> manipulation.avg_welfare_
-    0.8
-    >>> manipulation.worst_welfare_
     0.0
+    >>> manipulation.avg_welfare_
+    1.0
+    >>> manipulation.worst_welfare_
+    1.0
     >>> manipulation.manipulation_global_
-    [1, 1, 1, 1, 2, 2, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     """
 
     def __init__(self, ratings, embeddings, k=2, rule=None):

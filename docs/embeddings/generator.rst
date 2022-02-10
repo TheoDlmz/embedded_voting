@@ -7,7 +7,7 @@ Embeddings generator
 
 Random Embeddings
 _________________
-.. autoclass:: embedded_voting.EmbeddingsGeneratorRandom
+.. autoclass:: embedded_voting.EmbeddingsGeneratorUniform
     :members:
 
 

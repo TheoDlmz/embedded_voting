@@ -47,11 +47,11 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
     >>> extension = InstantRunoffExtension()
     >>> manipulation = ManipulationCoalitionExtension(ratings, embeddings, extension, SVDNash())
     >>> manipulation.winner_
-    1
+    2
     >>> manipulation.is_manipulable_
-    False
+    True
     >>> manipulation.worst_welfare_
-    1.0
+    0.0
     """
 
     def __init__(self, ratings, embeddings, extension=None, rule=None):
@@ -125,9 +125,9 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     >>> manipulation.winner_
     1
     >>> manipulation.is_manipulable_
-    True
+    False
     >>> manipulation.worst_welfare_
-    0.0
+    1.0
     """
 
     def __init__(self, ratings, embeddings, rule=None):
@@ -162,9 +162,9 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     >>> manipulation.winner_
     1
     >>> manipulation.is_manipulable_
-    True
+    False
     >>> manipulation.worst_welfare_
-    0.0
+    1.0
     """
 
     def __init__(self, ratings, embeddings, k=2, rule=None):
@@ -195,11 +195,11 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, 0.8)
     >>> manipulation = ManipulationCoalitionIRV(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
-    1
+    2
     >>> manipulation.is_manipulable_
-    False
+    True
     >>> manipulation.worst_welfare_
-    1.0
+    0.0
     """
 
     def __init__(self, ratings, embeddings, rule=None):
