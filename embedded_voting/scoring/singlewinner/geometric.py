@@ -38,7 +38,7 @@ class ZonotopeRule(ScoringRule):
 
     def _score_(self, candidate):
         n_voters, n_dim = self.embeddings_.shape
-        embeddings = self.embeddings_.times_ratings(self.ratings_.candidate_ratings(candidate))
+        embeddings = self.embeddings_.times_ratings_candidate(self.ratings_.candidate_ratings(candidate))
         matrix_rank = np.linalg.matrix_rank(embeddings)
         volume = 0
         current_subset = list(np.arange(matrix_rank))
@@ -93,7 +93,7 @@ class MaxCubeRule(ScoringRule):
 
     def _score_(self, candidate):
         n_voters, n_dim = self.embeddings_.shape
-        embeddings = self.embeddings_.times_ratings(self.ratings_.candidate_ratings(candidate))
+        embeddings = self.embeddings_.times_ratings_candidate(self.ratings_.candidate_ratings(candidate))
         matrix_rank = np.linalg.matrix_rank(embeddings)
         volume = 0
         current_subset = list(np.arange(matrix_rank))

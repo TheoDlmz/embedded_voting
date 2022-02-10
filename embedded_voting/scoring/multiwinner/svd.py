@@ -69,9 +69,9 @@ class IterSVD(IterRule):
                 vectors.append(np.zeros(n_dim))
                 continue
             if self.square_root:
-                embeddings = self.embeddings.times_ratings(np.sqrt(self.ratings.candidate_ratings(candidate)))
+                embeddings = self.embeddings.times_ratings_candidate(np.sqrt(self.ratings.candidate_ratings(candidate)))
             else:
-                embeddings = self.embeddings.times_ratings(self.ratings.candidate_ratings(candidate))
+                embeddings = self.embeddings.times_ratings_candidate(self.ratings.candidate_ratings(candidate))
 
             weights = self.weights
 

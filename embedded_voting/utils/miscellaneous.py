@@ -83,18 +83,26 @@ def max_angular_dilatation_factor(vector, center):
     >>> dilated_vector = np.cos(k * my_theta) * my_center + np.sin(k * my_theta) * my_unit_orthogonal
     >>> np.round(dilated_vector, 4)
     array([0.8944, 0.    , 0.4472])
+
+    >>> max_angular_dilatation_factor(
+    ...     np.array([np.sqrt(1/2), np.sqrt(1/2)]),
+    ...     np.array([np.sqrt(1/2), np.sqrt(1/2)])
+    ... )
+    inf
     """
     scalar_product = vector @ center
+    if 1 < scalar_product <= 1.0001:  # Compensate for numerical approximations.
+        scalar_product = 1.
+    theta = np.arccos(scalar_product)
     vector_collinear = scalar_product * center  # Component of `vector` on the direction of `center`.
     vector_orthogonal = vector - vector_collinear  # Component of `vector` in the orthogonal direction.
     norm_vector_orthogonal = np.linalg.norm(vector_orthogonal)
-    if norm_vector_orthogonal == 0:
+    if theta == 0 or norm_vector_orthogonal == 0:
         return np.inf
-    unit_orthogonal = vector_orthogonal / np.linalg.norm(vector_orthogonal)
+    unit_orthogonal = vector_orthogonal / norm_vector_orthogonal
     mask = unit_orthogonal < 0
     if not any(mask):
         theta_max = np.pi / 2
     else:
         theta_max = np.arctan(np.min(- center[mask] / unit_orthogonal[mask]))
-    theta = np.arccos(scalar_product)
     return theta_max / theta

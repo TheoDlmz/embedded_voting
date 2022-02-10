@@ -45,57 +45,82 @@ class Embeddings(np.ndarray):
     def __new__(cls, positions, norm):
         obj = np.asarray(positions).view(cls)
         if norm:
-            obj = (obj.T / np.sqrt((obj ** 2).sum(axis=1))).T
+            obj = obj / np.linalg.norm(obj, axis=1)[:, np.newaxis]
         return obj
 
     def __array_finalize__(self, obj):
         if obj is None:
             return
         if len(self.shape) == 2:
-            self.n_dim, self.n_voters = self.shape
+            self.n_voters, self.n_dim = self.shape
 
     def voter_embeddings(self, i):
         return np.array(self[i:i + 1, :])[0]
 
-    def times_ratings(self, ratings):
+    def times_ratings_candidate(self, ratings_candidate):
         """
         This method computes the embeddings multiplied by the ratings given by the voters to a given candidate.
         For each voter, its embeddings are multiplied by the given rating.
 
         Parameters
         ----------
-        ratings: np.ndarray
+        ratings_candidate: np.ndarray
             The vector of ratings given by the voters to a given candidate.
 
         Return
         ------
-        np.ndarray
-            The scored embeddings.
+        Embddings
+            A new Embeddings object, where the embedding of each voter is multiplied by the rating she assigned
+            to the candidate.
 
         Examples
         --------
         >>> embeddings = Embeddings(np.array([[1, 0], [0, 1], [0.5, 0.5]]), norm=False)
-        >>> embeddings.times_ratings(np.array([.8, .5, .4]))
+        >>> embeddings.times_ratings_candidate(np.array([.8, .5, .4]))
         Embeddings([[0.8, 0. ],
                     [0. , 0.5],
                     [0.2, 0.2]])
         """
-        return np.multiply(self, ratings[::, np.newaxis])
+        return np.multiply(self, ratings_candidate[::, np.newaxis])
+
+    def normalized(self):
+        """
+        Normalize the embeddings of the voters so the Euclidean norm of every embedding is 1.
+
+        Return
+        ------
+        Embeddings
+            A new Embeddings object with the normalized embeddings.
+
+        Examples
+        --------
+        >>> embeddings = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
+        >>> embeddings
+        Embeddings([[-0.5, -0.9, -0.4],
+                    [-0.4, -0.7, -0.5],
+                    [-0.4, -0.2, -0.4]])
+        >>> embeddings.normalized()
+        Embeddings([[-0.45267873, -0.81482171, -0.36214298],
+                    [-0.42163702, -0.73786479, -0.52704628],
+                    [-0.66666667, -0.33333333, -0.66666667]])
+        """
+        return self / np.linalg.norm(self, axis=1)[:, np.newaxis]
 
     def get_center(self, approx=True):
         """
-        Return the center of the embeddings.
+        Return the center direction of the embeddings.
+
+        For this method, we work on the normalized embeddings. Cf. :meth:`normalized`.
 
         With `approx` set to False, we use an exponential algorithm in `n_dim.`
         If `r` is the rank of the embedding matrix, we first find the `r` voters with
-        maximal determinant, i.e. whose associated parallelepiped has the maximal volume.
-        Then the result is the mean of the embeddings of these voters, normalized in the
-        sense of the Euclidean norm.
+        maximal determinant (in absolute value), i.e. whose associated parallelepiped has
+        the maximal volume (e.g. in two dimensions, it means finding the two vectors with
+        maximal angle). Then the result is the mean of the embeddings of these voters,
+        normalized in the sense of the Euclidean norm.
 
         With `approx` set to True, we use a polynomial algorithm: we simply take the mean
-        of the embeddings of all the voters, normalized in the sens of the Euclidean norm.
-
-        Caution: this method has not beed tested for non-normalized embeddings.
+        of the embeddings of all the voters, normalized in the sense of the Euclidean norm.
 
         Parameters
         ----------
@@ -112,19 +137,25 @@ class Embeddings(np.ndarray):
         >>> embeddings = Embeddings([[1, 0], [0, 1], [.5, .5], [.7, .3]], norm=True)
         >>> embeddings.get_center(approx=False)
         array([0.70710678, 0.70710678])
+
+        >>> embeddings = Embeddings([[1, 0], [0, 1], [.5, .5], [.7, .3]], norm=False)
+        >>> embeddings.get_center(approx=False)
+        array([0.70710678, 0.70710678])
+
         >>> embeddings = Embeddings([[1, 0], [0, 1], [.5, .5], [.7, .3]], norm=True)
         >>> embeddings.get_center(approx=True)
         array([0.78086524, 0.62469951])
         """
+        self_normalized = self.normalized()
         if approx:
-            return normalize(np.array(self.sum(axis=0)))
+            return normalize(np.array(self_normalized.sum(axis=0)))
         else:
-            matrix_rank = np.linalg.matrix_rank(self)
+            matrix_rank = np.linalg.matrix_rank(self_normalized)
             subset_of_voters = max(
                 combinations(range(self.n_voters), matrix_rank),
-                key=lambda subset: np.abs(np.linalg.det(self[subset, :]))
+                key=lambda subset: np.abs(np.linalg.det(self_normalized[subset, :]))
             )
-            embeddings_subset = self[subset_of_voters, :]
+            embeddings_subset = self_normalized[subset_of_voters, :]
             mean = normalize(np.array(embeddings_subset.sum(axis=0)))
             return mean
 
@@ -136,8 +167,10 @@ class Embeddings(np.ndarray):
         by multiplying the angle between `center` and `vector` by a given dilatation factor.
 
         More formally, for each `vector` of the embedding, there exists a unit vector `unit_orthogonal` and
-        an angle `theta in [0, pi/2]` such that `vector = cos(theta) * center + sin(theta) * unit_orthogonal`.
-        Then the image of `vector` is `cos(k * theta) * center + sin(k * theta) * unit_orthogonal`.
+        an angle `theta in [0, pi/2]` such that
+        `vector = norm(vector) * (cos(theta) * center + sin(theta) * unit_orthogonal)`.
+        Then the image of `vector` is
+        `norm(vector) * (cos(k * theta) * center + sin(k * theta) * unit_orthogonal)`.
 
         Parameters
         ----------
@@ -149,28 +182,35 @@ class Embeddings(np.ndarray):
         Return
         ------
         Embeddings
-            A new Embedding object with the dilated embeddings.
+            A new Embeddings object with the dilated embeddings.
 
         Examples
         --------
         >>> embeddings = Embeddings([[1, 0], [1, 1]], norm=True)
         >>> dilated_embeddings = embeddings.dilated_aux(center=np.array([1, 0]), k=2)
         >>> np.round(dilated_embeddings, 4)
-        array([[ 1.,  0.],
-               [-0.,  1.]])
+        array([[1., 0.],
+               [0., 1.]])
+
+        >>> embeddings = Embeddings([[1, 0], [1, 1]], norm=False)
+        >>> dilated_embeddings = embeddings.dilated_aux(center=np.array([1, 0]), k=2)
+        >>> np.round(dilated_embeddings, 4)
+        array([[ 1.    ,  0.    ],
+               [-0.    ,  1.4142]])
         """
         new_positions = np.zeros((self.n_voters, self.n_dim))
         for i in range(self.n_voters):
             vector = self.voter_embeddings(i)
+            norm_vector = np.linalg.norm(vector)
             scalar_product = vector @ center
-            theta = np.arccos(scalar_product)
+            theta = np.arccos(scalar_product / norm_vector)
             if theta == 0:
                 new_positions[i] = vector
             else:
                 vector_collinear = scalar_product * center
                 vector_orthogonal = vector - vector_collinear
                 unit_orthogonal = normalize(vector_orthogonal)
-                new_positions[i] = center * np.cos(k * theta) + unit_orthogonal * np.sin(k * theta)
+                new_positions[i] = norm_vector * (center * np.cos(k * theta) + unit_orthogonal * np.sin(k * theta))
         return Embeddings(new_positions, norm=False)
 
     def dilated(self, approx=True):
@@ -190,11 +230,11 @@ class Embeddings(np.ndarray):
         Return
         ------
         Embeddings
-            A new Embedding object with the dilated embeddings.
+            A new Embeddings object with the dilated embeddings.
 
         Examples
         --------
-        >>> embeddings = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]]), norm=True).normalize()
+        >>> embeddings = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]]), norm=True)
         >>> embeddings
         Embeddings([[0.66226618, 0.52981294, 0.52981294],
                     [0.52981294, 0.52981294, 0.66226618],
@@ -207,19 +247,22 @@ class Embeddings(np.ndarray):
         Note that the resulting embedding may not be in the positive orthant,
         even if the original embedding is:
 
-        >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True).normalize()
+        >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True)
         >>> embeddings.dilated()
         Embeddings([[ 0.92387953, -0.38268343],
                     [ 0.38268343,  0.92387953]])
+
+        >>> Embeddings([[1, 0]], norm=True).dilated()
+        Embeddings([[1., 0.]])
         """
-        if self.n_voters < 2:
-            raise ValueError("Cannot dilate embeddings with less than 2 voters.")
         center = self.get_center(approx=approx)
         min_scalar_product = min([
             np.dot(normalize(self.voter_embeddings(i)), center)
             for i in range(self.n_voters)
         ])
         theta_max = np.arccos(min_scalar_product)
+        if theta_max == 0:  # all embeddings are aligned with `center`.
+            return self.copy()
         k = np.pi / (4 * theta_max)
         return self.dilated_aux(center=center, k=k)
 
@@ -229,6 +272,7 @@ class Embeddings(np.ndarray):
 
         The `center` is computed with :meth:`get_center`. The angular dilatation
         factor the largest possible so that all vectors stay in the positive orthant.
+        Cf. :func:`max_angular_dilatation_factor`.
 
         Parameters
         ----------
@@ -239,11 +283,11 @@ class Embeddings(np.ndarray):
         Return
         ------
         Embeddings
-            A new Embedding object with the dilated embeddings.
+            A new Embeddings object with the dilated embeddings.
 
         Examples
         --------
-        >>> embeddings = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]]), norm=True).normalize()
+        >>> embeddings = Embeddings(np.array([[.5,.4,.4],[.4,.4,.5],[.4,.5,.4]]), norm=True)
         >>> embeddings
         Embeddings([[0.66226618, 0.52981294, 0.52981294],
                     [0.52981294, 0.52981294, 0.66226618],
@@ -254,102 +298,121 @@ class Embeddings(np.ndarray):
                [ 0., -0.,  1.],
                [ 0.,  1.,  0.]])
 
-        >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True).normalize()
+        >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True)
         >>> dilated_embeddings = embeddings.dilated_new()
         >>> np.round(dilated_embeddings, 4)
         array([[1.    , 0.    ],
                [0.7071, 0.7071]])
+
+        >>> embeddings = Embeddings([[2, 1], [100, 200]], norm=False)
+        >>> dilated_embeddings = embeddings.dilated_new()
+        >>> np.round(dilated_embeddings, 4)
+        array([[  2.2361,   0.    ],
+               [  0.    , 223.6068]])
         """
         center = self.get_center(approx=approx)
         k = min([
-            max_angular_dilatation_factor(vector=vector, center=center)
-            for vector in self
+            max_angular_dilatation_factor(vector=np.array(vector), center=center)
+            for vector in self.normalized()
         ])
+        if np.isinf(k):
+            return self.copy()
         return self.dilated_aux(center=center, k=k)
 
-    def recenter(self, approx=True):
+    def recentered(self, approx=True):
         """
-        Recenter the embeddings of the
-        voters so that they are the most
-        possible on the non-negative orthant.
+        Recenter the embeddings so that their new center is [1, ..., 1].
 
         Parameters
         ----------
         approx : bool
-            If True, we compute the center of the population
-            with a polynomial time algorithm. If False, we use
-            an algorithm exponential in :attr:`n_dim`.
+            Passed to :meth:`get_center` in order to compute the center
+            of the voters' embeddings.
 
         Return
         ------
         Embeddings
-            The embeddings itself.
+            A new Embeddings object with the recentered embeddings.
 
         Examples
         --------
-        >>> embeddings = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=True).normalize()
+        >>> embeddings = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=True)
         >>> embeddings
         Embeddings([[-0.45267873, -0.81482171, -0.36214298],
                     [-0.42163702, -0.73786479, -0.52704628],
                     [-0.66666667, -0.33333333, -0.66666667]])
-        >>> embeddings.recenter()
+        >>> embeddings.recentered()
         Embeddings([[0.40215359, 0.75125134, 0.52334875],
                     [0.56352875, 0.6747875 , 0.47654713],
                     [0.70288844, 0.24253193, 0.66867489]])
+
+        >>> embeddings = Embeddings([[1, 0], [np.sqrt(3)/2, 1/2], [1/2, np.sqrt(3)/2]], norm=True)
+        >>> embeddings
+        Embeddings([[1.       , 0.       ],
+                    [0.8660254, 0.5      ],
+                    [0.5      , 0.8660254]])
+        >>> embeddings.recentered(approx=False)
+        Embeddings([[0.96592583, 0.25881905],
+                    [0.70710678, 0.70710678],
+                    [0.25881905, 0.96592583]])
         """
+        old_center = self.get_center(approx=approx)
+        target_center = normalize(np.ones(self.n_dim))
+        scalar_product = old_center @ target_center
+        if scalar_product == -1:
+            return - self
+        elif scalar_product == 1:
+            return self.copy()
+        theta = np.arccos(scalar_product)
+        target_center_collinear = scalar_product * old_center
+        target_center_orthogonal = target_center - target_center_collinear
+        unit_orthogonal = target_center_orthogonal / np.linalg.norm(target_center_orthogonal)
+        # (old_center, unit_orthogonal) is an orthogonal basis of the plane (old_center, target_center).
+        rotation_matrix = (
+            (np.cos(theta) - 1) * (
+                np.outer(old_center, old_center)
+                + np.outer(unit_orthogonal, unit_orthogonal)
+            )
+            + np.sin(theta) * (
+                np.outer(unit_orthogonal, old_center)
+                - np.outer(old_center, unit_orthogonal)
+            )
+            + np.eye(self.n_dim)
+        )
+        new_positions = self @ rotation_matrix.T
+        return Embeddings(new_positions, norm=False)
 
-        if self.n_voters < 2:
-            raise ValueError("Cannot recenter a ratings with less than 2 candidates")
-
-        center = self.get_center(approx=approx)
-
-        target_center = np.ones(self.n_dim)
-        target_center = normalize(target_center)
-        if np.dot(center, target_center) == -1:
-            new_positions = - self
-        elif np.dot(center, target_center) == 1:
-            new_positions = self
-        else:
-            orthogonal_center = center - np.dot(center, target_center)*target_center
-            orthogonal_center = normalize(orthogonal_center)
-            theta = -np.arccos(np.dot(center, target_center))
-            rotation_matrix = np.array([[np.cos(theta), - np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-            new_positions = np.zeros((self.n_voters, self.n_dim))
-            for i in range(self.n_voters):
-                position_i = self.voter_embeddings(i)
-                comp_1 = position_i.dot(target_center)
-                comp_2 = position_i.dot(orthogonal_center)
-                vector = [comp_1, comp_2]
-                remainder = position_i - comp_1*target_center - comp_2*orthogonal_center
-                new_vector = rotation_matrix.dot(vector)
-                new_positions[i] = new_vector[0]*target_center + new_vector[1]*orthogonal_center + remainder
-
-        return Embeddings(new_positions, False)
-
-    def normalize(self):
+    def recentered_and_dilated(self, approx=True):
         """
-        Normalize the embeddings of the
-        voters so the norm of every embedding is 1.
+        Recenter and dilate.
 
-        Return
-        ------
+        This is just a shortcut for the (common) operation :meth:`recentered`, then :meth:`dilated_new`.
+
+        Parameters
+        ----------
+        approx : bool
+            Passed to :meth:`get_center` in order to compute the center
+            of the voters' embeddings.
+
+        Returns
+        -------
         Embeddings
-            The embeddings itself.
+            A new Embeddings object with the recentered and dilated embeddings.
 
         Examples
         --------
-        >>> embeddings = Embeddings(-np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
+        >>> embeddings = Embeddings([[1, 0], [np.sqrt(3)/2, 1/2], [1/2, np.sqrt(3)/2]], norm=True)
         >>> embeddings
-        Embeddings([[-0.5, -0.9, -0.4],
-                    [-0.4, -0.7, -0.5],
-                    [-0.4, -0.2, -0.4]])
-        >>> embeddings.normalize()
-        Embeddings([[-0.45267873, -0.81482171, -0.36214298],
-                    [-0.42163702, -0.73786479, -0.52704628],
-                    [-0.66666667, -0.33333333, -0.66666667]])
+        Embeddings([[1.       , 0.       ],
+                    [0.8660254, 0.5      ],
+                    [0.5      , 0.8660254]])
+        >>> new_embeddings = embeddings.recentered_and_dilated(approx=False)
+        >>> np.round(new_embeddings, 4)
+        array([[ 1.    ,  0.    ],
+               [ 0.7071,  0.7071],
+               [-0.    ,  1.    ]])
         """
-        new_positions = (self.T / np.sqrt((self ** 2).sum(axis=1))).T
-        return Embeddings(new_positions, False)
+        return self.recentered(approx=approx).dilated_new(approx=approx)
 
     def _plot_3d(self, fig, dim, plot_position=None):
         """
@@ -715,24 +778,3 @@ class Embeddings(np.ndarray):
 
         if show:
             plt.show()  # pragma: no cover
-
-    # noinspection PyMethodOverriding
-    def copy(self):
-        """
-        Return a copy of the embeddings.
-
-        Return
-        ------
-        Embeddings
-            A copy of the embeddings.
-
-        Examples
-        --------
-        >>> embeddings = Embeddings(np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
-        >>> second_embeddings = embeddings.copy()
-        >>> second_embeddings
-        Embeddings([[0.5, 0.9, 0.4],
-                    [0.4, 0.7, 0.5],
-                    [0.4, 0.2, 0.4]])
-        """
-        return Embeddings(self, norm=False)
