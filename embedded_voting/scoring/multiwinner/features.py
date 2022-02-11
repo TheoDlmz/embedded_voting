@@ -17,7 +17,7 @@ class IterFeatures(IterRule):
     >>> ratings_dim_candidate = np.array([[1, 0.8, 0.5, 0, 0, 0], [0, 0, 0, 0.5, 0.8, 1]])
     >>> probability = [3/4, 1/4]
     >>> embeddings = EmbeddingsGeneratorPolarized(100, 2, probability)(1)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(n_candidates=6, n_dim=2, coherence=1, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=1, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
     >>> election = IterFeatures(3)(ratings, embeddings)
     >>> election.winners_
     [0, 5, 1]

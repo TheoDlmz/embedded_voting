@@ -11,10 +11,6 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
 
     Parameters
     ----------
-    n_candidates: int
-        The number of candidates wanted in the ratings
-    n_dim: int
-        The number of dimension of the embeddings
     coherence: float
         Between 0 and 1, indicates the desired level of correlation between embeddings and ratings. If 0,
         ratings are random, if 1, ratings are perfectly correlated to embeddings.
@@ -27,25 +23,37 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
         each group. More precisely, `ratings_dim_candidate[i,j]` is the score given by the group
         represented by the dimension i to the candidate j.
         By default, it is set at random with a uniform distribution.
+    n_dim: int
+        The number of dimension of the embeddings
+    n_candidates: int
+        The number of candidates wanted in the ratings
 
     Examples
     --------
     >>> np.random.seed(42)
     >>> embeddings = Embeddings(np.array([[0, 1], [1, 0], [1, 1]]), norm=True)
-    >>> generator = RatingsFromEmbeddingsCorrelated(n_candidates=2, n_dim=3, coherence=.5, ratings_dim_candidate=np.array([[.8,.4],[.1,.7]]))
+    >>> generator = RatingsFromEmbeddingsCorrelated(coherence=.5, ratings_dim_candidate=np.array([[.8,.4],[.1,.7]]))
     >>> generator(embeddings)
     Ratings([[0.23727006, 0.82535715],
              [0.76599697, 0.49932924],
              [0.30300932, 0.35299726]])
     """
 
-    def __init__(self, coherence=0, ratings_dim_candidate=None, n_candidates=None, n_dim=None):
-        super().__init__(n_candidates)
-        self.n_dim = n_dim
-        self.coherence = coherence
+    def __init__(self, coherence=0, ratings_dim_candidate=None, n_dim=None, n_candidates=None):
         if ratings_dim_candidate is None:
-            ratings_dim_candidate = np.random.rand(self.n_dim, self.n_candidates)
-        self.ratings_dim_candidate = np.array(ratings_dim_candidate)
+            ratings_dim_candidate = np.random.rand(n_dim, n_candidates)
+        else:
+            if n_dim is not None and n_dim != ratings_dim_candidate.shape[0]:
+                raise ValueError("n_dim should be omitted or equal to ratings_dim_candidate.shape[0].")
+            if n_candidates is not None and n_candidates != ratings_dim_candidate.shape[1]:
+                raise ValueError("n_candidates should be omitted or equal to ratings_dim_candidate.shape[1].")
+            ratings_dim_candidate = np.array(ratings_dim_candidate)
+            n_dim, n_candidates = ratings_dim_candidate.shape
+        # Store variables
+        self.coherence = coherence
+        self.ratings_dim_candidate = ratings_dim_candidate
+        self.n_dim = n_dim
+        super().__init__(n_candidates)
 
     def __call__(self, embeddings, *args):
         """

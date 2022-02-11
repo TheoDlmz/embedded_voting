@@ -43,7 +43,7 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
     >>> np.random.seed(42)
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(n_candidates=3, n_dim=3, coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
     >>> extension = InstantRunoffExtension()
     >>> manipulation = ManipulationCoalitionExtension(ratings, embeddings, extension, SVDNash())
     >>> manipulation.winner_
@@ -120,7 +120,7 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     >>> np.random.seed(42)
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(n_candidates=3, n_dim=3, coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
     >>> manipulation = ManipulationCoalitionBorda(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1
@@ -157,7 +157,7 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     >>> np.random.seed(42)
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(n_candidates=3, n_dim=3, coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
     >>> manipulation = ManipulationCoalitionKApp(ratings, embeddings, k=2, rule=SVDNash())
     >>> manipulation.winner_
     1
@@ -192,7 +192,7 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     >>> np.random.seed(42)
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(n_candidates=3, n_dim=3, coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
     >>> manipulation = ManipulationCoalitionIRV(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     2
