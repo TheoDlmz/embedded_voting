@@ -27,7 +27,7 @@ class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
     >>> np.random.seed(42)
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, ratings_dim_candidate)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(n_candidates=3, n_dim=3, coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
     >>> manipulation = SingleVoterManipulationBorda(ratings, embeddings, SVDNash())
     >>> manipulation.prop_manipulator_
     0.0

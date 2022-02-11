@@ -32,14 +32,14 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
     --------
     >>> np.random.seed(42)
     >>> embeddings = Embeddings(np.array([[0, 1], [1, 0], [1, 1]]), norm=True)
-    >>> generator = RatingsFromEmbeddingsCorrelated(2, 3, .5, ratings_dim_candidate=np.array([[.8,.4],[.1,.7]]))
+    >>> generator = RatingsFromEmbeddingsCorrelated(n_candidates=2, n_dim=3, coherence=.5, ratings_dim_candidate=np.array([[.8,.4],[.1,.7]]))
     >>> generator(embeddings)
     Ratings([[0.23727006, 0.82535715],
              [0.76599697, 0.49932924],
              [0.30300932, 0.35299726]])
     """
 
-    def __init__(self, n_candidates, n_dim, coherence=0, ratings_dim_candidate=None):
+    def __init__(self, coherence=0, ratings_dim_candidate=None, n_candidates=None, n_dim=None):
         super().__init__(n_candidates)
         self.n_dim = n_dim
         self.coherence = coherence
