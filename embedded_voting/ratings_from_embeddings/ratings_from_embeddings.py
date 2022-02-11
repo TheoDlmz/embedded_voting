@@ -9,17 +9,12 @@ This file is part of Embedded Voting.
 
 class RatingsFromEmbeddings:
     """
-    This abstract class is used to generate ratings from embeddings
+    This abstract class is used to generate ratings from embeddings.
 
     Parameters
     ----------
     n_candidates: int
-        The number of candidates wanted in the ratings
-
-    Attributes
-    ----------
-    n_candidates: int
-        The number of candidates wanted in the ratings
+        The number of candidates wanted in the ratings.
     """
 
     def __init__(self, n_candidates):
@@ -28,7 +23,13 @@ class RatingsFromEmbeddings:
     def __call__(self, embeddings, *args):
         """
         This method generate ratings from the embeddings
+
+        Parameters
+        ----------
+        embeddings : Embeddings
+
+        Returns
+        -------
+        ratings : Ratings
         """
         raise NotImplementedError
-
-

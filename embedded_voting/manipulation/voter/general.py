@@ -48,7 +48,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
     >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1
@@ -171,7 +171,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.manipulation_global_
         [1, 1, 0, 1, 1, 1, 1, 1, 0, 1]
@@ -195,7 +195,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.prop_manipulator_
         0.2
@@ -218,7 +218,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.avg_welfare_
         0.933...
@@ -241,7 +241,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.worst_welfare_
         0.665...
@@ -265,7 +265,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
         >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
         >>> manipulation.is_manipulable_
         True
@@ -334,9 +334,10 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
         for i in range(map_size):
             for j in range(map_size):
-                ratings_generator = RatingsFromEmbeddingsCorrelated(n_candidates, n_dim, scores_matrix=scores_matrix)
+                ratings_generator = RatingsFromEmbeddingsCorrelated(
+                    n_candidates, n_dim, coherence=j/(map_size-1), scores_matrix=scores_matrix)
                 embeddings = embeddings_generator(polarisation=i/(map_size-1))
-                ratings = ratings_generator(embeddings, coherence=j/(map_size-1))
+                ratings = ratings_generator(embeddings)
                 self.set_profile(ratings, embeddings)
                 manipulator[i, j] = self.prop_manipulator_
                 worst_welfare[i, j] = self.worst_welfare_
@@ -388,7 +389,7 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
     >>> extension = BordaExtension(3)
     >>> manipulation = SingleVoterManipulationExtension(ratings, embeddings, extension, SVDNash())
     >>> manipulation.prop_manipulator_

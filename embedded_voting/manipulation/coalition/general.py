@@ -51,7 +51,7 @@ class ManipulationCoalition(DeleteCacheMixin):
     >>> np.random.seed(42)
     >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, coherence=.8, scores_matrix=scores_matrix)(embeddings)
     >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1
@@ -120,7 +120,7 @@ class ManipulationCoalition(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.trivial_manipulation(0, verbose=True)
         1 voters interested to elect 0 instead of 1
@@ -167,7 +167,7 @@ class ManipulationCoalition(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.is_manipulable_
         True
@@ -196,7 +196,7 @@ class ManipulationCoalition(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, scores_matrix)(embeddings, .8)
+        >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, SVDNash())
         >>> manipulation.worst_welfare_
         0.6651173304239312
@@ -266,9 +266,10 @@ class ManipulationCoalition(DeleteCacheMixin):
 
         for i in range(map_size):
             for j in range(map_size):
-                ratings_generator = RatingsFromEmbeddingsCorrelated(n_candidates, n_dim, scores_matrix)
+                ratings_generator = RatingsFromEmbeddingsCorrelated(
+                    n_candidates, n_dim, coherence=j/(map_size-1), scores_matrix=scores_matrix)
                 embeddings = embeddings_generator(polarisation=i/(map_size-1))
-                ratings = ratings_generator(embeddings, coherence=j/(map_size-1))
+                ratings = ratings_generator(embeddings)
                 self.set_profile(ratings, embeddings)
 
                 worst_welfare = self.welfare_[self.winner_]
