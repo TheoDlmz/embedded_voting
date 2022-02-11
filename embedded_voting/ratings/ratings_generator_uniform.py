@@ -20,5 +20,5 @@ class RatingsGeneratorUniform(RatingsGenerator):
              [0.30424224, 0.52475643, 0.43194502, 0.29122914]])
     """
 
-    def __call__(self, n_candidates, **kwargs):
+    def __call__(self, n_candidates):
         return Ratings(np.random.rand(self.n_voters, n_candidates))

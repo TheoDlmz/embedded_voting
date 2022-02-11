@@ -48,7 +48,7 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
         self.n_voters, self.n_noises = m_voters_noises.shape
         super().__init__(n_voters=self.n_voters, truth_generator=truth_generator)
 
-    def __call__(self, n_candidates=1, *args):
+    def __call__(self, n_candidates=1):
         self.ground_truth_ = self.truth_generator(n_candidates=n_candidates)
         m_noises_candidates = np.random.randn(self.n_noises, n_candidates)
         return Ratings(

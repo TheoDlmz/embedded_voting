@@ -20,7 +20,7 @@ class RatingsGenerator:
     def __init__(self, n_voters):
         self.n_voters = n_voters
 
-    def __call__(self, n_candidates, *args):
+    def __call__(self, n_candidates):
         """
         This function creates ratings.
 

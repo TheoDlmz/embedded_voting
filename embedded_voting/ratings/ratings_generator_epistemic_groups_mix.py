@@ -83,7 +83,7 @@ class RatingsGeneratorEpistemicGroupsMix(RatingsGeneratorEpistemicGroups):
         self.independent_noise = independent_noise
         _, self.n_features = self.groups_features.shape
 
-    def __call__(self, n_candidates=1, *args):
+    def __call__(self, n_candidates=1):
         self.ground_truth_ = self.truth_generator(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):

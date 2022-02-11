@@ -31,7 +31,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         super().__init__(n_voters)
         self.ground_truth_ = None
 
-    def __call__(self, n_candidates=1, *args):
+    def __call__(self, n_candidates=1):
         """
         This function generate the ground truth and the ratings given by each voter to
         n_candidates candidates.

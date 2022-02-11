@@ -40,7 +40,7 @@ class RatingsGeneratorEpistemicGroups(RatingsGeneratorEpistemic):
         ])
         super().__init__(n_voters=self.m_voter_group.shape[0], truth_generator=truth_generator)
 
-    def __call__(self, n_candidates=1, *args):
+    def __call__(self, n_candidates=1):
         raise NotImplementedError
 
     def _plot_ratings_aux(self, ax, ratings):
