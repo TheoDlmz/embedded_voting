@@ -1,16 +1,16 @@
 import numpy as np
 from embedded_voting.ratings.ratings_generator_epistemic_grouped_mix \
-    import RatingsGeneratorEpistemicGroupedMix
+    import RatingsGeneratorEpistemicGroupsMix
 
 
-class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemicGroupedMix):
+class RatingsGeneratorEpistemicGroupsMean(RatingsGeneratorEpistemicGroupsMix):
     """
     A generator of ratings such that voters are
     separated into different groups and the noise of
     an voter on a candidate is equal to the noise
     of his group plus his own independent noise.
 
-    This is a particular case of :class:`RatingsGeneratorEpistemicGroupedMix`
+    This is a particular case of :class:`RatingsGeneratorEpistemicGroupsMix`
     when `groups_features` is the identity matrix, i.e. each group has its own
     exclusive feature.
 
@@ -45,7 +45,7 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemicGroupedMix):
     Examples
     --------
     >>> np.random.seed(44)
-    >>> generator = RatingsGeneratorEpistemicGroupedMean([2, 2])
+    >>> generator = RatingsGeneratorEpistemicGroupsMean([2, 2])
     >>> generator()  # doctest: +ELLIPSIS
     Ratings([[17.625...],
              [17.625...],

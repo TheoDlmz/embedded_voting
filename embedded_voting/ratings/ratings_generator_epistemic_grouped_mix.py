@@ -1,10 +1,9 @@
 import numpy as np
-from embedded_voting.ratings.ratings_generator_epistemic \
-    import RatingsGeneratorEpistemic
+from embedded_voting.ratings.ratings_generator_epistemic_groups import RatingsGeneratorEpistemicGroups
 from embedded_voting.ratings.ratings import Ratings
 
 
-class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
+class RatingsGeneratorEpistemicGroupsMix(RatingsGeneratorEpistemicGroups):
     """
     A generator of ratings such that voters are
     separated into different groups and the noise of
@@ -51,7 +50,7 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
     --------
     >>> np.random.seed(42)
     >>> features = [[1, 0], [0, 1], [1, 1]]
-    >>> generator = RatingsGeneratorEpistemicGroupedMix([2, 2, 2], features)
+    >>> generator = RatingsGeneratorEpistemicGroupsMix([2, 2, 2], features)
     >>> generator()  # doctest: +ELLIPSIS
     Ratings([[14.039...],
              [14.039...],
@@ -64,7 +63,7 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
 
     >>> np.random.seed(42)
     >>> features = [[1, 0, 1, 1], [0, 1, 0, 1], [1, 1, 0, 0]]
-    >>> generator = RatingsGeneratorEpistemicGroupedMix([2, 2, 2], features)
+    >>> generator = RatingsGeneratorEpistemicGroupsMix([2, 2, 2], features)
     >>> generator()
     Ratings([[13.20254261],
              [13.20254261],

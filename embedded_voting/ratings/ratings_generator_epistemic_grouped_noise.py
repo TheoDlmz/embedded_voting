@@ -1,10 +1,10 @@
 import numpy as np
-from embedded_voting.ratings.ratings_generator_epistemic \
-    import RatingsGeneratorEpistemic
+from embedded_voting.ratings.ratings_generator_epistemic_groups \
+    import RatingsGeneratorEpistemicGroups
 from embedded_voting.ratings.ratings import Ratings
 
 
-class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
+class RatingsGeneratorEpistemicGroupsNoise(RatingsGeneratorEpistemicGroups):
     """
     A generator of ratings such that voters are separated into different groups and for each
     candidate the variance of each voter of the same group is the same.
@@ -37,7 +37,7 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> generator = RatingsGeneratorEpistemicGroupedNoise([2, 2])
+    >>> generator = RatingsGeneratorEpistemicGroupsNoise([2, 2])
     >>> generator()  # doctest: +ELLIPSIS
     Ratings([[14.0396...],
              [14.8109...],

@@ -1,7 +1,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import cm
 from embedded_voting.ratings.ratings_generator import RatingsGenerator
 from embedded_voting.truth.truth_generator import TruthGenerator
 from embedded_voting.truth.truth_generator_uniform import TruthGeneratorUniform
@@ -18,48 +17,19 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
     truth_generator : TruthGenerator
         The truth generator used to generate to true values of each candidate.
         Default: `TruthGeneratorUniform(10, 20)`.
-    groups_sizes : list or np.ndarray
-        The number of voters in each group.
-        If set to None, then there are no "groups".
 
     Attributes
     ----------
-    n_groups : int
-        The number of groups. If `groups_size` is None, then `n_groups` is None.
-    m_voter_group : np.ndarray
-        Incidence matrix between voters and groups: `m_voter_group[v, g]` is 1 if
-        and only if voter `v` is in group `g`, and 0 otherwise.
-        Size `n_voters` * `n_groups`.
-        If `groups_size` is None, then `m_voter_group` is None.
     ground_truth_ : np.ndarray
         The ground truth ("true value") for each candidate, corresponding to the
         last ratings generated.
     """
 
-    def __init__(self, n_voters=None, truth_generator=None, groups_sizes=None):
+    def __init__(self, n_voters=None, truth_generator=None):
         if truth_generator is None:
             truth_generator = TruthGeneratorUniform(minimum_value=10, maximum_value=20)
         self.truth_generator = truth_generator
-        if groups_sizes is not None:
-            groups_sizes = np.array(groups_sizes)
-            n_voters_computed = np.sum(groups_sizes)
-            if n_voters is not None and n_voters != n_voters_computed:
-                raise ValueError('n_voters should be equal to the sum of groups_sizes.')
-            n_voters = n_voters_computed
-            self.n_groups = len(groups_sizes)
-            self.m_voter_group = np.vstack([
-                np.hstack((
-                    np.zeros((group_size, i_group)),
-                    np.ones((group_size, 1)),
-                    np.zeros((group_size, self.n_groups - i_group - 1))
-                ))
-                for i_group, group_size in enumerate(groups_sizes)
-            ])
-        else:
-            self.n_groups = None
-            self.m_voter_group = None
         super().__init__(n_voters)
-        self.groups_sizes = groups_sizes
         self.ground_truth_ = None
 
     def generate_true_values(self, n_candidates=1):
@@ -103,24 +73,13 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         ratings = self()
         fig, ax = plt.subplots()
         ax.plot([self.ground_truth_[0]] * 2, [0, 1], color="red", label="True value")
-        if self.groups_sizes is None:
-            for i_voter in range(self.n_voters):
-                ax.plot([ratings[i_voter]] * 2, [0, 1], color="k")
-        else:
-            # noinspection PyUnresolvedReferences
-            color = cm.rainbow(np.linspace(0, 0.8, self.n_groups))
-            sum_previous_groups_sizes = 0
-            for i_group, group_size in enumerate(self.groups_sizes):
-                for i_voter_in_group in range(group_size):
-                    i_voter = sum_previous_groups_sizes + i_voter_in_group
-                    if i_voter_in_group == 0:
-                        ax.plot([ratings[i_voter]] * 2, [0, 1], color=color[i_group],
-                                label="group %i" % (i_group + 1))
-                    else:
-                        ax.plot([ratings[i_voter]] * 2, [0, 1], color=color[i_group])
-                sum_previous_groups_sizes += group_size
+        self._plot_ratings_aux(ax=ax, ratings=ratings)
         ax.set_ylim(0, 1)
         ax.set_title("Distribution of voters' guesses")
         plt.legend()
         if show:
             plt.show()  # pragma: no cover
+
+    def _plot_ratings_aux(self, ax, ratings):
+        for i_voter in range(self.n_voters):
+            ax.plot([ratings[i_voter]] * 2, [0, 1], color="k")

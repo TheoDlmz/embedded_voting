@@ -7,18 +7,18 @@ Ratings Generator Epistemic
 
 Grouped Mean
 _______________
-.. autoclass:: embedded_voting.RatingsGeneratorEpistemicGroupedMean
+.. autoclass:: embedded_voting.RatingsGeneratorEpistemicGroupsMean
     :members:
 
 
 Grouped Noise
 _______________
-.. autoclass:: embedded_voting.RatingsGeneratorEpistemicGroupedNoise
+.. autoclass:: embedded_voting.RatingsGeneratorEpistemicGroupsNoise
     :members:
 
 Grouped Mix
 _______________
-.. autoclass:: embedded_voting.RatingsGeneratorEpistemicGroupedMix
+.. autoclass:: embedded_voting.RatingsGeneratorEpistemicGroupsMix
     :members:
 
 
