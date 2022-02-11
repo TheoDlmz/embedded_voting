@@ -44,7 +44,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         Return
         ------
         Ratings
-            The ratings given by the voters to the alternatives
+            The ratings given by the voters to the candidates.
         """
         raise NotImplementedError
 

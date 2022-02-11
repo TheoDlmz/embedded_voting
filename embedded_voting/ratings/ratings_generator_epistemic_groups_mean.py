@@ -1,5 +1,5 @@
 import numpy as np
-from embedded_voting.ratings.ratings_generator_epistemic_grouped_mix \
+from embedded_voting.ratings.ratings_generator_epistemic_groups_mix \
     import RatingsGeneratorEpistemicGroupsMix
 
 
