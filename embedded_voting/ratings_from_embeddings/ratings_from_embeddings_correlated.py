@@ -69,10 +69,9 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
         Ratings
         """
         embeddings = Embeddings(embeddings, norm=True)
-        positions = np.array(embeddings)
-        n_voters = embeddings.n_voters
-        ratings = self.coherence * (positions ** 2).dot(self.ratings_dim_candidate)
-        ratings += (1 - self.coherence) * np.random.rand(n_voters, self.n_candidates)
-        ratings = np.minimum(ratings, 1)
-        ratings = np.maximum(ratings, 0)
+        ratings = (
+            self.coherence * (embeddings ** 2).dot(self.ratings_dim_candidate)
+            + (1 - self.coherence) * np.random.rand(embeddings.n_voters, self.n_candidates)
+        )
+        ratings = np.clip(ratings, 0, 1)
         return Ratings(ratings)
