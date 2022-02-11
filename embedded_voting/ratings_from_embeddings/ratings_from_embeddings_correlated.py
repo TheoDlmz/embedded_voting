@@ -8,26 +8,33 @@ from embedded_voting.ratings.ratings_generator_uniform import RatingsGeneratorUn
 
 class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
     """
-    This method create ratings correlated to the embeddings by a score matrix.
+    Generate ratings from embeddings and from a matrix where each embedding dimension gives a rating to each candidate.
+
+    `ratings_automatic[voter, candidate]` is computed as the average of `ratings_dim_candidate[:, candidate]`, weighted
+    by the squares of `emdeddings[voter, :]`. In particular, for each `voter` belonging to group `i` (in the sense that
+    their embedding is the i-th vector of the canonical basis), then `ratings_automatic[voter, candidate]` is equal to
+    `ratings_dim_candidate[i, candidate]`.
+
+    `ratings_random[voter, candidate]` is computed as a uniform random number between `minimum_random_rating` and
+    `maximum_random_rating`.
+
+    Finally, `ratings` is the barycenter: `coherence * ratings_automatic + (1 - coherence) * ratings_random`.
 
     Parameters
     ----------
     coherence: float
-        Between 0 and 1, indicates the desired level of correlation between embeddings and ratings. If 0,
-        ratings are random, if 1, ratings are perfectly correlated to embeddings.
+        Between 0 and 1, indicates the degree of coherence between voters having similar embeddings.
+        If 0, the ratings are purely random. If 1, the ratings are automatically deduced
+        from `embeddings` and `ratings_dim_candidate`.
     ratings_dim_candidate: np.ndarray or list
-        An array with shape ``n_dim, n_candidates`` such that ``ratings_dim_candidate[i,j]`` determines the rating
-        given by the group of voter in the dimension i to candidate j. If none is specified, a random one
-        is generated
-    ratings_dim_candidate : np.ndarray or list
-        Matrix of shape :attr:`n_dim`, :attr:`n_candidates` containing the scores given by
-        each group. More precisely, `ratings_dim_candidate[i,j]` is the score given by the group
-        represented by the dimension i to the candidate j.
-        By default, it is set at random with a uniform distribution.
+        An array with shape :attr:`n_dim`, :attr:`n_candidates`. The coefficient
+        `ratings_dim_candidate[dim, candidate]` is the score given by the group represented by the dimension `dim`
+        to the `candidate`. By default, it is set at random with a uniform distribution in the interval
+        [`minimum_random_rating`, `maximum_random_rating`].
     n_dim: int
-        The number of dimension of the embeddings
+        The number of dimension of the embeddings. Used to generate `ratings_dim_candidate` if it is not specified.
     n_candidates: int
-        The number of candidates wanted in the ratings
+        The number of candidates. Used to generate `ratings_dim_candidate` if it is not specified.
     minimum_random_rating: float
         Minimum rating for the random part.
     maximum_random_rating: float
@@ -49,7 +56,10 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
     def __init__(self, coherence=0, ratings_dim_candidate=None, n_dim=None, n_candidates=None,
                  minimum_random_rating=0, maximum_random_rating=1, clip=False):
         if ratings_dim_candidate is None:
-            ratings_dim_candidate = np.random.rand(n_dim, n_candidates)
+            ratings_dim_candidate = (
+                np.random.rand(n_dim, n_candidates) * (maximum_random_rating - minimum_random_rating)
+                + minimum_random_rating
+            )
         else:
             if n_dim is not None and n_dim != ratings_dim_candidate.shape[0]:
                 raise ValueError("n_dim should be omitted or equal to ratings_dim_candidate.shape[0].")
@@ -68,25 +78,24 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
 
     def __call__(self, embeddings, *args):
         """
-        This method generate ratings from the embeddings using the score matrix.
+        This method generate ratings from the embeddings, possibly with a random component.
 
         Parameters
         ----------
-        embeddings: Embeddings
-            The embeddings we want to use to obtain the ratings
+        embeddings : Embeddings
 
         Return
         ------
-        Ratings
+        ratings : Ratings
         """
         embeddings = Embeddings(embeddings, norm=True)
-        ratings_from_embeddings = embeddings ** 2 @ self.ratings_dim_candidate
+        ratings_automatic = embeddings ** 2 @ self.ratings_dim_candidate
         ratings_random = RatingsGeneratorUniform(
             n_voters=embeddings.n_voters,
             minimum_rating=self.minimum_random_rating,
             maximum_rating=self.maximum_random_rating
         )(self.n_candidates)
-        ratings = self.coherence * ratings_from_embeddings + (1 - self.coherence) * ratings_random
+        ratings = self.coherence * ratings_automatic + (1 - self.coherence) * ratings_random
         if self.clip:
             ratings = np.clip(ratings, self.minimum_random_rating, self.maximum_random_rating)
         return Ratings(ratings)
