@@ -1,6 +1,6 @@
 import numpy as np
 from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.scoring.singlewinner.rule_sum_ratings import RuleSumRatings
+from embedded_voting.rules.singlewinner_rules.rule_sum_ratings import RuleSumRatings
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 

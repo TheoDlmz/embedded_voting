@@ -6,7 +6,7 @@ theo.delemazure@ens.fr
 This file is part of Embedded Voting.
 """
 
-from embedded_voting.scoring.singlewinner.rule_fast_nash import RuleFastNash
+from embedded_voting.rules.singlewinner_rules.rule_fast_nash import RuleFastNash
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation import EmbeddingsFromRatingsCorrelation
 import numpy as np

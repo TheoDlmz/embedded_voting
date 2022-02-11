@@ -12,6 +12,6 @@ from embedded_voting.experiments import *
 from embedded_voting.manipulation import *
 from embedded_voting.ratings import *
 from embedded_voting.ratings_from_embeddings import *
-from embedded_voting.scoring import *
+from embedded_voting.rules import *
 from embedded_voting.truth import *
 from embedded_voting.utils.plots import *

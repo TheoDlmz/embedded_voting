@@ -1,9 +1,9 @@
 from embedded_voting.aggregation.aggregator import Aggregator
-from embedded_voting.scoring.singlewinner.rule_fast_nash import RuleFastNash
-from embedded_voting.scoring.singlewinner.rule_fast_sum import RuleFastSum
-from embedded_voting.scoring.singlewinner.rule_sum_ratings import RuleSumRatings
-from embedded_voting.scoring.singlewinner.rule_product_ratings import RuleProductRatings
-from embedded_voting.scoring.singlewinner.rule_mle_gaussian import RuleMLEGaussian
+from embedded_voting.rules.singlewinner_rules.rule_fast_nash import RuleFastNash
+from embedded_voting.rules.singlewinner_rules.rule_fast_sum import RuleFastSum
+from embedded_voting.rules.singlewinner_rules.rule_sum_ratings import RuleSumRatings
+from embedded_voting.rules.singlewinner_rules.rule_product_ratings import RuleProductRatings
+from embedded_voting.rules.singlewinner_rules.rule_mle_gaussian import RuleMLEGaussian
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
 
 

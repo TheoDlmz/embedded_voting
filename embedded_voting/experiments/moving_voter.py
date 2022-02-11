@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.utils.plots import create_3d_plot, create_ternary_plot
-from embedded_voting.scoring.singlewinner.rule_sum_ratings import RuleSumRatings
-from embedded_voting.scoring.singlewinner.rule_svd_max import RuleSVDMax
-from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
+from embedded_voting.rules.singlewinner_rules.rule_sum_ratings import RuleSumRatings
+from embedded_voting.rules.singlewinner_rules.rule_svd_max import RuleSVDMax
+from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 from embedded_voting.embeddings.embeddings import Embeddings
 
 
