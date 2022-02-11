@@ -51,7 +51,7 @@ class RatingsGeneratorEpistemicGroupsNoise(RatingsGeneratorEpistemicGroups):
         self.group_noise = group_noise
 
     def __call__(self, n_candidates=1, *args):
-        self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
+        self.ground_truth_ = self.truth_generator(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
             sigma_groups = np.abs(np.random.normal(loc=0, scale=self.group_noise, size=self.n_groups))

@@ -1,4 +1,3 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 from embedded_voting.ratings.ratings_generator import RatingsGenerator
@@ -31,17 +30,6 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         self.truth_generator = truth_generator
         super().__init__(n_voters)
         self.ground_truth_ = None
-
-    def generate_true_values(self, n_candidates=1):
-        """
-        This function generate a true value for each candidate.
-
-        Return
-        ------
-        np.ndarray
-            The true value for each candidate.
-        """
-        return self.truth_generator(n_candidates)
 
     def __call__(self, n_candidates=1, *args):
         """

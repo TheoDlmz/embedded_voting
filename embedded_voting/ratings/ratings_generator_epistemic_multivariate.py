@@ -53,7 +53,7 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
         self.independent_noise = independent_noise
 
     def __call__(self, n_candidates=1, *args):
-        self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
+        self.ground_truth_ = self.truth_generator(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
             v_dependent_noise = np.random.multivariate_normal(

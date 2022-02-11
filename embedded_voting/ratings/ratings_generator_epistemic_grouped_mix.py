@@ -84,7 +84,7 @@ class RatingsGeneratorEpistemicGroupsMix(RatingsGeneratorEpistemicGroups):
         _, self.n_features = self.groups_features.shape
 
     def __call__(self, n_candidates=1, *args):
-        self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
+        self.ground_truth_ = self.truth_generator(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
             sigma_features = np.abs(
