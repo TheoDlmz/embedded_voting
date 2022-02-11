@@ -47,7 +47,7 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
     """
 
     def __init__(self, coherence=0, ratings_dim_candidate=None, n_dim=None, n_candidates=None,
-                 minimum_random_rating=0, maximum_random_rating=1, clip=True):
+                 minimum_random_rating=0, maximum_random_rating=1, clip=False):
         if ratings_dim_candidate is None:
             ratings_dim_candidate = np.random.rand(n_dim, n_candidates)
         else:
