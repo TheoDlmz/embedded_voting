@@ -1,11 +1,11 @@
 import numpy as np
-from embedded_voting.scoring.singlewinner.general import ScoringRule
+from embedded_voting.scoring.singlewinner.rule import Rule
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation import EmbeddingsFromRatingsCorrelation
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 
 
-class Fast(ScoringRule):
+class RuleFast(Rule):
     """
     Voting rule in which the aggregated score of
     a candidate is based on singular values
@@ -51,7 +51,7 @@ class Fast(ScoringRule):
     Examples
     --------
     >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> election = Fast()(ratings)
+    >>> election = RuleFast()(ratings)
     >>> election.ranking_
     [0, 2, 1]
     >>> election.winner_
@@ -111,117 +111,3 @@ class Fast(ScoringRule):
         s = np.sqrt(s)
         s = np.sort(s)[::-1]
         return self.aggregation_rule(s[:self.n_v])
-
-
-class FastNash(Fast):
-    """
-    Voting rule in which the aggregated score of
-    a candidate is the product of the important singular values
-    of his score matrix.
-
-    Parameters
-    ----------
-    f : callable
-        The transformation for the scores given by the voters.
-        Input : np.ndarray. Output : np.ndarray
-        By default, it is the normalization function.
-
-    Examples
-    --------
-    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> election = FastNash()(ratings)
-    >>> election.ranking_
-    [0, 2, 1]
-    >>> election.winner_
-    0
-
-    """
-    def __init__(self,  f=None, embeddings_as_history=False):
-        super().__init__(f=f, aggregation_rule=np.prod, embeddings_as_history=embeddings_as_history)
-
-
-class FastSum(Fast):
-    """
-    Voting rule in which the aggregated score of
-    a candidate is the sum of the important singular values
-    of his score matrix.
-
-    Parameters
-    ----------
-    f : callable
-        The transformation for the scores given by the voters.
-        Input : np.ndarray. Output : np.ndarray
-        By default, it is the normalization function.
-
-    Examples
-    --------
-    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> election = FastSum()(ratings)
-    >>> election.ranking_
-    [0, 2, 1]
-    >>> election.winner_
-    0
-
-    """
-    def __init__(self, f=None, embeddings_as_history=False):
-        super().__init__(f=f, aggregation_rule=np.sum, embeddings_as_history=embeddings_as_history)
-
-
-class FastMin(Fast):
-    """
-    Voting rule in which the aggregated score of
-    a candidate is the minimum of the important singular values
-    of his score matrix.
-
-    Parameters
-    ----------
-    f : callable
-        The transformation for the scores given by the voters.
-        Input : np.ndarray. Output : np.ndarray
-        By default, it is the normalization f.
-
-    Examples
-    --------
-    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> election = FastMin()(ratings)
-    >>> election.ranking_
-    [0, 2, 1]
-    >>> election.winner_
-    0
-
-    """
-    def __init__(self,  f=None, embeddings_as_history=False):
-        super().__init__(f=f, aggregation_rule=np.min, embeddings_as_history=embeddings_as_history)
-
-
-class FastLog(Fast):
-    """
-    Voting rule in which the aggregated score of
-    a candidate is the log sum of the important singular values
-    of his score matrix.
-
-    Parameters
-    ----------
-    f : callable
-        The transformation for the scores given by the voters.
-        Input : np.ndarray. Output : np.ndarray
-        By default, it is the normalization f.
-
-    Examples
-    --------
-    >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
-    >>> election = FastLog()(ratings)
-    >>> election.ranking_
-    [0, 2, 1]
-    >>> election.winner_
-    0
-
-    """
-    def __init__(self, f=None, embeddings_as_history=False):
-        super().__init__(f=f, embeddings_as_history=embeddings_as_history)
-
-    def __call__(self, ratings, embeddings=None):
-        ratings = Ratings(ratings)
-        self.aggregation_rule = lambda x: np.sum(np.log(1+x*ratings.n_voters))
-        super().__call__(ratings, embeddings)
-        return self

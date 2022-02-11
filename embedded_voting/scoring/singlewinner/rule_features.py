@@ -8,13 +8,13 @@ This file is part of Embedded Voting.
 import numpy as np
 from embedded_voting.utils.cached import cached_property
 from embedded_voting.utils.miscellaneous import normalize
-from embedded_voting.scoring.singlewinner.general import ScoringRule
+from embedded_voting.scoring.singlewinner.rule import Rule
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 import matplotlib.pyplot as plt
 
 
-class FeaturesRule(ScoringRule):
+class RuleFeatures(Rule):
     """
     Voting rule in which the aggregated score of
     a candidate is the norm of the feature
@@ -24,7 +24,7 @@ class FeaturesRule(ScoringRule):
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
     >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
-    >>> election = FeaturesRule()(ratings, embeddings)
+    >>> election = RuleFeatures()(ratings, embeddings)
     >>> election.scores_
     [0.44..., 0.92..., 0.43...]
     >>> election.ranking_

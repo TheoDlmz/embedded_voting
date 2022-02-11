@@ -1,8 +1,10 @@
 
 import numpy as np
 from embedded_voting.manipulation.coalition.general import ManipulationCoalition
-from embedded_voting.scoring.singlewinner.svd import SVDNash
-from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension, BordaExtension, KApprovalExtension
+from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
+from embedded_voting.scoring.singlewinner.rule_instant_runoff_extension import RuleInstantRunoffExtension
+from embedded_voting.scoring.singlewinner.rule_positional_extension_borda import RulePositionalExtensionBorda
+from embedded_voting.scoring.singlewinner.rule_positional_extension_k_approval import RulePositionalExtensionKApproval
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting import RatingsFromEmbeddingsCorrelated
 
@@ -20,22 +22,22 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
         The ratings of voters to candidates
     embeddings: Embeddings
         The embeddings of the voters
-    extension : PositionalRuleExtension
+    extension : RulePositionalExtension
         The ordinal extension used.
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
 
     Attributes
     ----------
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
     winner_ : int
         The index of the winner of the election without manipulation.
     welfare_ : float list
         The welfares of the candidates without manipulation.
-    extended_rule : ScoringRule
+    extended_rule : Rule
         The rule we are analysing
-    extension : PositionalRuleExtension
+    extension : RulePositionalExtension
         The extension used.
 
     Examples
@@ -44,8 +46,8 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> extension = InstantRunoffExtension()
-    >>> manipulation = ManipulationCoalitionExtension(ratings, embeddings, extension, SVDNash())
+    >>> extension = RuleInstantRunoffExtension()
+    >>> manipulation = ManipulationCoalitionExtension(ratings, embeddings, extension, RuleSVDNash())
     >>> manipulation.winner_
     2
     >>> manipulation.is_manipulable_
@@ -104,7 +106,7 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
 class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     """
     This class do the coalition manipulation
-    analysis for the :class:`BordaExtension` extension.
+    analysis for the :class:`RulePositionalExtensionBorda` extension.
 
     Parameters
     ----------
@@ -112,7 +114,7 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
         The ratings of voters to candidates
     embeddings: Embeddings
         The embeddings of the voters
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
 
     Examples
@@ -121,7 +123,7 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = ManipulationCoalitionBorda(ratings, embeddings, SVDNash())
+    >>> manipulation = ManipulationCoalitionBorda(ratings, embeddings, RuleSVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.is_manipulable_
@@ -133,13 +135,13 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     def __init__(self, ratings, embeddings, rule=None):
         if not isinstance(ratings, np.ndarray):
             ratings = ratings.ratings
-        super().__init__(ratings, embeddings, extension=BordaExtension(ratings.shape[1]), rule=rule)
+        super().__init__(ratings, embeddings, extension=RulePositionalExtensionBorda(ratings.shape[1]), rule=rule)
 
 
 class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     """
     This class do the coalition manipulation
-    analysis for the :class:`KApprovalExtension` extension.
+    analysis for the :class:`RulePositionalExtensionKApproval` extension.
 
     Parameters
     ----------
@@ -149,7 +151,7 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
         The embeddings of the voters
     k : int
         The parameter of the k-approval rule.
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
 
     Examples
@@ -158,7 +160,7 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = ManipulationCoalitionKApp(ratings, embeddings, k=2, rule=SVDNash())
+    >>> manipulation = ManipulationCoalitionKApp(ratings, embeddings, k=2, rule=RuleSVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.is_manipulable_
@@ -170,13 +172,13 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     def __init__(self, ratings, embeddings, k=2, rule=None):
         if not isinstance(ratings, np.ndarray):
             ratings = ratings.ratings
-        super().__init__(ratings, embeddings, extension=KApprovalExtension(ratings.shape[1], k=k), rule=rule)
+        super().__init__(ratings, embeddings, extension=RulePositionalExtensionKApproval(ratings.shape[1], k=k), rule=rule)
 
 
 class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     """
     This class do the coalition manipulation
-    analysis for the :class:`InstantRunoffExtension` extension.
+    analysis for the :class:`RuleInstantRunoffExtension` extension.
 
     Parameters
     ----------
@@ -184,7 +186,7 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
         The ratings of voters to candidates
     embeddings: Embeddings
         The embeddings of the voters
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
 
     Examples
@@ -193,7 +195,7 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = ManipulationCoalitionIRV(ratings, embeddings, SVDNash())
+    >>> manipulation = ManipulationCoalitionIRV(ratings, embeddings, RuleSVDNash())
     >>> manipulation.winner_
     2
     >>> manipulation.is_manipulable_
@@ -205,4 +207,4 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     def __init__(self, ratings, embeddings, rule=None):
         if not isinstance(ratings, np.ndarray):
             ratings = ratings.ratings
-        super().__init__(ratings, embeddings, extension=InstantRunoffExtension(ratings.shape[1]), rule=rule)
+        super().__init__(ratings, embeddings, extension=RuleInstantRunoffExtension(ratings.shape[1]), rule=rule)

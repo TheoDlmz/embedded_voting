@@ -1,31 +1,33 @@
 from embedded_voting.aggregation.aggregator import Aggregator
-from embedded_voting.scoring.singlewinner.fast import FastNash, FastSum
-from embedded_voting.scoring.singlewinner.trivialRules import SumScores, ProductScores
-from embedded_voting.scoring.singlewinner.mlerules import MLEGaussian
+from embedded_voting.scoring.singlewinner.rule_fast_nash import RuleFastNash
+from embedded_voting.scoring.singlewinner.rule_fast_sum import RuleFastSum
+from embedded_voting.scoring.singlewinner.rule_sum_ratings import RuleSumRatings
+from embedded_voting.scoring.singlewinner.rule_product_ratings import RuleProductRatings
+from embedded_voting.scoring.singlewinner.rule_mle_gaussian import RuleMLEGaussian
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
 
 
 class AggregatorFastNash(Aggregator):
     def __init__(self):
-        super().__init__(FastNash(), default_train=True, name="FastNash")
+        super().__init__(RuleFastNash(), default_train=True, name="RuleFastNash")
 
 
 class AggregatorFastSum(Aggregator):
     def __init__(self):
-        super().__init__(FastSum(), default_train=True, name="FastSum")
+        super().__init__(RuleFastSum(), default_train=True, name="RuleFastSum")
 
 
 class AggregatorSum(Aggregator):
     def __init__(self):
-        super().__init__(SumScores(), embedder=EmbeddingsFromRatingsSelf(), default_train=False, name="SumScores")
+        super().__init__(RuleSumRatings(), embedder=EmbeddingsFromRatingsSelf(), default_train=False, name="RuleSumRatings")
 
 
 class AggregatorProduct(Aggregator):
     def __init__(self):
-        super().__init__(ProductScores(), embedder=EmbeddingsFromRatingsSelf(),
-                         default_train=False, name="ProductScores")
+        super().__init__(RuleProductRatings(), embedder=EmbeddingsFromRatingsSelf(),
+                         default_train=False, name="RuleProductRatings")
 
 
 class AggregatorMLEGaussian(Aggregator):
     def __init__(self):
-        super().__init__(MLEGaussian(), embedder=EmbeddingsFromRatingsSelf(), default_train=True, name="MLEGaussian")
+        super().__init__(RuleMLEGaussian(), embedder=EmbeddingsFromRatingsSelf(), default_train=True, name="RuleMLEGaussian")

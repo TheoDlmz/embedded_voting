@@ -1,16 +1,16 @@
 import numpy as np
 from embedded_voting.manipulation.voter.general import SingleVoterManipulationExtension
-from embedded_voting.scoring.singlewinner.ordinal import KApprovalExtension
+from embedded_voting.scoring.singlewinner.rule_positional_extension_k_approval import RulePositionalExtensionKApproval
 from embedded_voting import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
-from embedded_voting.scoring.singlewinner.svd import SVDNash
+from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
 from embedded_voting.ratings.ratings import Ratings
 
 
 class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
     """
     This class do the single voter manipulation
-    analysis for the :class:`KApprovalExtension` extension.
+    analysis for the :class:`RulePositionalExtensionKApproval` extension.
     It is faster than the general class
     class:`SingleVoterManipulationExtension`.
 
@@ -20,7 +20,7 @@ class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
         The ratings of voters on which we do the analysis.
     k : int
         The k parameter for the k-approval rule.
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
 
     Examples
@@ -29,7 +29,7 @@ class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = SingleVoterManipulationKApp(ratings, embeddings, 2, SVDNash())
+    >>> manipulation = SingleVoterManipulationKApp(ratings, embeddings, 2, RuleSVDNash())
     >>> manipulation.prop_manipulator_
     0.0
     >>> manipulation.avg_welfare_
@@ -42,7 +42,7 @@ class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
 
     def __init__(self, ratings, embeddings, k=2, rule=None):
         ratings = Ratings(ratings)
-        super().__init__(ratings, embeddings, KApprovalExtension(ratings.n_candidates, k=k), rule)
+        super().__init__(ratings, embeddings, RulePositionalExtensionKApproval(ratings.n_candidates, k=k), rule)
 
     def manipulation_voter(self, i):
         fake_scores_i = self.extended_rule.fake_ratings_[i].copy()

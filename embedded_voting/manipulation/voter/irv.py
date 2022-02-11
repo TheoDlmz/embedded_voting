@@ -1,16 +1,16 @@
 import numpy as np
 from embedded_voting.manipulation.voter.general import SingleVoterManipulationExtension
-from embedded_voting.scoring.singlewinner.ordinal import InstantRunoffExtension
+from embedded_voting.scoring.singlewinner.rule_instant_runoff_extension import RuleInstantRunoffExtension
 from embedded_voting import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
-from embedded_voting.scoring.singlewinner.svd import SVDNash
+from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
 from embedded_voting.ratings.ratings import Ratings
 
 
 class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
     """
     This class do the single voter manipulation
-    analysis for the :class:`InstantRunoffExtension` extension.
+    analysis for the :class:`RuleInstantRunoffExtension` extension.
     It is faster than the general class
     class:`SingleVoterManipulationExtension`.
 
@@ -20,7 +20,7 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
         The ratings of voters to candidates
     embeddings: Embeddings
         The embeddings of the voters
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
 
     Examples
@@ -29,7 +29,7 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = SingleVoterManipulationIRV(ratings, embeddings, SVDNash())
+    >>> manipulation = SingleVoterManipulationIRV(ratings, embeddings, RuleSVDNash())
     >>> manipulation.prop_manipulator_
     0.4
     >>> manipulation.avg_welfare_
@@ -42,7 +42,7 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
 
     def __init__(self, ratings, embeddings, rule=None):
         ratings = Ratings(ratings)
-        super().__init__(ratings, embeddings, InstantRunoffExtension(ratings.n_candidates), rule)
+        super().__init__(ratings, embeddings, RuleInstantRunoffExtension(ratings.n_candidates), rule)
 
     def _create_fake_scores(self, eliminated, scores):
         """

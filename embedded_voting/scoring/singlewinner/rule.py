@@ -14,7 +14,7 @@ from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_identity import EmbeddingsFromRatingsIdentity
 
 
-class ScoringRule(DeleteCacheMixin):
+class Rule(DeleteCacheMixin):
     """
     The general class of functions for scoring rules.
     These rules aggregate the scores of every voter to create
@@ -55,7 +55,7 @@ class ScoringRule(DeleteCacheMixin):
 
         Return
         ------
-        ScoringRule
+        Rule
             The object itself
         """
         self.delete_cache()
@@ -80,8 +80,8 @@ class ScoringRule(DeleteCacheMixin):
         Return
         ------
         float or tuple
-            if :attr:`~embedded_voting.ScoringRule._score_components` = 1, return a float,
-            otherwise a tuple of length :attr:`~embedded_voting.ScoringRule._score_components`.
+            if :attr:`~embedded_voting.Rule._score_components` = 1, return a float,
+            otherwise a tuple of length :attr:`~embedded_voting.Rule._score_components`.
         """
         raise NotImplementedError
 
@@ -114,8 +114,8 @@ class ScoringRule(DeleteCacheMixin):
         Return
         ------
         float or tuple
-            if :attr:`~embedded_voting.ScoringRule._score_components` = 1, return a float,
-            otherwise a tuple of length :attr:`~embedded_voting.ScoringRule._score_components`.
+            if :attr:`~embedded_voting.Rule._score_components` = 1, return a float,
+            otherwise a tuple of length :attr:`~embedded_voting.Rule._score_components`.
         """
         return self.scores_[candidate]
 

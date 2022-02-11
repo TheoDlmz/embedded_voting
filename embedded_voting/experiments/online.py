@@ -1,6 +1,6 @@
 import numpy as np
 from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.scoring.singlewinner.trivialRules import SumScores
+from embedded_voting.scoring.singlewinner.rule_sum_ratings import RuleSumRatings
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
@@ -23,7 +23,7 @@ class OnlineLearning:
             ratings = np.maximum(ratings, 0)
 
             # We get the real welfare of each candidate using a SumScoresProfile
-            welfare = SumScores()(Ratings([truth])).welfare_
+            welfare = RuleSumRatings()(Ratings([truth])).welfare_
 
             results_i = []
             for agg in self.list_agg:

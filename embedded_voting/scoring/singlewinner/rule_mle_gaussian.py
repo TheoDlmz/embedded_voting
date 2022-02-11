@@ -1,10 +1,9 @@
-from embedded_voting.scoring.singlewinner.general import ScoringRule
+from embedded_voting.scoring.singlewinner.rule import Rule
 from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.embeddings.embeddings import Embeddings
 import numpy as np
 
 
-class MLEGaussian(ScoringRule):
+class RuleMLEGaussian(Rule):
     """
     A rule that computes the scores of the candidates
     with the assumption that the embeddings of the
@@ -13,7 +12,7 @@ class MLEGaussian(ScoringRule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> election = MLEGaussian()(ratings)
+    >>> election = RuleMLEGaussian()(ratings)
     >>> election.scores_
     [0.507..., 0.606..., 0.275...]
     >>> election.ranking_

@@ -6,7 +6,7 @@ theo.delemazure@ens.fr
 This file is part of Embedded Voting.
 """
 
-from embedded_voting.scoring.singlewinner.fast import FastNash
+from embedded_voting.scoring.singlewinner.rule_fast_nash import RuleFastNash
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation import EmbeddingsFromRatingsCorrelation
 import numpy as np
@@ -20,8 +20,8 @@ class Aggregator:
 
     Parameters
     ----------
-    rule: ScoringRule
-        The aggregation rule you want to use in your elections. Default is :class:`~embedded_voting.FastNash`
+    rule: Rule
+        The aggregation rule you want to use in your elections. Default is :class:`~embedded_voting.RuleFastNash`
 
     Attributes
     ----------
@@ -32,7 +32,7 @@ class Aggregator:
         The history of all ratings given by the voter. Is used to compute correlations between
         voters.
 
-    rule: ScoringRule
+    rule: Rule
         The scoring rule used for the elections.
 
     Examples
@@ -50,7 +50,7 @@ class Aggregator:
 
     def __init__(self, rule=None, embedder=None, default_train=False, name="aggregator"):
         if rule is None:
-            rule = FastNash()
+            rule = RuleFastNash()
         self.rule = rule
         self.embeddings = None
         self.ratings_history = None

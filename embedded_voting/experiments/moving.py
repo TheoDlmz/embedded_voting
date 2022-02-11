@@ -12,8 +12,9 @@ import matplotlib.pyplot as plt
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.utils.miscellaneous import normalize
 from embedded_voting.utils.plots import create_3d_plot, create_ternary_plot
-from embedded_voting.scoring.singlewinner.trivialRules import SumScores
-from embedded_voting.scoring.singlewinner.svd import SVDMax, SVDNash
+from embedded_voting.scoring.singlewinner.rule_sum_ratings import RuleSumRatings
+from embedded_voting.scoring.singlewinner.rule_svd_max import RuleSVDMax
+from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
 from embedded_voting.embeddings.embeddings import Embeddings
 
 
@@ -45,7 +46,7 @@ class MovingVoter:
 
     Attributes
     ----------
-    rule: ScoringRule
+    rule: Rule
         The rule we are using in the election.
     moving_voter: int
         The index of the voter that is moving.
@@ -56,7 +57,7 @@ class MovingVoter:
     Examples
     --------
     >>> moving_profile = MovingVoter()
-    >>> moving_profile(SumScores())  # DOCTEST: +ELLIPSIS
+    >>> moving_profile(RuleSumRatings())  # DOCTEST: +ELLIPSIS
     <embedded_voting.experiments.moving.MovingVoter object at ...>
     >>> moving_profile.moving_voter
     0
@@ -85,7 +86,7 @@ class MovingVoter:
 
         Parameters
         ----------
-        rule: ScoringRule
+        rule: Rule
             The rule we will use
         ratings: np.ndarray or Ratings
             The ratings of the candidates
@@ -116,7 +117,7 @@ class MovingVoter:
 
         Examples
         --------
-        >>> p = MovingVoter()(SVDNash())
+        >>> p = MovingVoter()(RuleSVDNash())
         >>> p.plot_scores_evolution(show=False)
         """
 
@@ -144,7 +145,7 @@ class MovingVoter:
         This function plot the evolution
         of the features of the candidates
         when the moving voters' embeddings
-        are changing. Only works for :class:`SVDMax` and :class:`FeaturesRule`.
+        are changing. Only works for :class:`SVDMax` and :class:`RuleFeatures`.
 
         Parameters
         ----------
@@ -154,7 +155,7 @@ class MovingVoter:
 
         Examples
         --------
-        >>> p = MovingVoter()(SVDMax())
+        >>> p = MovingVoter()(RuleSVDMax())
         >>> p.plot_features_evolution(show=False)
         """
         tab_x = np.linspace(0, 1, 20)

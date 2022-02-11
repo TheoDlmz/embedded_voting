@@ -1,8 +1,8 @@
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting import RatingsFromEmbeddingsCorrelated
-from embedded_voting.scoring.singlewinner.svd import SVDNash
-from embedded_voting.scoring.singlewinner.ordinal import BordaExtension
+from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
+from embedded_voting.scoring.singlewinner.rule_positional_extension_borda import RulePositionalExtensionBorda
 import numpy as np
 import itertools
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ from embedded_voting.embeddings.embeddings import Embeddings
 class SingleVoterManipulation(DeleteCacheMixin):
     """
     This general class is used for the
-    analysis of the manipulability of some :class:`ScoringRule`
+    analysis of the manipulability of some :class:`Rule`
     by a single voter.
 
     For instance, what proportion of voters can
@@ -27,14 +27,14 @@ class SingleVoterManipulation(DeleteCacheMixin):
         The ratings of voters to candidates
     embeddings: Embeddings
         The embeddings of the voters
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
 
     Attributes
     ----------
     ratings : Profile
         The ratings of voters on which we do the analysis.
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
     winner_ : int
         The index of the winner of the election without manipulation.
@@ -49,7 +49,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
+    >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
@@ -172,7 +172,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.manipulation_global_
         [1, 1, 0, 1, 1, 1, 1, 1, 0, 1]
         """
@@ -196,7 +196,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.prop_manipulator_
         0.2
         """
@@ -219,7 +219,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.avg_welfare_
         0.933...
         """
@@ -242,7 +242,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.worst_welfare_
         0.665...
         """
@@ -266,7 +266,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, SVDNash())
+        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.is_manipulable_
         True
         """
@@ -313,7 +313,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> emb = EmbeddingsGeneratorPolarized(100, 3)(0)
         >>> rat = RatingsFromEmbeddingsCorrelated(n_dim=3, n_candidates=5)(emb)
-        >>> manipulation = SingleVoterManipulation(rat, emb, rule=SVDNash())
+        >>> manipulation = SingleVoterManipulation(rat, emb, rule=RuleSVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['manipulator']
         array([[0.33, 0.  , 0.  , 0.  , 0.  ],
@@ -368,18 +368,18 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
         The ratings of voters on which we do the analysis.
     extension : PositionalRuleExtension
         The ordinal extension used.
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
 
     Attributes
     ----------
-    rule : ScoringRule
+    rule : Rule
         The aggregation rule we want to analysis.
     winner_ : int
         The index of the winner of the election without manipulation.
     welfare_ : float list
         The welfares of the candidates without manipulation.
-    extended_rule : ScoringRule
+    extended_rule : Rule
         The rule we are analysing
     extension : PositionalRuleExtension
         The extension used.
@@ -390,8 +390,8 @@ class SingleVoterManipulationExtension(SingleVoterManipulation):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> extension = BordaExtension(3)
-    >>> manipulation = SingleVoterManipulationExtension(ratings, embeddings, extension, SVDNash())
+    >>> extension = RulePositionalExtensionBorda(3)
+    >>> manipulation = SingleVoterManipulationExtension(ratings, embeddings, extension, RuleSVDNash())
     >>> manipulation.prop_manipulator_
     0.0
     >>> manipulation.manipulation_global_

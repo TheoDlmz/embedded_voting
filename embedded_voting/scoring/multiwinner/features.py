@@ -8,7 +8,7 @@ import numpy as np
 class IterFeatures(IterRule):
     """
     Iterative multiwinner rule
-    based on the :class:`FeaturesRule`
+    based on the :class:`RuleFeatures`
     aggregation rule.
 
     Examples
