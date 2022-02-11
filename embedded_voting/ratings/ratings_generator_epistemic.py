@@ -7,17 +7,17 @@ from embedded_voting.ratings.ratings_generator import RatingsGenerator
 
 class RatingsGeneratorEpistemic(RatingsGenerator):
     """
-    A generator of ratings based on a ground truth ("true value") for each alternative.
+    A generator of ratings based on a ground truth ("true value") for each candidate.
 
     Parameters
     ----------
     n_voters : int
         The number of voters in the generator.
     minimum_value : float or int
-        The minimum true value of an alternative.
+        The minimum true value of a candidate.
         By default, it is set to 10.
     maximum_value : float or int
-        The maximum true value of an alternative.
+        The maximum true value of a candidate.
         By default, it is set to 20.
     groups_sizes : list or np.ndarray
         The number of voters in each group.
@@ -64,12 +64,12 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
 
     def generate_true_values(self, n_candidates=1):
         """
-        This function generate a true value for each alternative.
+        This function generate a true value for each candidate.
 
         Return
         ------
         np.ndarray
-            The true value for each alternative.
+            The true value for each candidate.
         """
         return (
             self.minimum_value

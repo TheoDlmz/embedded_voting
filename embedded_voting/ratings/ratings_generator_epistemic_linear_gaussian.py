@@ -17,10 +17,10 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
         An array of size `n_voters` * `n_noises`, where `n_noises` is the number of elementary
         gaussian noises.
     minimum_value : float or int
-        The minimum true value of an alternative.
+        The minimum true value of a candidate.
         By default, it is set to 10.
     maximum_value : float or int
-        The maximum true value of an alternative.
+        The maximum true value of a candidate.
         By default, it is set to 20.
 
     Attributes

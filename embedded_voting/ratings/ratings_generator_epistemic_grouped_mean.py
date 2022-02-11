@@ -7,7 +7,7 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemicGroupedMix):
     """
     A generator of ratings such that voters are
     separated into different groups and the noise of
-    an voter on an alternative is equal to the noise
+    an voter on a candidate is equal to the noise
     of his group plus his own independent noise.
 
     This is a particular case of :class:`RatingsGeneratorEpistemicGroupedMix`
@@ -33,10 +33,10 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemicGroupedMix):
     independent_noise : float
         The variance used to sample the independent noise of each voter.
     minimum_value : float or int
-        The minimum true value of an alternative.
+        The minimum true value of a candidate.
         By default, it is set to 10.
     maximum_value : float or int
-        The maximum true value of an alternative.
+        The maximum true value of a candidate.
         By default, it is set to 20.
 
     Attributes

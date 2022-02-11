@@ -7,7 +7,7 @@ from embedded_voting.ratings.ratings import Ratings
 class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     """
     A generator of ratings such that voters are separated into different groups and for each
-    alternative the variance of each voter of the same group is the same.
+    candidate the variance of each voter of the same group is the same.
 
     For each candidate `i`:
 
@@ -25,10 +25,10 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     group_noise : float
         The variance used to sample the variances of each group.
     minimum_value : float or int
-        The minimum true value of an alternative.
+        The minimum true value of a candidate.
         By default, it is set to 10.
     maximum_value : float or int
-        The maximum true value of an alternative.
+        The maximum true value of a candidate.
         By default, it is set to 20.
 
     Attributes

@@ -17,10 +17,10 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
     independent_noise : float
         The variance of the independent noise.
     minimum_value : float or int
-        The minimum true value of an alternative.
+        The minimum true value of a candidate.
         By default, it is set to 10.
     maximum_value : float or int
-        The maximum true value of an alternative.
+        The maximum true value of a candidate.
         By default, it is set to 20.
 
     Attributes
