@@ -5,29 +5,26 @@ theo.delemazure@ens.fr
 
 This file is part of Embedded Voting.
 """
-
 import numpy as np
-
 from embedded_voting.embeddings.embeddings import Embeddings
 
 
 class EmbeddingsFromRatings:
     """
-    An abstract class that convert ratings into embeddings using some function
-
+    An abstract class that convert ratings into embeddings using some function.
     """
 
     def __call__(self, ratings):
         """
-        This function takes as input the ratings and return the embeddings
+        Compute the embeddings.
 
         Parameters
         ----------
-        ratings: np.ndarray
+        ratings: Ratings or np.ndarray
             Ratings given by the voters to the candidates
 
         Return
         ------
-        Embeddings
+        embeddings: Embeddings
         """
         raise NotImplementedError

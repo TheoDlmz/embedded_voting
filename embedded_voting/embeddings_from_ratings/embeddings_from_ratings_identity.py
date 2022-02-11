@@ -6,21 +6,20 @@ from embedded_voting.embeddings_from_ratings.embeddings_from_ratings import Embe
 
 class EmbeddingsFromRatingsIdentity(EmbeddingsFromRatings):
     """
-    Use the identity matrix as the embeddings for the voters
+    Use the identity matrix as the embeddings for the voters.
+
+    Intuitively, each voter is alone in her group. These embeddings actually does not take
+    the ratings into account.
 
     Examples
     --------
-    >>> np.random.seed(42)
-    >>> ratings = np.ones((5, 3))
-    >>> generator = EmbeddingsFromRatingsIdentity()
-    >>> generator(ratings)
-    Embeddings([[1., 0., 0., 0., 0.],
-                [0., 1., 0., 0., 0.],
-                [0., 0., 1., 0., 0.],
-                [0., 0., 0., 1., 0.],
-                [0., 0., 0., 0., 1.]])
+    >>> ratings = np.array([[.4, .6], [.1, .9], [.7, .5]])
+    >>> embeddings_from_ratings = EmbeddingsFromRatingsIdentity()
+    >>> embeddings_from_ratings(ratings)
+    Embeddings([[1., 0., 0.],
+                [0., 1., 0.],
+                [0., 0., 1.]])
     """
     def __call__(self, ratings):
-        ratings = Ratings(ratings)
-        n_dim = ratings.shape[0]
-        return Embeddings(np.eye(n_dim), norm=True)
+        n_voters = Ratings(ratings).n_voters
+        return Embeddings(np.eye(n_voters), norm=False)
