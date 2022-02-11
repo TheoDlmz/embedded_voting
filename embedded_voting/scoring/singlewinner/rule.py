@@ -7,7 +7,6 @@ This file is part of Embedded Voting.
 """
 
 import numpy as np
-
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property

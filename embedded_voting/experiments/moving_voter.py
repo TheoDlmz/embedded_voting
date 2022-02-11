@@ -58,7 +58,7 @@ class MovingVoter:
     --------
     >>> moving_profile = MovingVoter()
     >>> moving_profile(RuleSumRatings())  # DOCTEST: +ELLIPSIS
-    <embedded_voting.experiments.moving.MovingVoter object at ...>
+    <embedded_voting.experiments.moving_voter.MovingVoter object at ...>
     >>> moving_profile.moving_voter
     0
     >>> moving_profile.embeddings

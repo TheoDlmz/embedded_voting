@@ -9,17 +9,20 @@ from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import
 
 class AggregatorFastNash(Aggregator):
     def __init__(self):
-        super().__init__(RuleFastNash(), default_train=True, name="RuleFastNash")
+        super().__init__(RuleFastNash(),
+                         default_train=True, name="RuleFastNash")
 
 
 class AggregatorFastSum(Aggregator):
     def __init__(self):
-        super().__init__(RuleFastSum(), default_train=True, name="RuleFastSum")
+        super().__init__(RuleFastSum(),
+                         default_train=True, name="RuleFastSum")
 
 
-class AggregatorSum(Aggregator):
+class AggregatorSumRatings(Aggregator):
     def __init__(self):
-        super().__init__(RuleSumRatings(), embedder=EmbeddingsFromRatingsSelf(), default_train=False, name="RuleSumRatings")
+        super().__init__(RuleSumRatings(), embedder=EmbeddingsFromRatingsSelf(),
+                         default_train=False, name="RuleSumRatings")
 
 
 class AggregatorProduct(Aggregator):
@@ -30,4 +33,5 @@ class AggregatorProduct(Aggregator):
 
 class AggregatorMLEGaussian(Aggregator):
     def __init__(self):
-        super().__init__(RuleMLEGaussian(), embedder=EmbeddingsFromRatingsSelf(), default_train=True, name="RuleMLEGaussian")
+        super().__init__(RuleMLEGaussian(), embedder=EmbeddingsFromRatingsSelf(),
+                         default_train=True, name="RuleMLEGaussian")

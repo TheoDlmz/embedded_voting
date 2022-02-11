@@ -1,13 +1,12 @@
-
 import numpy as np
-from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
 import matplotlib.pyplot as plt
-from embedded_voting.utils.plots import create_map_plot
-from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
-from embedded_voting import RatingsFromEmbeddingsCorrelated
-from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
+from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
+from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
+from embedded_voting.utils.plots import create_map_plot
 
 
 class ManipulationCoalition(DeleteCacheMixin):

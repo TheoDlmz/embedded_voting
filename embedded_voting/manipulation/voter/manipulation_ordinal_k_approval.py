@@ -1,18 +1,18 @@
 import numpy as np
-from embedded_voting.manipulation.voter.general import SingleVoterManipulationExtension
+from embedded_voting.manipulation.voter.manipulation_ordinal import ManipulationOrdinal
 from embedded_voting.scoring.singlewinner.rule_positional_extension_k_approval import RulePositionalExtensionKApproval
-from embedded_voting import RatingsFromEmbeddingsCorrelated
+from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
 from embedded_voting.ratings.ratings import Ratings
 
 
-class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
+class ManipulationOrdinalKApproval(ManipulationOrdinal):
     """
     This class do the single voter manipulation
     analysis for the :class:`RulePositionalExtensionKApproval` extension.
     It is faster than the general class
-    class:`SingleVoterManipulationExtension`.
+    class:`ManipulationOrdinal`.
 
     Parameters
     ----------
@@ -29,7 +29,7 @@ class SingleVoterManipulationKApp(SingleVoterManipulationExtension):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = SingleVoterManipulationKApp(ratings, embeddings, 2, RuleSVDNash())
+    >>> manipulation = ManipulationOrdinalKApproval(ratings, embeddings, 2, RuleSVDNash())
     >>> manipulation.prop_manipulator_
     0.0
     >>> manipulation.avg_welfare_

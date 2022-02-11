@@ -1,2 +1,2 @@
-from embedded_voting.experiments.online import OnlineLearning
-from embedded_voting.experiments.moving import *
+from embedded_voting.experiments.online_learning import OnlineLearning
+from embedded_voting.experiments.moving_voter import *

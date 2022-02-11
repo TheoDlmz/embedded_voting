@@ -1,7 +1,7 @@
 import numpy as np
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting import RatingsFromEmbeddingsCorrelated
-from embedded_voting.manipulation.coalition.general import ManipulationCoalition
+from embedded_voting.manipulation.coalition.manipulation_coalition import ManipulationCoalition
 from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
 import matplotlib.pyplot as plt
 

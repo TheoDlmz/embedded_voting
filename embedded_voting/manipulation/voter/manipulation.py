@@ -1,17 +1,15 @@
-from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
-from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
-from embedded_voting import RatingsFromEmbeddingsCorrelated
-from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
-from embedded_voting.scoring.singlewinner.rule_positional_extension_borda import RulePositionalExtensionBorda
 import numpy as np
-import itertools
 import matplotlib.pyplot as plt
-from embedded_voting.utils.plots import create_map_plot
-from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
+from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
+from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
+from embedded_voting.utils.plots import create_map_plot
 
 
-class SingleVoterManipulation(DeleteCacheMixin):
+class Manipulation(DeleteCacheMixin):
     """
     This general class is used for the
     analysis of the manipulability of some :class:`Rule`
@@ -49,7 +47,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
+    >>> manipulation = Manipulation(ratings, embeddings, RuleSVDNash())
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
@@ -91,7 +89,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
 
         Return
         ------
-        SingleVoterManipulation
+        Manipulation
             The object itself.
         """
         if embeddings is not None:
@@ -172,7 +170,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
+        >>> manipulation = Manipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.manipulation_global_
         [1, 1, 0, 1, 1, 1, 1, 1, 0, 1]
         """
@@ -196,7 +194,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
+        >>> manipulation = Manipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.prop_manipulator_
         0.2
         """
@@ -219,7 +217,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
+        >>> manipulation = Manipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.avg_welfare_
         0.933...
         """
@@ -242,7 +240,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
+        >>> manipulation = Manipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.worst_welfare_
         0.665...
         """
@@ -266,7 +264,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
         >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-        >>> manipulation = SingleVoterManipulation(ratings, embeddings, RuleSVDNash())
+        >>> manipulation = Manipulation(ratings, embeddings, RuleSVDNash())
         >>> manipulation.is_manipulable_
         True
         """
@@ -313,7 +311,7 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> np.random.seed(42)
         >>> emb = EmbeddingsGeneratorPolarized(100, 3)(0)
         >>> rat = RatingsFromEmbeddingsCorrelated(n_dim=3, n_candidates=5)(emb)
-        >>> manipulation = SingleVoterManipulation(rat, emb, rule=RuleSVDNash())
+        >>> manipulation = Manipulation(rat, emb, rule=RuleSVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['manipulator']
         array([[0.33, 0.  , 0.  , 0.  , 0.  ],
@@ -355,95 +353,3 @@ class SingleVoterManipulation(DeleteCacheMixin):
         return {"manipulator": manipulator,
                 "worst_welfare": worst_welfare,
                 "avg_welfare": avg_welfare}
-
-
-class SingleVoterManipulationExtension(SingleVoterManipulation):
-    """
-    This class extends the :class:`SingleVoterManipulation`
-    class to ordinal extension (irv, borda, plurality, etc.).
-
-    Parameters
-    ----------
-    ratings : Profile
-        The ratings of voters on which we do the analysis.
-    extension : PositionalRuleExtension
-        The ordinal extension used.
-    rule : Rule
-        The aggregation rule we want to analysis.
-
-    Attributes
-    ----------
-    rule : Rule
-        The aggregation rule we want to analysis.
-    winner_ : int
-        The index of the winner of the election without manipulation.
-    welfare_ : float list
-        The welfares of the candidates without manipulation.
-    extended_rule : Rule
-        The rule we are analysing
-    extension : PositionalRuleExtension
-        The extension used.
-
-    Examples
-    --------
-    >>> np.random.seed(42)
-    >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
-    >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> extension = RulePositionalExtensionBorda(3)
-    >>> manipulation = SingleVoterManipulationExtension(ratings, embeddings, extension, RuleSVDNash())
-    >>> manipulation.prop_manipulator_
-    0.0
-    >>> manipulation.manipulation_global_
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    >>> manipulation.avg_welfare_
-    1.0
-    """
-
-    def __init__(self, ratings, embeddings, extension, rule=None):
-        super().__init__(ratings, embeddings)
-        self.rule = rule
-        self.extension = extension
-        if rule is not None:
-            self.extended_rule = self.extension.set_rule(rule)
-            self.extended_rule(self.ratings, self.embeddings)
-            self.winner_ = self.extended_rule.winner_
-            self.welfare_ = self.rule(self.ratings, self.embeddings).welfare_
-            self.delete_cache()
-        else:
-            self.extended_rule = None
-
-    def __call__(self, rule):
-        self.rule = rule
-        self.extended_rule = self.extension.set_rule(rule)
-        self.extended_rule(self.ratings, self.embeddings)
-        self.winner_ = self.extended_rule.winner_
-        self.welfare_ = self.rule(self.ratings, self.embeddings).welfare_
-        self.delete_cache()
-        return self
-
-    def manipulation_voter(self, i):
-        score_i = self.ratings[i].copy()
-        preferences_order = np.argsort(score_i)[::-1]
-
-        n_candidates = self.ratings.shape[1]
-        points = np.arange(n_candidates)[::-1]
-        if preferences_order[0] == self.winner_:
-            return self.winner_
-
-        best_manipulation_i = np.where(preferences_order == self.winner_)[0][0]
-
-        for perm in itertools.permutations(range(n_candidates)):
-            self.ratings[i] = points[list(perm)]
-            fake_run = self.extended_rule(self.ratings, self.embeddings)
-            new_winner = fake_run.winner_
-            index_candidate = np.where(preferences_order == new_winner)[0][0]
-            if index_candidate < best_manipulation_i:
-                best_manipulation_i = index_candidate
-                if best_manipulation_i == 0:
-                    break
-
-        best_manipulation = preferences_order[best_manipulation_i]
-        self.ratings[i] = score_i
-
-        return best_manipulation

@@ -1,6 +1,7 @@
-from embedded_voting.scoring.multiwinner.multiwinner_rule_iter_features import *
-from embedded_voting.scoring.multiwinner.multiwinner_rule import *
-from embedded_voting.scoring.multiwinner.multiwinner_rule_iter_svd import *
+from embedded_voting.scoring.multiwinner.multiwinner_rule import MultiwinnerRule
+from embedded_voting.scoring.multiwinner.multiwinner_rule_iter import MultiwinnerRuleIter
+from embedded_voting.scoring.multiwinner.multiwinner_rule_iter_features import MultiwinnerRuleIterFeatures
+from embedded_voting.scoring.multiwinner.multiwinner_rule_iter_svd import MultiwinnerRuleIterSVD
 
 from embedded_voting.scoring.singlewinner.rule import Rule
 from embedded_voting.scoring.singlewinner.rule_fast import RuleFast

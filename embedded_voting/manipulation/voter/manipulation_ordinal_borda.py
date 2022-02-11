@@ -1,17 +1,18 @@
 import numpy as np
-from embedded_voting.manipulation.voter.general import SingleVoterManipulationExtension
+from embedded_voting.manipulation.voter.manipulation_ordinal import ManipulationOrdinal
 from embedded_voting.scoring.singlewinner.rule_positional_extension_borda import RulePositionalExtensionBorda
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.scoring.singlewinner.rule_svd_nash import RuleSVDNash
 from embedded_voting.ratings.ratings import Ratings
 
-class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
+
+class ManipulationOrdinalBorda(ManipulationOrdinal):
     """
     This class do the single voter manipulation
     analysis for the :class:`RulePositionalExtensionBorda` extension.
     It is faster than the general class
-    class:`SingleVoterManipulationExtension`.
+    class:`ManipulationOrdinal`.
 
     Parameters
     ----------
@@ -28,7 +29,7 @@ class SingleVoterManipulationBorda(SingleVoterManipulationExtension):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> manipulation = SingleVoterManipulationBorda(ratings, embeddings, RuleSVDNash())
+    >>> manipulation = ManipulationOrdinalBorda(ratings, embeddings, RuleSVDNash())
     >>> manipulation.prop_manipulator_
     0.0
     >>> manipulation.avg_welfare_
