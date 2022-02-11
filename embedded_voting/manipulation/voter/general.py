@@ -316,11 +316,11 @@ class SingleVoterManipulation(DeleteCacheMixin):
         >>> manipulation = SingleVoterManipulation(rat, emb, rule=SVDNash())
         >>> maps = manipulation.manipulation_map(map_size=5, show=False)
         >>> maps['manipulator']
-        array([[0.02, 0.  , 0.  , 0.  , 0.58],
-               [0.08, 0.03, 0.  , 0.  , 0.  ],
-               [0.74, 0.  , 0.  , 0.  , 0.  ],
-               [0.24, 0.  , 0.  , 0.  , 0.  ],
-               [0.17, 0.  , 0.  , 0.  , 0.  ]])
+        array([[0.33, 0.  , 0.  , 0.  , 0.  ],
+               [0.34, 0.22, 0.  , 0.  , 0.  ],
+               [0.01, 0.  , 0.  , 0.  , 0.  ],
+               [0.  , 0.19, 0.  , 0.  , 0.  ],
+               [0.57, 0.22, 0.  , 0.  , 0.  ]])
         """
 
         manipulator = np.zeros((map_size, map_size))
@@ -331,15 +331,10 @@ class SingleVoterManipulation(DeleteCacheMixin):
         n_dim = self.embeddings.n_dim
 
         embeddings_generator = EmbeddingsGeneratorPolarized(n_voters, n_dim)
-        ratings_generator = RatingsFromEmbeddingsCorrelated(n_candidates, n_dim)
-
-        if scores_matrix is not None:
-            ratings_generator.set_scores(scores_matrix)
 
         for i in range(map_size):
             for j in range(map_size):
-                if scores_matrix is None:
-                    ratings_generator.set_scores()
+                ratings_generator = RatingsFromEmbeddingsCorrelated(n_candidates, n_dim, scores_matrix=scores_matrix)
                 embeddings = embeddings_generator(polarisation=i/(map_size-1))
                 ratings = ratings_generator(embeddings, coherence=j/(map_size-1))
                 self.set_profile(ratings, embeddings)
