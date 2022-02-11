@@ -5,8 +5,7 @@ from embedded_voting.ratings.ratings_generator import RatingsGenerator
 
 class RatingsGeneratorUniform(RatingsGenerator):
     """
-    A ratings generator that generates random ratings between 0 and 1 for a given number of voters
-    and candidates.
+    Generate uniform random ratings.
 
     Examples
     --------
