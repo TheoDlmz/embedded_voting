@@ -3,6 +3,7 @@ import numpy as np
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.ratings_from_embeddings import RatingsFromEmbeddings
+from embedded_voting.ratings.ratings_generator_uniform import RatingsGeneratorUniform
 
 
 class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
@@ -27,6 +28,12 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
         The number of dimension of the embeddings
     n_candidates: int
         The number of candidates wanted in the ratings
+    minimum_random_rating: float
+        Minimum rating for the random part.
+    maximum_random_rating: float
+        Maximum rating for the random part.
+    clip: bool
+        If true, the final ratings are clipped in the interval [`minimum_random_rating`, `maximum_random_rating`].
 
     Examples
     --------
@@ -39,7 +46,8 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
              [0.30300932, 0.35299726]])
     """
 
-    def __init__(self, coherence=0, ratings_dim_candidate=None, n_dim=None, n_candidates=None):
+    def __init__(self, coherence=0, ratings_dim_candidate=None, n_dim=None, n_candidates=None,
+                 minimum_random_rating=0, maximum_random_rating=1, clip=True):
         if ratings_dim_candidate is None:
             ratings_dim_candidate = np.random.rand(n_dim, n_candidates)
         else:
@@ -53,6 +61,9 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
         self.coherence = coherence
         self.ratings_dim_candidate = ratings_dim_candidate
         self.n_dim = n_dim
+        self.minimum_random_rating = minimum_random_rating
+        self.maximum_random_rating = maximum_random_rating
+        self.clip = clip
         super().__init__(n_candidates)
 
     def __call__(self, embeddings, *args):
@@ -69,9 +80,13 @@ class RatingsFromEmbeddingsCorrelated(RatingsFromEmbeddings):
         Ratings
         """
         embeddings = Embeddings(embeddings, norm=True)
-        ratings = (
-            self.coherence * (embeddings ** 2).dot(self.ratings_dim_candidate)
-            + (1 - self.coherence) * np.random.rand(embeddings.n_voters, self.n_candidates)
-        )
-        ratings = np.clip(ratings, 0, 1)
+        ratings_from_embeddings = embeddings ** 2 @ self.ratings_dim_candidate
+        ratings_random = RatingsGeneratorUniform(
+            n_voters=embeddings.n_voters,
+            minimum_rating=self.minimum_random_rating,
+            maximum_rating=self.maximum_random_rating
+        )(self.n_candidates)
+        ratings = self.coherence * ratings_from_embeddings + (1 - self.coherence) * ratings_random
+        if self.clip:
+            ratings = np.clip(ratings, self.minimum_random_rating, self.maximum_random_rating)
         return Ratings(ratings)
