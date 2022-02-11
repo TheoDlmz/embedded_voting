@@ -26,9 +26,9 @@ class SingleVoterManipulationIRV(SingleVoterManipulationExtension):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, scores_matrix)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, .8, ratings_dim_candidate)(embeddings)
     >>> manipulation = SingleVoterManipulationIRV(ratings, embeddings, SVDNash())
     >>> manipulation.prop_manipulator_
     0.4

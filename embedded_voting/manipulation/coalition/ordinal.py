@@ -41,9 +41,9 @@ class ManipulationCoalitionExtension(ManipulationCoalition):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, 0.8, scores_matrix)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, 0.8, ratings_dim_candidate)(embeddings)
     >>> extension = InstantRunoffExtension()
     >>> manipulation = ManipulationCoalitionExtension(ratings, embeddings, extension, SVDNash())
     >>> manipulation.winner_
@@ -118,9 +118,9 @@ class ManipulationCoalitionBorda(ManipulationCoalitionExtension):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, 0.8, scores_matrix)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, 0.8, ratings_dim_candidate)(embeddings)
     >>> manipulation = ManipulationCoalitionBorda(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     1
@@ -155,9 +155,9 @@ class ManipulationCoalitionKApp(ManipulationCoalitionExtension):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, 0.8, scores_matrix)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, 0.8, ratings_dim_candidate)(embeddings)
     >>> manipulation = ManipulationCoalitionKApp(ratings, embeddings, k=2, rule=SVDNash())
     >>> manipulation.winner_
     1
@@ -190,9 +190,9 @@ class ManipulationCoalitionIRV(ManipulationCoalitionExtension):
     Examples
     --------
     >>> np.random.seed(42)
-    >>> scores_matrix = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
+    >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
-    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, 0.8, scores_matrix)(embeddings)
+    >>> ratings = RatingsFromEmbeddingsCorrelated(3, 3, 0.8, ratings_dim_candidate)(embeddings)
     >>> manipulation = ManipulationCoalitionIRV(ratings, embeddings, SVDNash())
     >>> manipulation.winner_
     2
