@@ -1,6 +1,13 @@
-from embedded_voting.manipulation.voter.manipulation import *
-from embedded_voting.manipulation.voter.manipulation_ordinal_borda import *
-from embedded_voting.manipulation.voter.manipulation_ordinal_k_approval import *
-from embedded_voting.manipulation.voter.manipulation_ordinal_irv import *
-from embedded_voting.manipulation.coalition.manipulation_coalition import *
-from embedded_voting.manipulation.coalition.manipulation_coalition_ordinal import *
+from embedded_voting.manipulation.voter.manipulation import Manipulation
+from embedded_voting.manipulation.voter.manipulation_ordinal import ManipulationOrdinal
+from embedded_voting.manipulation.voter.manipulation_ordinal_borda import ManipulationOrdinalBorda
+from embedded_voting.manipulation.voter.manipulation_ordinal_irv import ManipulationOrdinalIRV
+from embedded_voting.manipulation.voter.manipulation_ordinal_k_approval import ManipulationOrdinalKApproval
+
+from embedded_voting.manipulation.coalition.manipulation_coalition import ManipulationCoalition
+from embedded_voting.manipulation.coalition.manipulation_coalition_ordinal import ManipulationCoalitionOrdinal
+from embedded_voting.manipulation.coalition.manipulation_coalition_ordinal_borda \
+    import ManipulationCoalitionOrdinalBorda
+from embedded_voting.manipulation.coalition.manipulation_coalition_ordinal_irv import ManipulationCoalitionOrdinalIRV
+from embedded_voting.manipulation.coalition.manipulation_coalition_ordinal_k_approval \
+    import ManipulationCoalitionOrdinalKApproval
