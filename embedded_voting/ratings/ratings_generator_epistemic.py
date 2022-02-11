@@ -51,7 +51,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
     def plot_ratings(self, show=True):
         """
         This function plots the true value of a candidate and the ratings
-        given by each voter for some candidate randomly selected.
+        given by each voter for a candidate with new random values and ratings.
 
         Parameters
         ----------
@@ -69,5 +69,15 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
             plt.show()  # pragma: no cover
 
     def _plot_ratings_aux(self, ax, ratings):
+        """
+        Auxiliary method for the plot itself (without boilerplate code like title, legend, etc).
+
+        Parameters
+        ----------
+        ax : ax
+            The matplotlib ax object.
+        ratings : Ratings
+            Ratings of the candidate.
+        """
         for i_voter in range(self.n_voters):
             ax.plot([ratings[i_voter]] * 2, [0, 1], color="k")
