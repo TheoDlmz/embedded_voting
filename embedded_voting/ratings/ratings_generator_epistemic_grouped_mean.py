@@ -32,12 +32,9 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemicGroupedMix):
         The variance used to sample the noise of each group.
     independent_noise : float
         The variance used to sample the independent noise of each voter.
-    minimum_value : float or int
-        The minimum true value of a candidate.
-        By default, it is set to 10.
-    maximum_value : float or int
-        The maximum true value of a candidate.
-        By default, it is set to 20.
+    truth_generator : TruthGenerator
+        The truth generator used to generate to true values of each candidate.
+        Default: `TruthGeneratorUniform(10, 20)`.
 
     Attributes
     ----------
@@ -49,18 +46,17 @@ class RatingsGeneratorEpistemicGroupedMean(RatingsGeneratorEpistemicGroupedMix):
     --------
     >>> np.random.seed(44)
     >>> generator = RatingsGeneratorEpistemicGroupedMean([2, 2])
-    >>> generator()
+    >>> generator()  # doctest: +ELLIPSIS
     Ratings([[17.625...],
              [17.625...],
              [17.422...],
              [17.422...]])
-    >>> generator.ground_truth_
+    >>> generator.ground_truth_  # doctest: +ELLIPSIS
     array([18.348...])
     """
-    def __init__(self, groups_sizes, group_noise=1, independent_noise=0, minimum_value=10,
-                 maximum_value=20):
+    def __init__(self, groups_sizes, group_noise=1, independent_noise=0, truth_generator=None):
         n_groups = len(groups_sizes)
         group_features = np.eye(n_groups)
         super().__init__(groups_sizes=groups_sizes, groups_features=group_features,
                          group_noise=group_noise, independent_noise=independent_noise,
-                         minimum_value=minimum_value, maximum_value=maximum_value)
+                         truth_generator=truth_generator)

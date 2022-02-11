@@ -24,12 +24,9 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
         The sum is equal to :attr:`~embedded_voting.RatingsGenerator.n_voters`.
     group_noise : float
         The variance used to sample the variances of each group.
-    minimum_value : float or int
-        The minimum true value of a candidate.
-        By default, it is set to 10.
-    maximum_value : float or int
-        The maximum true value of a candidate.
-        By default, it is set to 20.
+    truth_generator : TruthGenerator
+        The truth generator used to generate to true values of each candidate.
+        Default: `TruthGeneratorUniform(10, 20)`.
 
     Attributes
     ----------
@@ -41,17 +38,16 @@ class RatingsGeneratorEpistemicGroupedNoise(RatingsGeneratorEpistemic):
     --------
     >>> np.random.seed(42)
     >>> generator = RatingsGeneratorEpistemicGroupedNoise([2, 2])
-    >>> generator()
+    >>> generator()  # doctest: +ELLIPSIS
     Ratings([[14.0396...],
              [14.8109...],
              [13.4173...],
              [13.4488...]])
-    >>> generator.ground_truth_
+    >>> generator.ground_truth_  # doctest: +ELLIPSIS
     array([13.7454...])
     """
-    def __init__(self, groups_sizes, group_noise=1, minimum_value=10, maximum_value=20):
-        super().__init__(minimum_value=minimum_value, maximum_value=maximum_value,
-                         groups_sizes=groups_sizes)
+    def __init__(self, groups_sizes, group_noise=1, truth_generator=None):
+        super().__init__(truth_generator=truth_generator, groups_sizes=groups_sizes)
         self.group_noise = group_noise
 
     def __call__(self, n_candidates=1, *args):

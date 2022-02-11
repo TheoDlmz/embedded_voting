@@ -37,12 +37,9 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
         The variance used to sample the noise of each group.
     independent_noise : float
         The variance used to sample the independent noise of each voter.
-    minimum_value : float or int
-        The minimum true value of a candidate.
-        By default, it is set to 10.
-    maximum_value : float or int
-        The maximum true value of a candidate.
-        By default, it is set to 20.
+    truth_generator : TruthGenerator
+        The truth generator used to generate to true values of each candidate.
+        Default: `TruthGeneratorUniform(10, 20)`.
 
     Attributes
     ----------
@@ -55,14 +52,14 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
     >>> np.random.seed(42)
     >>> features = [[1, 0], [0, 1], [1, 1]]
     >>> generator = RatingsGeneratorEpistemicGroupedMix([2, 2, 2], features)
-    >>> generator()
+    >>> generator()  # doctest: +ELLIPSIS
     Ratings([[14.039...],
              [14.039...],
              [14.316...],
              [14.316...],
              [14.177...],
              [14.177...]])
-    >>> generator.ground_truth_
+    >>> generator.ground_truth_  # doctest: +ELLIPSIS
     array([13.745...])
 
     >>> np.random.seed(42)
@@ -76,10 +73,8 @@ class RatingsGeneratorEpistemicGroupedMix(RatingsGeneratorEpistemic):
              [13.27781234],
              [13.27781234]])
     """
-    def __init__(self, groups_sizes, groups_features, group_noise=1, independent_noise=0,
-                 minimum_value=10, maximum_value=20):
-        super().__init__(minimum_value=minimum_value, maximum_value=maximum_value,
-                         groups_sizes=groups_sizes)
+    def __init__(self, groups_sizes, groups_features, group_noise=1, independent_noise=0, truth_generator=None):
+        super().__init__(truth_generator=truth_generator, groups_sizes=groups_sizes)
         self.groups_features = np.array(groups_features)
         self.groups_features_normalized = (
             self.groups_features

@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
 from embedded_voting.ratings.ratings_generator import RatingsGenerator
+from embedded_voting.truth.truth_generator import TruthGenerator
+from embedded_voting.truth.truth_generator_uniform import TruthGeneratorUniform
 
 
 class RatingsGeneratorEpistemic(RatingsGenerator):
@@ -13,12 +15,9 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
     ----------
     n_voters : int
         The number of voters in the generator.
-    minimum_value : float or int
-        The minimum true value of a candidate.
-        By default, it is set to 10.
-    maximum_value : float or int
-        The maximum true value of a candidate.
-        By default, it is set to 20.
+    truth_generator : TruthGenerator
+        The truth generator used to generate to true values of each candidate.
+        Default: `TruthGeneratorUniform(10, 20)`.
     groups_sizes : list or np.ndarray
         The number of voters in each group.
         If set to None, then there are no "groups".
@@ -37,7 +36,10 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         last ratings generated.
     """
 
-    def __init__(self, n_voters=None, minimum_value=10, maximum_value=20, groups_sizes=None):
+    def __init__(self, n_voters=None, truth_generator=None, groups_sizes=None):
+        if truth_generator is None:
+            truth_generator = TruthGeneratorUniform(minimum_value=10, maximum_value=20)
+        self.truth_generator = truth_generator
         if groups_sizes is not None:
             groups_sizes = np.array(groups_sizes)
             n_voters_computed = np.sum(groups_sizes)
@@ -57,8 +59,6 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
             self.n_groups = None
             self.m_voter_group = None
         super().__init__(n_voters)
-        self.minimum_value = minimum_value
-        self.maximum_value = maximum_value
         self.groups_sizes = groups_sizes
         self.ground_truth_ = None
 
@@ -71,10 +71,7 @@ class RatingsGeneratorEpistemic(RatingsGenerator):
         np.ndarray
             The true value for each candidate.
         """
-        return (
-            self.minimum_value
-            + np.random.rand(n_candidates) * (self.maximum_value - self.minimum_value)
-        )
+        return self.truth_generator(n_candidates)
 
     def __call__(self, n_candidates=1, *args):
         """

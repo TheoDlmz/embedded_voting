@@ -16,12 +16,9 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
         :attr:`~embedded_voting.RatingsGenerator.n_voters`.
     independent_noise : float
         The variance of the independent noise.
-    minimum_value : float or int
-        The minimum true value of a candidate.
-        By default, it is set to 10.
-    maximum_value : float or int
-        The maximum true value of a candidate.
-        By default, it is set to 20.
+    truth_generator : TruthGenerator
+        The truth generator used to generate to true values of each candidate.
+        Default: `TruthGeneratorUniform(10, 20)`.
 
     Attributes
     ----------
@@ -33,14 +30,14 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
     --------
     >>> np.random.seed(42)
     >>> generator = RatingsGeneratorEpistemicMultivariate(np.ones((5, 5)))
-    >>> generator()
+    >>> generator()  # doctest: +ELLIPSIS
     Ratings([[14.857...],
              [14.857...],
              [14.857...],
              [14.857...],
              [14.857...]])
     >>> generator.independent_noise = 0.5
-    >>> generator()
+    >>> generator()  # doctest: +ELLIPSIS
     Ratings([[13.812...],
              [13.958...],
              [13.212...],
@@ -49,10 +46,9 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
 
     """
 
-    def __init__(self, covariance_matrix, independent_noise=0, minimum_value=10, maximum_value=20):
+    def __init__(self, covariance_matrix, independent_noise=0, truth_generator=None):
         n_voters = len(covariance_matrix)
-        super().__init__(n_voters=n_voters, minimum_value=minimum_value,
-                         maximum_value=maximum_value)
+        super().__init__(n_voters=n_voters, truth_generator=truth_generator)
         self.covariance_matrix = covariance_matrix
         self.independent_noise = independent_noise
 

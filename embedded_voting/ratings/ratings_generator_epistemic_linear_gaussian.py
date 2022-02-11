@@ -16,12 +16,9 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
     m_voters_noises: list or np.ndarray
         An array of size `n_voters` * `n_noises`, where `n_noises` is the number of elementary
         gaussian noises.
-    minimum_value : float or int
-        The minimum true value of a candidate.
-        By default, it is set to 10.
-    maximum_value : float or int
-        The maximum true value of a candidate.
-        By default, it is set to 20.
+    truth_generator : TruthGenerator
+        The truth generator used to generate to true values of each candidate.
+        Default: `TruthGeneratorUniform(10, 20)`.
 
     Attributes
     ----------
@@ -36,24 +33,20 @@ class RatingsGeneratorEpistemicLinearGaussian(RatingsGeneratorEpistemic):
     >>> n_noises = 3
     >>> m_voters_noises = np.random.randn(n_voters, n_noises)
     >>> ratings_generator = RatingsGeneratorEpistemicLinearGaussian(m_voters_noises)
-    >>> ratings_generator(n_candidates=2)
+    >>> ratings_generator(n_candidates=2)  # doctest: +ELLIPSIS
     Ratings([[15.888..., 10.7850...],
              [15.645...,  9.6529...],
              [14.252..., 11.0540...],
              [16.573..., 10.1916...],
              [19.074...,  8.254... ]])
-    >>> ratings_generator.ground_truth_
+    >>> ratings_generator.ground_truth_  # doctest: +ELLIPSIS
     array([16.118..., 11.394...])
     """
 
-    def __init__(self, m_voters_noises, minimum_value=10, maximum_value=20):
+    def __init__(self, m_voters_noises, truth_generator=None):
         self.m_voters_noises = np.array(m_voters_noises)
         self.n_voters, self.n_noises = m_voters_noises.shape
-        super().__init__(
-            n_voters=self.n_voters,
-            minimum_value=minimum_value,
-            maximum_value=maximum_value
-        )
+        super().__init__(n_voters=self.n_voters, truth_generator=truth_generator)
 
     def __call__(self, n_candidates=1, *args):
         self.ground_truth_ = self.generate_true_values(n_candidates=n_candidates)
