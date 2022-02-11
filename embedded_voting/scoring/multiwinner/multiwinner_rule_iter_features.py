@@ -1,11 +1,10 @@
-
-from embedded_voting.scoring.multiwinner.general import IterRule
+import numpy as np
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
-import numpy as np
+from embedded_voting.scoring.multiwinner.multiwinner_rule_iter import MultiwinnerRuleIter
 
 
-class IterFeatures(IterRule):
+class MultiwinnerRuleIterFeatures(MultiwinnerRuleIter):
     """
     Iterative multiwinner rule
     based on the :class:`RuleFeatures`
@@ -18,7 +17,7 @@ class IterFeatures(IterRule):
     >>> probability = [3/4, 1/4]
     >>> embeddings = EmbeddingsGeneratorPolarized(100, 2, probability)(1)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=1, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> election = IterFeatures(3)(ratings, embeddings)
+    >>> election = MultiwinnerRuleIterFeatures(3)(ratings, embeddings)
     >>> election.winners_
     [0, 5, 1]
     >>> _ = election.set_k(4)

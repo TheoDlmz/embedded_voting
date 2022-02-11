@@ -1,10 +1,10 @@
-from embedded_voting.scoring.multiwinner.general import IterRule
 import numpy as np
-from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
+from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
+from embedded_voting.scoring.multiwinner.multiwinner_rule_iter import MultiwinnerRuleIter
 
 
-class IterSVD(IterRule):
+class MultiwinnerRuleIterSVD(MultiwinnerRuleIter):
     """
     Iterative multiwinner rule based on
     a SVD aggregation rule.
@@ -26,7 +26,7 @@ class IterSVD(IterRule):
         ``'classic'`` quota `(n/k)`.
     take_min : bool
         If True, when the total
-        satisfaction is less than the :attr:`~embedded_voting.IterRule.quota`,
+        satisfaction is less than the :attr:`~embedded_voting.MultiwinnerRuleIter.quota`,
         we replace the quota by the total satisfaction.
         By default, it is set to False.
 
@@ -37,7 +37,7 @@ class IterSVD(IterRule):
     >>> probability = [3/4, 1/4]
     >>> embeddings = EmbeddingsGeneratorPolarized(100, 2, probability)(1)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=1, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> election = IterSVD(3)(ratings, embeddings)
+    >>> election = MultiwinnerRuleIterSVD(3)(ratings, embeddings)
     >>> election.winners_
     [0, 1, 5]
     >>> _ = election.set_k(4)
