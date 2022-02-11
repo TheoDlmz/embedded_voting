@@ -20,8 +20,6 @@ class RatingsGeneratorEpistemicGroups(RatingsGeneratorEpistemic):
     n_groups : int
         Number of groups.
     m_voter_group : np.ndarray
-        Array of size `n_voters` * `n_groups`. Incidence matrix of the relation (voters, groups).
-    m_voter_group : np.ndarray
         Incidence matrix between voters and groups: `m_voter_group[v, g]` is 1 if
         and only if voter `v` is in group `g`, and 0 otherwise.
         Size `n_voters` * `n_groups`.
