@@ -48,22 +48,22 @@ class Aggregator:
     [2, 0, 1]
     """
 
-    def __init__(self, rule=None, embedder=None, default_train=False, name="aggregator"):
+    def __init__(self, rule=None, embeddings_from_ratings=None, default_train=False, name="aggregator"):
         if rule is None:
             rule = RuleFastNash()
         self.rule = rule
         self.embeddings = None
         self.ratings_history = None
-        if embedder is None:
-            self.embedder = EmbeddingsFromRatingsCorrelation()
+        if embeddings_from_ratings is None:
+            self.embeddings_from_ratings = EmbeddingsFromRatingsCorrelation()
         else:
-            self.embedder = embedder
+            self.embeddings_from_ratings = embeddings_from_ratings
         self.default_train = default_train
         self.name = name
 
     def __call__(self, ratings, train=None):
         """
-        This function run an election using the :attr:`embedder` and the scores.
+        This function run an election using the :attr:`embeddings_from_ratings` and the scores.
 
         Parameters
         ----------
@@ -72,7 +72,7 @@ class Aggregator:
             score given by the voter i to candidate j.
 
         train: bool
-            If True, we retrain the :attr:`embedder` before doing the election (using the
+            If True, we retrain the :attr:`embeddings_from_ratings` before doing the election (using the
             data of the election).
         """
         ratings = Ratings(ratings)
@@ -90,7 +90,7 @@ class Aggregator:
 
     def train(self):
         """
-        This function can be used to train the embedder on the newest data
+        This function can be used to train the embeddings_from_ratings on the newest data
         it gathered during the recent elections.
 
         Return
@@ -98,7 +98,7 @@ class Aggregator:
         Aggregator
             The object
         """
-        self.embeddings = self.embedder(self.ratings_history)
+        self.embeddings = self.embeddings_from_ratings(self.ratings_history)
         return self
 
     def reset(self):

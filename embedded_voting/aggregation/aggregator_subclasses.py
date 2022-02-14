@@ -21,17 +21,17 @@ class AggregatorFastSum(Aggregator):
 
 class AggregatorSumRatings(Aggregator):
     def __init__(self):
-        super().__init__(RuleSumRatings(), embedder=EmbeddingsFromRatingsSelf(),
+        super().__init__(RuleSumRatings(), embeddings_from_ratings=EmbeddingsFromRatingsSelf(),
                          default_train=False, name="RuleSumRatings")
 
 
 class AggregatorProductRatings(Aggregator):
     def __init__(self):
-        super().__init__(RuleProductRatings(), embedder=EmbeddingsFromRatingsSelf(),
+        super().__init__(RuleProductRatings(), embeddings_from_ratings=EmbeddingsFromRatingsSelf(),
                          default_train=False, name="RuleProductRatings")
 
 
 class AggregatorMLEGaussian(Aggregator):
     def __init__(self):
-        super().__init__(RuleMLEGaussian(), embedder=EmbeddingsFromRatingsSelf(),
+        super().__init__(RuleMLEGaussian(), embeddings_from_ratings=EmbeddingsFromRatingsSelf(),
                          default_train=True, name="RuleMLEGaussian")

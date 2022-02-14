@@ -25,8 +25,8 @@ class Rule(DeleteCacheMixin):
         The ratings of voters on which we run the election.
     embeddings_ : Embeddings
         The embeddings of the voters on which we run the election.
-    embedder: EmbeddingsFromRatings
-        If no embeddings are specified in the call, this embedder is use to generate
+    embeddings_from_ratings: EmbeddingsFromRatings
+        If no embeddings are specified in the call, this embeddings_from_ratings is use to generate
         the embeddings
     score_components : int
         The number of components in the aggregated
@@ -35,13 +35,13 @@ class Rule(DeleteCacheMixin):
 
     """
 
-    def __init__(self, score_components=1, embedder=None):
+    def __init__(self, score_components=1, embeddings_from_ratings=None):
         self.score_components = score_components
         self.ratings_ = None
         self.embeddings_ = None
-        if embedder is None:
-            embedder = EmbeddingsFromRatingsIdentity()
-        self.embedder = embedder
+        if embeddings_from_ratings is None:
+            embeddings_from_ratings = EmbeddingsFromRatingsIdentity()
+        self.embeddings_from_ratings = embeddings_from_ratings
 
     def __call__(self, ratings, embeddings=None):
         """
@@ -60,7 +60,7 @@ class Rule(DeleteCacheMixin):
         self.delete_cache()
         self.ratings_ = Ratings(ratings)
         if embeddings is None:
-            self.embeddings_ = self.embedder(self.ratings_)
+            self.embeddings_ = self.embeddings_from_ratings(self.ratings_)
         elif embeddings is not None:
             self.embeddings_ = Embeddings(embeddings, norm=True)
         return self

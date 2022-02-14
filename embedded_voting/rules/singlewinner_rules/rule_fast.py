@@ -78,16 +78,16 @@ class RuleFast(Rule):
         self._modified_ratings = modified_ratings
 
         if self.embeddings_as_history or embeddings is None:
-            embedder = EmbeddingsFromRatingsCorrelation()
+            embeddings_from_ratings = EmbeddingsFromRatingsCorrelation()
             if embeddings is None:
-                self.embeddings_ = embedder(self.ratings_)
+                self.embeddings_ = embeddings_from_ratings(self.ratings_)
             else:
-                self.embeddings_ = embedder(np.concatenate([embeddings, self.ratings_], axis=1))
+                self.embeddings_ = embeddings_from_ratings(np.concatenate([embeddings, self.ratings_], axis=1))
         else:
             self.embeddings_ = Embeddings(embeddings, norm=True)
             self.embeddings_.n_sing_val_ = embeddings.n_sing_val_
 
-        self.n_v = self.embeddings_.n_sing_val_ #embedder.n_sing_val_
+        self.n_v = self.embeddings_.n_sing_val_  # embeddings_from_ratings.n_sing_val_
         self.delete_cache()
 
         return self
