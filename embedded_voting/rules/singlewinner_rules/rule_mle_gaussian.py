@@ -1,5 +1,6 @@
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_identity import EmbeddingsFromRatingsIdentity
 import numpy as np
 
 
@@ -12,7 +13,7 @@ class RuleMLEGaussian(Rule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> election = RuleMLEGaussian()(ratings)
+    >>> election = RuleMLEGaussian(embeddings_from_ratings=EmbeddingsFromRatingsIdentity())(ratings)
     >>> election.scores_
     [0.507..., 0.606..., 0.275...]
     >>> election.ranking_

@@ -40,8 +40,6 @@ class Rule(DeleteCacheMixin):
 
     def __init__(self, score_components=1, embeddings_from_ratings=None):
         self.score_components = score_components
-        if embeddings_from_ratings is None:
-            embeddings_from_ratings = EmbeddingsFromRatingsIdentity()
         self.embeddings_from_ratings = embeddings_from_ratings
         self.ratings_ = None
         self.embeddings_ = None
