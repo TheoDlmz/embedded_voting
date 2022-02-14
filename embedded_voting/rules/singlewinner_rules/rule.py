@@ -19,29 +19,31 @@ class Rule(DeleteCacheMixin):
     These rules aggregate the scores of every voter to create
     a ranking of the candidates and select a winner.
 
+    Parameters
+    ----------
+    score_components : int
+        The number of components in the aggregated
+        score of every candidate. If `> 1`, we
+        perform a lexical sort to obtain the ranking.
+    embeddings_from_ratings: EmbeddingsFromRatings
+        If no embeddings are specified in the call, this `EmbeddingsFromRatings` object is use to generate
+        the embeddings from the ratings. Default: `EmbeddingsFromRatingsIdentity()`.
+
     Attributes
     ----------
     ratings_ : Ratings
         The ratings of voters on which we run the election.
     embeddings_ : Embeddings
         The embeddings of the voters on which we run the election.
-    embeddings_from_ratings: EmbeddingsFromRatings
-        If no embeddings are specified in the call, this embeddings_from_ratings is use to generate
-        the embeddings
-    score_components : int
-        The number of components in the aggregated
-        score of every candidate. If `> 1`, we
-        perform a lexical sort to obtain the ranking.
-
     """
 
     def __init__(self, score_components=1, embeddings_from_ratings=None):
         self.score_components = score_components
-        self.ratings_ = None
-        self.embeddings_ = None
         if embeddings_from_ratings is None:
             embeddings_from_ratings = EmbeddingsFromRatingsIdentity()
         self.embeddings_from_ratings = embeddings_from_ratings
+        self.ratings_ = None
+        self.embeddings_ = None
 
     def __call__(self, ratings, embeddings=None):
         """
@@ -55,13 +57,13 @@ class Rule(DeleteCacheMixin):
         Return
         ------
         Rule
-            The object itself
+            The object itself.
         """
         self.delete_cache()
         self.ratings_ = Ratings(ratings)
         if embeddings is None:
             self.embeddings_ = self.embeddings_from_ratings(self.ratings_)
-        elif embeddings is not None:
+        else:
             self.embeddings_ = Embeddings(embeddings, norm=True)
         return self
 
