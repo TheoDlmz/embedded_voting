@@ -25,9 +25,16 @@ class RuleMaxCube(Rule):
     [1, 0, 2]
     >>> election.winner_
     1
-    >>> election.welfare_
+    >>> election.welfare_  # doctest: +ELLIPSIS
     [0.305..., 1.0, 0.0]
 
+    >>> ratings = Ratings([[1, 10], [1, 10], [1, 0]])
+    >>> embeddings = Embeddings([[1, 0, 0], [0, 1, 0], [0, 0, 1]], norm=False)
+    >>> election = RuleMaxCube()(ratings, embeddings)
+    >>> election.scores_  # doctest: +ELLIPSIS
+    [(3, 1.0), (2, 100.0...)]
+    >>> election.scores_focus_on_last_
+    [1.0, 0]
     """
     def __init__(self):
         super().__init__(score_components=2)

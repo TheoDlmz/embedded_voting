@@ -125,7 +125,7 @@ class MovingVoter:
         tab_y = []
         for x in tab_x:
             self.embeddings[self.moving_voter] = normalize([1-x, x, 0])
-            tab_y.append(self.rule(self.ratings_, self.embeddings).scores_float_)
+            tab_y.append(self.rule(self.ratings_, self.embeddings).scores_focus_on_last_)
 
         tab_y = np.array(tab_y).T
         name = ["Start", "End", "Orthogonal", "Consensus"]

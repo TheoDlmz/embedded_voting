@@ -106,3 +106,65 @@ def max_angular_dilatation_factor(vector, center):
     else:
         theta_max = np.arctan(np.min(- center[mask] / unit_orthogonal[mask]))
     return theta_max / theta
+
+
+def ranking_from_scores(scores):
+    """
+    Deduce ranking over the candidates from their scores.
+
+    Parameters
+    ----------
+    scores: list
+        List of floats, or list of tuple.
+
+    Returns
+    -------
+    ranking: list
+        The indices of the candidates, so candidate `ranking[0]` has the best score, etc.
+        If scores are floats, higher scores are better. If scores are tuples, a lexicographic
+        order is used.
+
+    Examples
+    --------
+    >>> my_scores = [4, 1, 3, 4, 0, 2, 1, 0, 1, 0]
+    >>> ranking_from_scores(my_scores)
+    [3, 0, 2, 5, 8, 6, 1, 9, 7, 4]
+
+    >>> my_scores = [(1, 0, 3), (2, 1, 5), (0, 1, 1), (2, 1, 4)]
+    >>> ranking_from_scores(my_scores)
+    [1, 3, 0, 2]
+    """
+    if isinstance(scores[0], tuple):
+        score_components = len(scores[0])
+        full_scores = [[s[i] for s in scores] for i in range(score_components)][::-1]
+        return list(np.lexsort(full_scores)[::-1])
+    else:
+        return list(np.argsort(scores)[::-1])
+
+
+def winner_from_scores(scores):
+    """
+    Deduce the best of candidates from their scores.
+
+    Parameters
+    ----------
+    scores: list
+        List of floats, or list of tuple.
+
+    Returns
+    -------
+    winner: int
+        The index of the winning candidate. If scores are floats, higher scores are better. If scores are tuples,
+        a lexicographic order is used.
+
+    Examples
+    --------
+    >>> my_scores = [4, 1, 3, 4, 0, 2, 1, 0, 1, 0]
+    >>> winner_from_scores(my_scores)
+    3
+
+    >>> my_scores = [(1, 0, 3), (2, 1, 5), (0, 1, 1), (2, 1, 4)]
+    >>> winner_from_scores(my_scores)
+    1
+    """
+    return ranking_from_scores(scores)[0]

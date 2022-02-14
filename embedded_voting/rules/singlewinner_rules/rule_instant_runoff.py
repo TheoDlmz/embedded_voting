@@ -65,6 +65,10 @@ class RuleInstantRunoff(Rule):
             eliminated.append(loser)
         return list(ranking)
 
+    @cached_property
+    def winner_(self):
+        return self.ranking_[0]
+
     def _create_fake_ratings(self, eliminated):
         """
         This function creates a fake ratings for the election, based

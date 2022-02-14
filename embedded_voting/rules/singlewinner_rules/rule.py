@@ -7,10 +7,11 @@ This file is part of Embedded Voting.
 """
 
 import numpy as np
-from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
-from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_identity import EmbeddingsFromRatingsIdentity
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
+from embedded_voting.utils.miscellaneous import ranking_from_scores, winner_from_scores
 
 
 class Rule(DeleteCacheMixin):
@@ -81,8 +82,8 @@ class Rule(DeleteCacheMixin):
         Return
         ------
         float or tuple
-            if :attr:`~embedded_voting.Rule._score_components` = 1, return a float,
-            otherwise a tuple of length :attr:`~embedded_voting.Rule._score_components`.
+            if :attr:`score_components` = 1, return a float,
+            otherwise a tuple of length :attr:`score_components`.
         """
         raise NotImplementedError
 
@@ -95,17 +96,14 @@ class Rule(DeleteCacheMixin):
         ------
         list
             The scores of all candidates. The score of each
-            candidate is a float if :attr:`_score_components` = 1
-            and a tuple of length :attr:`_score_components` otherwise.
+            candidate is a float if :attr:`score_components` = 1
+            and a tuple of length :attr:`score_components` otherwise.
         """
         return [self._score_(candidate) for candidate in range(self.ratings_.n_candidates)]
 
     def score_(self, candidate):
         """
-        Return the aggregated score
-        of a given candidate. This one is called
-        by the user to prevent from calling _score_
-        every time.
+        Return the aggregated score of a given candidate.
 
         Parameters
         ----------
@@ -115,26 +113,34 @@ class Rule(DeleteCacheMixin):
         Return
         ------
         float or tuple
-            if :attr:`~embedded_voting.Rule._score_components` = 1, return a float,
-            otherwise a tuple of length :attr:`~embedded_voting.Rule._score_components`.
+            if :attr:`score_components` = 1, return a float,
+            otherwise a tuple of length :attr:`score_components`.
         """
+        # Note for developers: this method is called by the user to prevent from calling _score_ every time.
         return self.scores_[candidate]
 
     @cached_property
-    def scores_float_(self):
+    def scores_focus_on_last_(self):
         """
-        Return the scores of all candidates,
-        but there is only one component for each candidate.
+        Return the last score component of each candidate, but only if the other score components are maximal.
 
-        When :attr:`_score_components` `> 1`,
-        we simply take the last components
-        if all other components are maximum,
-        and `0` otherwise.
+        If :attr:`score_components` is 1, return :attr:`scores_`. Otherwise, for each candidate:
+
+        * Return the last score component if all other components are maximal.
+        * Return 0 otherwise.
+
+        Note that if the last score component is defined as non-negative, and if it is always positive for the winner,
+        then :attr:`scores_focus_on_last_` is enough to determine which candidate has the best score by lexicographical
+        order.
 
         Return
         ------
         float list
             The scores of every candidates.
+
+        Examples
+        --------
+        Cf. :class:`RuleMaxCube`.
         """
         if self.score_components == 1:
             return self.scores_
@@ -145,20 +151,14 @@ class Rule(DeleteCacheMixin):
     @cached_property
     def ranking_(self):
         """
-        Return the ranking of the candidates
-        based on their aggregated scores.
+        Return the ranking of the candidates based on their aggregated scores.
 
         Return
         ------
-        int list
+        list of int
             The ranking of the candidates.
         """
-
-        if self.score_components == 1:
-            return list(np.argsort(self.scores_)[::-1])
-        else:
-            full_scores = [[s[i] for s in self.scores_] for i in range(self.score_components)][::-1]
-            return list(np.lexsort(full_scores)[::-1])
+        return ranking_from_scores(self.scores_)
 
     @cached_property
     def winner_(self):
@@ -170,32 +170,34 @@ class Rule(DeleteCacheMixin):
         int
             The index of the winner of the election.
         """
-
-        return self.ranking_[0]
+        return winner_from_scores(self.scores_)
 
     @cached_property
     def welfare_(self):
         """
-        Return the welfare of all candidates,
-        where the welfare is defined as
+        Return the welfare of all candidates, where the welfare is defined as
         `(score - score_min)/(score_max - score_min)`.
+
+        If scores are tuple, then `scores_focus_on_last_` is used.
+
+        If `score_max = score_min`, then by convention, all candidates have a welfare of 1.
 
         Return
         ------
-        float list
-            Return the welfare of all candidates.
-
+        list of float
+            Welfare of all candidates.
         """
-        scores = self.scores_float_
-        max_score = np.max(scores)
-        min_score = np.min(scores)
+        max_score = np.max(self.scores_focus_on_last_)
+        min_score = np.min(self.scores_focus_on_last_)
         if max_score == min_score:
-            return np.ones(self.ratings_.n_voters)
-        return list((scores - min_score) / (max_score - min_score))
+            return [1.] * self.ratings_.n_candidates
+        return list((self.scores_focus_on_last_ - min_score) / (max_score - min_score))
 
     def plot_winner(self, plot_kind="3D", dim=None, fig=None, plot_position=None, show=True):
         """
-        Plot the winner of the election.
+        Plot the matrix associated to the winner of the election.
+
+        Cf. :meth:`Embeddings.plot_candidate`.
 
         Parameters
         ----------
@@ -219,11 +221,9 @@ class Rule(DeleteCacheMixin):
         ------
         matplotlib ax
             The ax with the plot.
-
         """
-        winner = self.winner_
-        ax = self.embeddings_.plot_candidate(self.ratings_,
-                                             winner,
+        ax = self.embeddings_.plot_candidate(ratings=self.ratings_,
+                                             candidate=self.winner_,
                                              plot_kind=plot_kind,
                                              dim=dim,
                                              fig=fig,
@@ -233,7 +233,7 @@ class Rule(DeleteCacheMixin):
 
     def plot_ranking(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
-        Plot the candidates in the same order than the ranking.
+        Plot the matrix associated to each candidate, in the same order than the ranking of the election.
 
         Parameters
         ----------
@@ -252,7 +252,7 @@ class Rule(DeleteCacheMixin):
         """
         ranking = self.ranking_
         titles = ["#%i. Candidate %i" % (i+1, c) for i, c in enumerate(ranking)]
-        self.embeddings_.plot_candidates(self.ratings_,
+        self.embeddings_.plot_candidates(ratings=self.ratings_,
                                          plot_kind=plot_kind,
                                          dim=dim,
                                          list_candidates=ranking,

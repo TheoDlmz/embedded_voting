@@ -31,7 +31,6 @@ class RuleZonotope(Rule):
     0
     >>> election.welfare_
     [1.0, 0.605..., 0.0]
-
     """
     def __init__(self):
         super().__init__(score_components=2)
