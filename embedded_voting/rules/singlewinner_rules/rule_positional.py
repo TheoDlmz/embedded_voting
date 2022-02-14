@@ -13,7 +13,7 @@ from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_identity import EmbeddingsFromRatingsIdentity
 
 
-class RulePositionalExtension(Rule):
+class RulePositional(Rule):
     """
     This class enables to extend a
     voting rule to an ordinal input
@@ -61,7 +61,7 @@ class RulePositionalExtension(Rule):
     >>> election = RuleSVDNash()(ratings, embeddings)
     >>> election.ranking_
     [3, 0, 1, 2]
-    >>> election_bis = RulePositionalExtension([2, 1, 1, 0])(ratings, embeddings)
+    >>> election_bis = RulePositional([2, 1, 1, 0])(ratings, embeddings)
     >>> election_bis.fake_ratings_
     Ratings([[0. , 0.5, 0.5, 1. ],
              [0.5, 1. , 0.5, 0. ],
@@ -100,7 +100,7 @@ class RulePositionalExtension(Rule):
 
         Return
         ------
-        RulePositionalExtension
+        RulePositional
             The object itself.
         """
         self.base_rule = rule

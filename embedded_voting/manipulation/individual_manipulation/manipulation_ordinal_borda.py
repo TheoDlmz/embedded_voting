@@ -1,6 +1,6 @@
 import numpy as np
 from embedded_voting.manipulation.individual_manipulation.manipulation_ordinal import ManipulationOrdinal
-from embedded_voting.rules.singlewinner_rules.rule_positional_extension_borda import RulePositionalExtensionBorda
+from embedded_voting.rules.singlewinner_rules.rule_positional_borda import RulePositionalBorda
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
@@ -10,7 +10,7 @@ from embedded_voting.ratings.ratings import Ratings
 class ManipulationOrdinalBorda(ManipulationOrdinal):
     """
     This class do the single voter manipulation
-    analysis for the :class:`RulePositionalExtensionBorda` extension.
+    analysis for the :class:`RulePositionalBorda` rule_positional.
     It is faster than the general class
     class:`ManipulationOrdinal`.
 
@@ -41,7 +41,7 @@ class ManipulationOrdinalBorda(ManipulationOrdinal):
     """
     def __init__(self, ratings, embeddings, rule=None):
         ratings = Ratings(ratings)
-        super().__init__(ratings, embeddings, RulePositionalExtensionBorda(ratings.n_candidates, rule), rule)
+        super().__init__(ratings, embeddings, RulePositionalBorda(ratings.n_candidates, rule), rule)
 
     def manipulation_voter(self, i):
         fake_scores_i = self.extended_rule.fake_ratings_[i].copy()

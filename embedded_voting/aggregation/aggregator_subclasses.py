@@ -25,7 +25,7 @@ class AggregatorSumRatings(Aggregator):
                          default_train=False, name="RuleSumRatings")
 
 
-class AggregatorProduct(Aggregator):
+class AggregatorProductRatings(Aggregator):
     def __init__(self):
         super().__init__(RuleProductRatings(), embedder=EmbeddingsFromRatingsSelf(),
                          default_train=False, name="RuleProductRatings")

@@ -1,14 +1,14 @@
 import numpy as np
 from embedded_voting.embeddings.embeddings import Embeddings
-from embedded_voting.rules.singlewinner_rules.rule_positional_extension import RulePositionalExtension
+from embedded_voting.rules.singlewinner_rules.rule_positional import RulePositional
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 
 
-class RulePositionalExtensionBorda(RulePositionalExtension):
+class RulePositionalPlurality(RulePositional):
     """
     This class enables to extend a
     voting rule to an ordinal input
-    with Borda rule (vector ``[m-1, m-2, ..., 1, 0]``).
+    with Plurality rule (vector ``[1, 0, ..., 0]``).
 
     Parameters
     ----------
@@ -21,14 +21,15 @@ class RulePositionalExtensionBorda(RulePositionalExtension):
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
     >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
-    >>> election = RulePositionalExtensionBorda(n_candidates=4, rule=RuleSVDNash())(ratings, embeddings)
+    >>> election = RulePositionalPlurality(4, rule=RuleSVDNash(use_rank=True))(ratings, embeddings)
     >>> election.fake_ratings_
-    Ratings([[0.        , 0.33333333, 0.66666667, 1.        ],
-             [0.33333333, 1.        , 0.66666667, 0.        ],
-             [1.        , 0.66666667, 0.        , 0.33333333]])
+    Ratings([[0., 0., 0., 1.],
+             [0., 1., 0., 0.],
+             [1., 0., 0., 0.]])
     >>> election.ranking_
-    [1, 3, 2, 0]
+    [3, 1, 0, 2]
     """
-    def __init__(self, n_candidates, rule=None):
-        points = [n_candidates-i-1 for i in range(n_candidates)]
+
+    def __init__(self, n_candidates,  rule=None):
+        points = [1] + [0]*(n_candidates-1)
         super().__init__(points, rule)

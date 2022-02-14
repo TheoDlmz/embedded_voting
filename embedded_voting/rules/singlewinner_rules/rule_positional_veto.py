@@ -1,10 +1,10 @@
 import numpy as np
 from embedded_voting.embeddings.embeddings import Embeddings
-from embedded_voting.rules.singlewinner_rules.rule_positional_extension import RulePositionalExtension
+from embedded_voting.rules.singlewinner_rules.rule_positional import RulePositional
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 
 
-class RulePositionalExtensionVeto(RulePositionalExtension):
+class RulePositionalVeto(RulePositional):
     """
     This class enables to extend a
     voting rule to an ordinal input
@@ -21,7 +21,7 @@ class RulePositionalExtensionVeto(RulePositionalExtension):
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
     >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
-    >>> election = RulePositionalExtensionVeto(n_candidates=4, rule=RuleSVDNash())(ratings, embeddings)
+    >>> election = RulePositionalVeto(n_candidates=4, rule=RuleSVDNash())(ratings, embeddings)
     >>> election.fake_ratings_
     Ratings([[0., 1., 1., 1.],
              [1., 1., 1., 0.],

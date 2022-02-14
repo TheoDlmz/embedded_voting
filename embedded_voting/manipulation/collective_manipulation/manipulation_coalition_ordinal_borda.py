@@ -2,14 +2,14 @@ import numpy as np
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.manipulation.collective_manipulation.manipulation_coalition_ordinal import ManipulationCoalitionOrdinal
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
-from embedded_voting.rules.singlewinner_rules.rule_positional_extension_borda import RulePositionalExtensionBorda
+from embedded_voting.rules.singlewinner_rules.rule_positional_borda import RulePositionalBorda
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 
 
 class ManipulationCoalitionOrdinalBorda(ManipulationCoalitionOrdinal):
     """
     This class do the coalition manipulation
-    analysis for the :class:`RulePositionalExtensionBorda` extension.
+    analysis for the :class:`RulePositionalBorda` rule_positional.
 
     Parameters
     ----------
@@ -38,4 +38,4 @@ class ManipulationCoalitionOrdinalBorda(ManipulationCoalitionOrdinal):
     def __init__(self, ratings, embeddings, rule=None):
         if not isinstance(ratings, np.ndarray):
             ratings = ratings.ratings
-        super().__init__(ratings, embeddings, extension=RulePositionalExtensionBorda(ratings.shape[1]), rule=rule)
+        super().__init__(ratings, embeddings, rule_positional=RulePositionalBorda(ratings.shape[1]), rule=rule)

@@ -2,14 +2,14 @@ import numpy as np
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.manipulation.collective_manipulation.manipulation_coalition_ordinal import ManipulationCoalitionOrdinal
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
-from embedded_voting.rules.singlewinner_rules.rule_positional_extension_k_approval import RulePositionalExtensionKApproval
+from embedded_voting.rules.singlewinner_rules.rule_positional_k_approval import RulePositionalKApproval
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 
 
 class ManipulationCoalitionOrdinalKApproval(ManipulationCoalitionOrdinal):
     """
     This class do the coalition manipulation
-    analysis for the :class:`RulePositionalExtensionKApproval` extension.
+    analysis for the :class:`RulePositionalKApproval` rule_positional.
 
     Parameters
     ----------
@@ -40,4 +40,4 @@ class ManipulationCoalitionOrdinalKApproval(ManipulationCoalitionOrdinal):
     def __init__(self, ratings, embeddings, k=2, rule=None):
         if not isinstance(ratings, np.ndarray):
             ratings = ratings.ratings
-        super().__init__(ratings, embeddings, extension=RulePositionalExtensionKApproval(ratings.shape[1], k=k), rule=rule)
+        super().__init__(ratings, embeddings, rule_positional=RulePositionalKApproval(ratings.shape[1], k=k), rule=rule)

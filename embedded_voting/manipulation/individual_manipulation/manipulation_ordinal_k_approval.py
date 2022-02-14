@@ -1,6 +1,6 @@
 import numpy as np
 from embedded_voting.manipulation.individual_manipulation.manipulation_ordinal import ManipulationOrdinal
-from embedded_voting.rules.singlewinner_rules.rule_positional_extension_k_approval import RulePositionalExtensionKApproval
+from embedded_voting.rules.singlewinner_rules.rule_positional_k_approval import RulePositionalKApproval
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
@@ -10,7 +10,7 @@ from embedded_voting.ratings.ratings import Ratings
 class ManipulationOrdinalKApproval(ManipulationOrdinal):
     """
     This class do the single voter manipulation
-    analysis for the :class:`RulePositionalExtensionKApproval` extension.
+    analysis for the :class:`RulePositionalKApproval` rule_positional.
     It is faster than the general class
     class:`ManipulationOrdinal`.
 
@@ -42,14 +42,14 @@ class ManipulationOrdinalKApproval(ManipulationOrdinal):
 
     def __init__(self, ratings, embeddings, k=2, rule=None):
         ratings = Ratings(ratings)
-        super().__init__(ratings, embeddings, RulePositionalExtensionKApproval(ratings.n_candidates, k=k), rule)
+        super().__init__(ratings, embeddings, RulePositionalKApproval(ratings.n_candidates, k=k), rule)
 
     def manipulation_voter(self, i):
         fake_scores_i = self.extended_rule.fake_ratings_[i].copy()
         score_i = self.ratings[i].copy()
         preferences_order = np.argsort(score_i)[::-1]
 
-        k = int(np.sum(self.extension.points))
+        k = int(np.sum(self.rule_positional.points))
         n_candidates = self.ratings.n_candidates
         unk = n_candidates - k
 

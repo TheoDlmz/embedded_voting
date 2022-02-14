@@ -1,7 +1,7 @@
 import numpy as np
 from embedded_voting.manipulation.collective_manipulation.manipulation_coalition import ManipulationCoalition
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
-from embedded_voting.rules.singlewinner_rules.rule_instant_runoff_extension import RuleInstantRunoffExtension
+from embedded_voting.rules.singlewinner_rules.rule_instant_runoff import RuleInstantRunoff
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
 
@@ -9,7 +9,7 @@ from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated 
 class ManipulationCoalitionOrdinal(ManipulationCoalition):
     """
     This class extends the :class:`ManipulationCoalition`
-    class to ordinal extension (irv, borda, plurality, etc.), because
+    class to ordinal rules (irv, borda, plurality, etc.), because
     the :class:`ManipulationCoalition` cannot
     be used for ordinal preferences.
 
@@ -19,8 +19,8 @@ class ManipulationCoalitionOrdinal(ManipulationCoalition):
         The ratings of voters to candidates
     embeddings: Embeddings
         The embeddings of the voters
-    extension : RulePositionalExtension
-        The ordinal extension used.
+    rule_positional : RulePositional
+        The ordinal rule used.
     rule : Rule
         The aggregation rule we want to analysis.
 
@@ -34,8 +34,8 @@ class ManipulationCoalitionOrdinal(ManipulationCoalition):
         The welfares of the candidates without manipulation.
     extended_rule : Rule
         The rule we are analysing
-    extension : RulePositionalExtension
-        The extension used.
+    rule_positional : RulePositional
+        The positional rule used.
 
     Examples
     --------
@@ -43,8 +43,8 @@ class ManipulationCoalitionOrdinal(ManipulationCoalition):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=0.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> extension = RuleInstantRunoffExtension()
-    >>> manipulation = ManipulationCoalitionOrdinal(ratings, embeddings, extension, RuleSVDNash())
+    >>> rule_positional = RuleInstantRunoff()
+    >>> manipulation = ManipulationCoalitionOrdinal(ratings, embeddings, rule_positional, RuleSVDNash())
     >>> manipulation.winner_
     2
     >>> manipulation.is_manipulable_
@@ -53,12 +53,12 @@ class ManipulationCoalitionOrdinal(ManipulationCoalition):
     0.0
     """
 
-    def __init__(self, ratings, embeddings, extension=None, rule=None):
+    def __init__(self, ratings, embeddings, rule_positional=None, rule=None):
         super().__init__(ratings, embeddings)
-        self.extension = extension
+        self.rule_positional = rule_positional
         self.rule = rule
         if rule is not None:
-            self.extended_rule = self.extension.set_rule(rule)
+            self.extended_rule = self.rule_positional.set_rule(rule)
             self.extended_rule(self.ratings, self.embeddings)
             self.winner_ = self.extended_rule.winner_
             self.welfare_ = self.rule(self.ratings, self.embeddings).welfare_
@@ -68,7 +68,7 @@ class ManipulationCoalitionOrdinal(ManipulationCoalition):
 
     def __call__(self, rule):
         self.rule = rule
-        self.extended_rule = self.extension.set_rule(rule)
+        self.extended_rule = self.rule_positional.set_rule(rule)
         self.extended_rule(self.ratings, self.embeddings)
         self.winner_ = self.extended_rule.winner_
         self.welfare_ = self.rule(self.ratings, self.embeddings).welfare_

@@ -3,21 +3,21 @@ import numpy as np
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.manipulation.individual_manipulation.manipulation import Manipulation
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
-from embedded_voting.rules.singlewinner_rules.rule_positional_extension_borda import RulePositionalExtensionBorda
+from embedded_voting.rules.singlewinner_rules.rule_positional_borda import RulePositionalBorda
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 
 
 class ManipulationOrdinal(Manipulation):
     """
     This class extends the :class:`Manipulation`
-    class to ordinal extension (irv, borda, plurality, etc.).
+    class to ordinal rule_positional (irv, borda, plurality, etc.).
 
     Parameters
     ----------
     ratings : Profile
         The ratings of voters on which we do the analysis.
-    extension : PositionalRuleExtension
-        The ordinal extension used.
+    rule_positional : RulePositional
+        The ordinal rule_positional used.
     rule : Rule
         The aggregation rule we want to analysis.
 
@@ -31,8 +31,8 @@ class ManipulationOrdinal(Manipulation):
         The welfares of the candidates without manipulation.
     extended_rule : Rule
         The rule we are analysing
-    extension : PositionalRuleExtension
-        The extension used.
+    rule_positional : RulePositional
+        The rule_positional used.
 
     Examples
     --------
@@ -40,8 +40,8 @@ class ManipulationOrdinal(Manipulation):
     >>> ratings_dim_candidate = [[1, .2, 0], [.5, .6, .9], [.1, .8, .3]]
     >>> embeddings = EmbeddingsGeneratorPolarized(10, 3)(.8)
     >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
-    >>> extension = RulePositionalExtensionBorda(3)
-    >>> manipulation = ManipulationOrdinal(ratings, embeddings, extension, RuleSVDNash())
+    >>> rule_positional = RulePositionalBorda(3)
+    >>> manipulation = ManipulationOrdinal(ratings, embeddings, rule_positional, RuleSVDNash())
     >>> manipulation.prop_manipulator_
     0.0
     >>> manipulation.manipulation_global_
@@ -50,12 +50,12 @@ class ManipulationOrdinal(Manipulation):
     1.0
     """
 
-    def __init__(self, ratings, embeddings, extension, rule=None):
+    def __init__(self, ratings, embeddings, rule_positional, rule=None):
         super().__init__(ratings, embeddings)
         self.rule = rule
-        self.extension = extension
+        self.rule_positional = rule_positional
         if rule is not None:
-            self.extended_rule = self.extension.set_rule(rule)
+            self.extended_rule = self.rule_positional.set_rule(rule)
             self.extended_rule(self.ratings, self.embeddings)
             self.winner_ = self.extended_rule.winner_
             self.welfare_ = self.rule(self.ratings, self.embeddings).welfare_
@@ -65,7 +65,7 @@ class ManipulationOrdinal(Manipulation):
 
     def __call__(self, rule):
         self.rule = rule
-        self.extended_rule = self.extension.set_rule(rule)
+        self.extended_rule = self.rule_positional.set_rule(rule)
         self.extended_rule(self.ratings, self.embeddings)
         self.winner_ = self.extended_rule.winner_
         self.welfare_ = self.rule(self.ratings, self.embeddings).welfare_

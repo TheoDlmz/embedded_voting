@@ -7,7 +7,7 @@ from embedded_voting.utils.cached import cached_property
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 
 
-class RuleInstantRunoffExtension(Rule):
+class RuleInstantRunoff(Rule):
     """
     This class enables to extend a
     voting rule to an ordinal input
@@ -26,7 +26,7 @@ class RuleInstantRunoffExtension(Rule):
     --------
     >>> ratings = np.array([[.1, .2, .8, 1], [.7, .9, .8, .6], [1, .6, .1, .3]])
     >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
-    >>> election = RuleInstantRunoffExtension(RuleSVDNash())(ratings, embeddings)
+    >>> election = RuleInstantRunoff(RuleSVDNash())(ratings, embeddings)
     >>> election.ranking_
     [1, 3, 2, 0]
     """

@@ -1,6 +1,6 @@
 import numpy as np
 from embedded_voting.manipulation.individual_manipulation.manipulation_ordinal import ManipulationOrdinal
-from embedded_voting.rules.singlewinner_rules.rule_instant_runoff_extension import RuleInstantRunoffExtension
+from embedded_voting.rules.singlewinner_rules.rule_instant_runoff import RuleInstantRunoff
 from embedded_voting.ratings_from_embeddings.ratings_from_embeddings_correlated import RatingsFromEmbeddingsCorrelated
 from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
@@ -10,7 +10,7 @@ from embedded_voting.ratings.ratings import Ratings
 class ManipulationOrdinalIRV(ManipulationOrdinal):
     """
     This class do the single voter manipulation
-    analysis for the :class:`RuleInstantRunoffExtension` extension.
+    analysis for the :class:`RuleInstantRunoff` rule_positional.
     It is faster than the general class
     class:`ManipulationOrdinal`.
 
@@ -42,7 +42,7 @@ class ManipulationOrdinalIRV(ManipulationOrdinal):
 
     def __init__(self, ratings, embeddings, rule=None):
         ratings = Ratings(ratings)
-        super().__init__(ratings, embeddings, RuleInstantRunoffExtension(ratings.n_candidates), rule)
+        super().__init__(ratings, embeddings, RuleInstantRunoff(ratings.n_candidates), rule)
 
     def _create_fake_scores(self, eliminated, scores):
         """
