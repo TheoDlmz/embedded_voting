@@ -8,7 +8,6 @@ This file is part of Embedded Voting.
 
 import numpy as np
 from embedded_voting.embeddings.embeddings import Embeddings
-from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_identity import EmbeddingsFromRatingsIdentity
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.utils.cached import DeleteCacheMixin, cached_property
 from embedded_voting.utils.miscellaneous import ranking_from_scores, winner_from_scores
