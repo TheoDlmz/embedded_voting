@@ -28,7 +28,7 @@ class RuleInstantRunoff(Rule):
     >>> embeddings = Embeddings(np.array([[1, 0], [1, 1], [0, 1]]), norm=True)
     >>> election = RuleInstantRunoff(RuleSVDNash())(ratings, embeddings)
     >>> election.ranking_
-    [1, 3, 2, 0]
+    [1, 0, 2, 3]
     """
 
     def __init__(self,  rule=None):

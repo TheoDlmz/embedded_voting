@@ -27,7 +27,7 @@ class RulePositionalPlurality(RulePositional):
              [0., 1., 0., 0.],
              [1., 0., 0., 0.]])
     >>> election.ranking_
-    [3, 1, 0, 2]
+    [1, 3, 0, 2]
     """
 
     def __init__(self, n_candidates,  rule=None):

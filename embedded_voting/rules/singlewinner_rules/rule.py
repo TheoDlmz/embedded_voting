@@ -156,7 +156,7 @@ class Rule(DeleteCacheMixin):
         Return
         ------
         list of int
-            The ranking of the candidates.
+            The ranking of the candidates. In case of tie, candidates with lower indices are favored.
         """
         return ranking_from_scores(self.scores_)
 
@@ -168,7 +168,7 @@ class Rule(DeleteCacheMixin):
         Return
         ------
         int
-            The index of the winner of the election.
+            The index of the winner of the election. In case of tie, candidates with lower indices are favored.
         """
         return winner_from_scores(self.scores_)
 

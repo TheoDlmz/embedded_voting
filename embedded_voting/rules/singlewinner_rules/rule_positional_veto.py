@@ -27,7 +27,7 @@ class RulePositionalVeto(RulePositional):
              [1., 1., 1., 0.],
              [1., 1., 0., 1.]])
     >>> election.ranking_
-    [1, 3, 2, 0]
+    [1, 3, 0, 2]
     """
     def __init__(self, n_candidates, rule=None):
         points = [1]*(n_candidates-1) + [0]
