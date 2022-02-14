@@ -163,3 +163,31 @@ def winner_from_scores(scores):
     1
     """
     return max(range(len(scores)), key=scores.__getitem__)
+
+
+def volume_parallelepiped(matrix):
+    """Volume of the parallelepiped defined by the rows of a matrix.
+
+    Parameters
+    ==========
+    matrix: np.ndarray
+        The matrix.
+
+    Returns
+    =======
+    float
+        The volume of the parallelepiped defined by the rows of a matrix (in the `r`-dimensional space defined
+        by its `r` rows). If the rank of the matrix is less than its number of rows, then the result is 0.
+
+    Examples
+    ========
+    >>> volume_parallelepiped(matrix=np.array([[10, 0, 0, 0], [0, 42, 0, 0]]))  # doctest: +ELLIPSIS
+    420.0...
+
+    >>> volume_parallelepiped(matrix=np.array([[10, 0, 0, 0], [42, 0, 0, 0]]))
+    0.0
+
+    >>> volume_parallelepiped(matrix=np.array([[10, 0, 0, 0]]))  # doctest: +ELLIPSIS
+    10.0...
+    """
+    return np.sqrt(np.linalg.det(matrix @ matrix.T))

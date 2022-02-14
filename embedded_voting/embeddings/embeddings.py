@@ -8,7 +8,7 @@ This file is part of Embedded Voting.
 from itertools import combinations
 import numpy as np
 import matplotlib.pyplot as plt
-from embedded_voting.utils.miscellaneous import normalize, max_angular_dilatation_factor
+from embedded_voting.utils.miscellaneous import normalize, max_angular_dilatation_factor, volume_parallelepiped
 from embedded_voting.utils.plots import create_ternary_plot, create_3d_plot
 
 
@@ -153,7 +153,7 @@ class Embeddings(np.ndarray):
             matrix_rank = np.linalg.matrix_rank(self_normalized)
             subset_of_voters = max(
                 combinations(range(self.n_voters), matrix_rank),
-                key=lambda subset: np.abs(np.linalg.det(self_normalized[subset, :]))
+                key=lambda subset: volume_parallelepiped(self_normalized[subset, :])
             )
             embeddings_subset = self_normalized[subset_of_voters, :]
             mean = normalize(np.array(embeddings_subset.sum(axis=0)))

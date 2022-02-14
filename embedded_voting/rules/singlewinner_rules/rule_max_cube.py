@@ -1,7 +1,9 @@
+from itertools import combinations
 import numpy as np
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.utils.miscellaneous import volume_parallelepiped
 
 
 class RuleMaxCube(Rule):
@@ -19,7 +21,7 @@ class RuleMaxCube(Rule):
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
     >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = RuleMaxCube()(ratings, embeddings)
-    >>> election.scores_
+    >>> election.scores_  # doctest: +ELLIPSIS
     [(2, 0.24...), (2, 0.42...), (2, 0.16...)]
     >>> election.ranking_
     [1, 0, 2]
@@ -36,25 +38,14 @@ class RuleMaxCube(Rule):
     >>> election.scores_focus_on_last_
     [1.0, 0]
     """
-    def __init__(self):
-        super().__init__(score_components=2)
+    def __init__(self, embeddings_from_ratings=None):
+        super().__init__(score_components=2, embeddings_from_ratings=embeddings_from_ratings)
 
     def _score_(self, candidate):
-        n_voters, n_dim = self.embeddings_.shape
-        embeddings = self.embeddings_.times_ratings_candidate(self.ratings_.candidate_ratings(candidate))
-        matrix_rank = np.linalg.matrix_rank(embeddings)
-        volume = 0
-        current_subset = list(np.arange(matrix_rank))
-        while current_subset[0] <= n_voters - matrix_rank:
-            current_embeddings = embeddings[current_subset, ...]
-            volume = max(volume, np.sqrt(np.linalg.det(np.dot(current_embeddings, current_embeddings.T))))
-            x = 1
-            while current_subset[matrix_rank - x] == n_voters - x:
-                x += 1
-            val = current_subset[matrix_rank - x] + 1
-            while x > 0:
-                current_subset[matrix_rank - x] = val
-                val += 1
-                x -= 1
-
+        m_candidate = self.embeddings_.times_ratings_candidate(self.ratings_.candidate_ratings(candidate))
+        matrix_rank = np.linalg.matrix_rank(m_candidate)
+        volume = max([
+            volume_parallelepiped(m_candidate[subset_of_voters, :])
+            for subset_of_voters in combinations(range(self.embeddings_.n_voters), matrix_rank)
+        ])
         return matrix_rank, volume
