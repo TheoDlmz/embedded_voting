@@ -6,21 +6,24 @@ from embedded_voting.embeddings.embeddings import Embeddings
 from embedded_voting.utils.miscellaneous import volume_parallelepiped
 
 
-class RuleMaxCube(Rule):
+class RuleMaxParallelepiped(Rule):
     """
     Voting rule in which the aggregated score of
-    a candidate is the volume of a cube
+    a candidate is the volume of a parallelepiped
     described by :attr:`~embedded_voting.Embeddings.embeddings.n_dim` rows of
     the candidate embedding matrix `M` such
     that `M[i] = score[i, candidate] * embeddings[i]`.
-    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
+    (cf :meth:`~embedded_voting.Embeddings.times_ratings_candidate`).
 
+    For each candidate, the rank `r` of her associated matrix is computed. Then we choose `r` voters in order to
+    maximize the volume of the parallelepiped associated to the submatrix keeping only these voters
+    (cf. :func:`volume_parallelepiped`). The score of the candidate is then `(r, volume)`.
 
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
     >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
-    >>> election = RuleMaxCube()(ratings, embeddings)
+    >>> election = RuleMaxParallelepiped()(ratings, embeddings)
     >>> election.scores_  # doctest: +ELLIPSIS
     [(2, 0.24...), (2, 0.42...), (2, 0.16...)]
     >>> election.ranking_
@@ -32,7 +35,7 @@ class RuleMaxCube(Rule):
 
     >>> ratings = Ratings([[1, 10], [1, 10], [1, 0]])
     >>> embeddings = Embeddings([[1, 0, 0], [0, 1, 0], [0, 0, 1]], norm=False)
-    >>> election = RuleMaxCube()(ratings, embeddings)
+    >>> election = RuleMaxParallelepiped()(ratings, embeddings)
     >>> election.scores_  # doctest: +ELLIPSIS
     [(3, 1.0), (2, 100.0...)]
     >>> election.scores_focus_on_last_

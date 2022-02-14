@@ -11,7 +11,7 @@ from embedded_voting.rules.singlewinner_rules.rule_fast_nash import RuleFastNash
 from embedded_voting.rules.singlewinner_rules.rule_fast_sum import RuleFastSum
 from embedded_voting.rules.singlewinner_rules.rule_features import RuleFeatures
 from embedded_voting.rules.singlewinner_rules.rule_instant_runoff import RuleInstantRunoff
-from embedded_voting.rules.singlewinner_rules.rule_max_cube import RuleMaxCube
+from embedded_voting.rules.singlewinner_rules.rule_max_parallelepiped import RuleMaxParallelepiped
 from embedded_voting.rules.singlewinner_rules.rule_mle_gaussian import RuleMLEGaussian
 from embedded_voting.rules.singlewinner_rules.rule_positional import RulePositional
 from embedded_voting.rules.singlewinner_rules.rule_positional_borda import RulePositionalBorda

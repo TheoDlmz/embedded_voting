@@ -140,7 +140,7 @@ class Rule(DeleteCacheMixin):
 
         Examples
         --------
-        Cf. :class:`RuleMaxCube`.
+        Cf. :class:`RuleMaxParallelepiped`.
         """
         if self.score_components == 1:
             return self.scores_
