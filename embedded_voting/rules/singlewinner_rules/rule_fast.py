@@ -62,9 +62,10 @@ class RuleFast(Rule):
 
         embeddings_from_ratings = EmbeddingsFromRatingsCorrelation()
         if embeddings is None:
-            self.correlations_ = embeddings_from_ratings(self.ratings_)
+            self.embeddings_ = self.ratings_
         else:
-            self.correlations_ = embeddings_from_ratings(np.concatenate([embeddings, self.ratings_], axis=1))
+            self.embeddings_ = np.concatenate([embeddings, self.ratings_], axis=1)
+        self.correlations_ = embeddings_from_ratings(self.embeddings_)
 
         self.n_v = self.correlations_.n_sing_val_  # embeddings_from_ratings.n_sing_val_
         self.delete_cache()
