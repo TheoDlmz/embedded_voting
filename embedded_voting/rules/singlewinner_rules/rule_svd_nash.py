@@ -6,10 +6,8 @@ from embedded_voting.rules.singlewinner_rules.rule_svd import RuleSVD
 
 class RuleSVDNash(RuleSVD):
     """
-    Voting rule in which the aggregated score of
-    a candidate is the product of the singular values
-    of his embedding matrix
-    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
+    Voting rule in which the aggregated score of a candidate is the product of the singular values
+    of his embedding matrix (cf :meth:`~embedded_voting.Embeddings.times_ratings_candidate`).
 
     Parameters
     ----------
@@ -35,5 +33,6 @@ class RuleSVDNash(RuleSVD):
     [1.0, 0.0, 0.16044515869439...]
 
     """
-    def __init__(self, square_root=True, use_rank=False):
-        super().__init__(aggregation_rule=np.prod, square_root=square_root, use_rank=use_rank)
+    def __init__(self, square_root=True, use_rank=False, embedded_from_ratings=None):
+        super().__init__(aggregation_rule=np.prod, square_root=square_root, use_rank=use_rank,
+                         embedded_from_ratings=embedded_from_ratings)
