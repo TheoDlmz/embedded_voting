@@ -67,9 +67,9 @@ class RuleSVDMax(RuleSVD):
         _, vp, vec = np.linalg.svd(m_candidate)
         vec = vec[0]
         if vec.sum() < 0:
-            return - vec * np.sqrt(vp[0])
+            return - vec * vp[0]
         else:
-            return vec * np.sqrt(vp[0])  # TODO: vec OR vec * np.sqrt(vp[0]) OR vec * vp[0]? Idem above.
+            return vec * vp[0]
 
     @cached_property
     def features_(self):
@@ -91,9 +91,9 @@ class RuleSVDMax(RuleSVD):
         >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
         >>> election = RuleSVDMax()(ratings, embeddings)
         >>> election.features_
-        array([[0.93600783, 0.38770714],
-               [0.28947845, 1.04510904],
-               [0.22891028, 0.96967952]])
+        array([[0.94829535, 0.39279679],
+               [0.31392742, 1.13337759],
+               [0.22807074, 0.96612315]])
         """
         return np.array([self._feature(candidate) for candidate in range(self.ratings_.n_candidates)])
 
