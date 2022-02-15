@@ -3,6 +3,7 @@ from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation import EmbeddingsFromRatingsCorrelation
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
 from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.utils.cached import cached_property
 
 
 class RuleFast(Rule):
@@ -28,7 +29,7 @@ class RuleFast(Rule):
         The ratings given by voters to candidates
     embeddings_: Embeddings
         The embeddings of the voters
-    n_v: int
+    n_sing_val_: int
         The number of singular values we want to consider when computing the score
         of some candidate
 
@@ -50,29 +51,30 @@ class RuleFast(Rule):
         else:
             self.f = f
 
-        self._modified_ratings = None
+    @cached_property
+    def modified_ratings_(self):
+        modified_ratings = np.array([self.f(x) for x in self.ratings_])
+        return modified_ratings
 
-    def __call__(self, ratings, embeddings=None):
-        super().__call__(ratings, embeddings)
-        modified_ratings = np.zeros(self.ratings_.shape)
-        for i in range(self.ratings_.n_voters):
-            modified_ratings[i] = self.f(self.ratings_.voter_ratings(i))
-        self._modified_ratings = modified_ratings
-        self.correlations_ = EmbeddingsFromRatingsCorrelation()(self.embeddings_)
-        self.n_v = self.correlations_.n_sing_val_
-        return self
+    @cached_property
+    def correlations_(self):
+        return EmbeddingsFromRatingsCorrelation()(self.embeddings_)
+
+    @cached_property
+    def n_sing_val_(self):
+        return self.correlations_.n_sing_val_
 
     def _score_(self, candidate):
         try:
             correlations = np.array(self.correlations_).copy()
             for i in range(self.ratings_.n_voters):
-                s = self._modified_ratings[i, candidate]
+                s = self.modified_ratings_[i, candidate]
                 correlations[i, :] *= s
                 correlations[:, i] *= s
         except AttributeError:
             correlations = np.array(self.correlations_).copy()
             for i in range(self.ratings_.n_voters):
-                s = self._modified_ratings[i, candidate]
+                s = self.modified_ratings_[i, candidate]
                 correlations[i, :] *= s
             correlations = np.dot(correlations, correlations.T)
 
@@ -80,4 +82,4 @@ class RuleFast(Rule):
         s = np.maximum(s, np.zeros(len(s)))
         s = np.sqrt(s)
         s = np.sort(s)[::-1]
-        return self.aggregation_rule(s[:self.n_v])
+        return self.aggregation_rule(s[:self.n_sing_val_])
