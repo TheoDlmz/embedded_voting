@@ -16,9 +16,7 @@ import matplotlib.pyplot as plt
 
 class RuleFeatures(Rule):
     """
-    Voting rule in which the aggregated score of
-    a candidate is the norm of the feature
-    vector of this candidate.
+    Voting rule in which the aggregated score of a candidate is the norm of the feature vector of this candidate.
 
     Examples
     --------
@@ -38,8 +36,7 @@ class RuleFeatures(Rule):
     @cached_property
     def features_(self):
         """
-        This function return the
-        feature vector of all candidates.
+        This function return the feature vector of all candidates.
 
         Return
         ------
@@ -47,9 +44,9 @@ class RuleFeatures(Rule):
             The matrix of features.
             Its shape is :attr:`~embedded_voting.Ratings.n_candidates`, :attr:`~embedded_voting.Embeddings.n_dim`
         """
-        positions = np.array(self.embeddings_)
+        embeddings = np.array(self.embeddings_)
         ratings = np.array(self.ratings_)
-        return np.dot(np.dot(np.linalg.pinv(np.dot(positions.T, positions)), positions.T), ratings).T
+        return (np.linalg.pinv(embeddings.T @ embeddings) @ embeddings.T @ ratings).T
 
     def _score_(self, candidate):
         return (self.features_[candidate] ** 2).sum()
