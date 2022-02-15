@@ -51,7 +51,7 @@ class Manipulation(DeleteCacheMixin):
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
-    [0.6651173304239312, 1.0, 0.0]
+    [0.6651173304239..., 1.0, 0.0]
     """
 
     def __init__(self, ratings, embeddings, rule=None):

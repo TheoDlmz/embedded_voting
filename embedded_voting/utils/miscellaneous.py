@@ -217,7 +217,7 @@ def singular_values_short(matrix):
     ... ])
     >>> singular_values = singular_values_short(my_matrix)
     >>> np.round(singular_values, 4)
-    array([2.2747, 0.    , 0.5387])
+    array([2.2747, 0.5387, 0.    ])
     """
     r, c = matrix.shape
     if r < c:
@@ -227,4 +227,5 @@ def singular_values_short(matrix):
     s = np.linalg.eigvals(square_matrix)
     s = np.maximum(s, np.zeros(len(s)))
     s = np.sqrt(s)
+    s = np.sort(s)[::-1]
     return s

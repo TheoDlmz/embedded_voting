@@ -33,7 +33,7 @@ class RulePositionalKApproval(RulePositional):
              [0., 1., 1., 0.],
              [1., 1., 0., 0.]])
     >>> election.ranking_
-    [1, 2, 3, 0]
+    [1, 2, 0, 3]
     """
     def __init__(self, n_candidates, k=2, rule=None):
         if k >= n_candidates:

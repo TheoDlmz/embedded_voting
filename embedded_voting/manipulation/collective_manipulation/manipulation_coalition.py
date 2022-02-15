@@ -55,7 +55,7 @@ class ManipulationCoalition(DeleteCacheMixin):
     >>> manipulation.winner_
     1
     >>> manipulation.welfare_
-    [0.6651173304239312, 1.0, 0.0]
+    [0.6651173304239..., 1.0, 0.0]
 
     """
     def __init__(self, ratings, embeddings, rule=None):
@@ -198,7 +198,7 @@ class ManipulationCoalition(DeleteCacheMixin):
         >>> ratings = RatingsFromEmbeddingsCorrelated(coherence=.8, ratings_dim_candidate=ratings_dim_candidate)(embeddings)
         >>> manipulation = ManipulationCoalition(ratings, embeddings, RuleSVDNash())
         >>> manipulation.worst_welfare_
-        0.6651173304239312
+        0.6651173304239...
         """
         worst_welfare = self.welfare_[self.winner_]
         for i in range(self.ratings.n_candidates):
