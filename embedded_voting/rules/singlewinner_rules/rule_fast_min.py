@@ -25,5 +25,5 @@ class RuleFastMin(RuleFast):
     0
 
     """
-    def __init__(self,  f=None, embeddings_as_history=False):
-        super().__init__(f=f, aggregation_rule=np.min, embeddings_as_history=embeddings_as_history)
+    def __init__(self,  f=None):
+        super().__init__(f=f, aggregation_rule=np.min)

@@ -21,10 +21,6 @@ class RuleFast(Rule):
         The aggregation rule for the singular values.
         Input : float list. Output : float.
         By default, it is the product of the singular values.
-    embeddings_as_history: bool
-        If true, the embeddings are considered as rating history and used to
-        compute the real embeddings
-
 
     Attributes
     ----------
@@ -35,18 +31,6 @@ class RuleFast(Rule):
     n_v: int
         The number of singular values we want to consider when computing the score
         of some candidate
-    f : callable
-        The transformation for the scores given by the voters.
-        Input : np.ndarray. Output : np.ndarray
-        By default, it is the normalization function.
-    aggregation_rule : callable
-        The aggregation rule for the singular values.
-        Input : float list. Output : float.
-        By default, it is the product of the singular values.
-    embeddings_as_history: bool
-        If true, the embeddings are considered as rating history and used to
-        compute the real embeddings
-
 
     Examples
     --------
@@ -58,7 +42,7 @@ class RuleFast(Rule):
     0
 
     """
-    def __init__(self,  f=None, aggregation_rule=np.prod, embeddings_as_history=False):
+    def __init__(self,  f=None, aggregation_rule=np.prod):
         super().__init__()
         self.aggregation_rule = aggregation_rule
         if f is None:
@@ -67,7 +51,6 @@ class RuleFast(Rule):
             self.f = f
 
         self._modified_ratings = None
-        self.embeddings_as_history = embeddings_as_history
 
     def __call__(self, ratings, embeddings=None):
         ratings = Ratings(ratings)
@@ -77,15 +60,11 @@ class RuleFast(Rule):
         self.ratings_ = ratings
         self._modified_ratings = modified_ratings
 
-        if self.embeddings_as_history or embeddings is None:
-            embeddings_from_ratings = EmbeddingsFromRatingsCorrelation()
-            if embeddings is None:
-                self.embeddings_ = embeddings_from_ratings(self.ratings_)
-            else:
-                self.embeddings_ = embeddings_from_ratings(np.concatenate([embeddings, self.ratings_], axis=1))
+        embeddings_from_ratings = EmbeddingsFromRatingsCorrelation()
+        if embeddings is None:
+            self.embeddings_ = embeddings_from_ratings(self.ratings_)
         else:
-            self.embeddings_ = Embeddings(embeddings, norm=True)
-            self.embeddings_.n_sing_val_ = embeddings.n_sing_val_
+            self.embeddings_ = embeddings_from_ratings(np.concatenate([embeddings, self.ratings_], axis=1))
 
         self.n_v = self.embeddings_.n_sing_val_  # embeddings_from_ratings.n_sing_val_
         self.delete_cache()
