@@ -59,9 +59,6 @@ class RuleSVD(Rule):
         else:
             m_candidate = self.embeddings_.times_ratings_candidate(self.ratings_.candidate_ratings(candidate))
 
-        if self.embeddings_.shape[1] == 0:
-            return self.aggregation_rule(self.ratings_.candidate_ratings(candidate))
-
         if m_candidate.shape[0] < m_candidate.shape[1]:
             embeddings_matrix = m_candidate.dot(m_candidate.T)
         else:
