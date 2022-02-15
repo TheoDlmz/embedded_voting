@@ -6,17 +6,28 @@ theo.delemazure@ens.fr
 This file is part of Embedded Voting.
 """
 import numpy as np
+import matplotlib.pyplot as plt
+from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.utils.cached import cached_property
 from embedded_voting.utils.miscellaneous import normalize
-from embedded_voting.rules.singlewinner_rules.rule import Rule
-from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.embeddings.embeddings import Embeddings
-import matplotlib.pyplot as plt
 
 
 class RuleFeatures(Rule):
     """
     Voting rule in which the aggregated score of a candidate is the norm of the feature vector of this candidate.
+
+    Intuitively, for each candidate, her feature on embedding dimension `d` is the ideal rating that a voter of
+    group `d` should put to that candidate. In this model, the actual rating of a voter for this candidate would be
+    a mean of the features, weighted by the voter's embedding: `embeddings[voter, :] @ features[candidate, :]`.
+    Considering all the voters and all the candidates, we then obtain `ratings = embeddings @ features.T`, i.e.
+    `features = (inv(embeddings) @ ratings).T`.
+
+    Since `embeddings` is not always invertible, we consider in practice `features = (pinv(embeddings) @ ratings).T`.
+    This can be seen as a least-square approximation of the inital model.
+
+    Finally, the score of a candidate is the Euclidean norm of her vector of features.
 
     Examples
     --------
@@ -42,16 +53,14 @@ class RuleFeatures(Rule):
         ------
         np.ndarray
             The matrix of features.
-            Its shape is :attr:`~embedded_voting.Ratings.n_candidates`, :attr:`~embedded_voting.Embeddings.n_dim`
+            Its shape is :attr:`~embedded_voting.Ratings.n_candidates`, :attr:`~embedded_voting.Embeddings.n_dim`.
         """
-        embeddings = np.array(self.embeddings_)
-        ratings = np.array(self.ratings_)
-        return (np.linalg.pinv(embeddings) @ ratings).T
+        return np.array((np.linalg.pinv(self.embeddings_) @ self.ratings_).T)
 
     def _score_(self, candidate):
         return (self.features_[candidate] ** 2).sum()
 
-    def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):
+    def plot_features(self, plot_kind="3D", dim: list = None, row_size=5, show=True):
         """
         This function plot the features vector of
         all candidates in the given dimensions.
