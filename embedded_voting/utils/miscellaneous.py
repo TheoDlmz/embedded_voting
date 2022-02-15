@@ -224,8 +224,9 @@ def singular_values_short(matrix):
         square_matrix = matrix @ matrix.T
     else:
         square_matrix = matrix.T @ matrix
-    s = np.linalg.eigvals(square_matrix)
-    s = np.maximum(s, np.zeros(len(s)))
-    s = np.sqrt(s)
-    s = np.sort(s)[::-1]
-    return s
+    eigenvalues = np.linalg.eigvals(square_matrix)
+    eigenvalues = np.maximum(eigenvalues, 0)
+    # In theory, all eigenvalues are nonnegative, but due to numerical approximations, it may happen that
+    # some of them are computed as very small negative values. Hence the np.maximum().
+
+    return np.sort(np.sqrt(eigenvalues))[::-1]
