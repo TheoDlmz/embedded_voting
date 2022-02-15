@@ -22,6 +22,18 @@ class RuleMLEGaussian(Rule):
     1
     >>> election.welfare_
     [0.70..., 1.0, 0.0]
+
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> embeddings = EmbeddingsFromRatingsIdentity()(ratings)
+    >>> election = RuleMLEGaussian()(ratings, embeddings)
+    >>> election.scores_
+    [-inf, -inf, inf]
+    >>> election.ranking_
+    [2, 0, 1]
+    >>> election.winner_
+    2
+    >>> election.welfare_
+    [nan, nan, nan]
     """
 
     def __call__(self, ratings, embeddings=None):
