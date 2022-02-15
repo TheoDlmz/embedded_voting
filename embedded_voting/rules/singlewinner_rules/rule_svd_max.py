@@ -60,8 +60,11 @@ class RuleSVDMax(RuleSVD):
             The feature vector of the
             candidate, of length :attr:`~embedded_voting.Embeddings.n_dim`.
         """
-        embeddings = self.embeddings_.times_ratings_candidate(np.sqrt(self.ratings_[::, candidate]))
-        _, vp, vec = np.linalg.svd(embeddings)
+        if self.square_root:
+            m_candidate = self.embeddings_.times_ratings_candidate(np.sqrt(self.ratings_[::, candidate]))
+        else:
+            m_candidate = self.embeddings_.times_ratings_candidate(self.ratings_[::, candidate])
+        _, vp, vec = np.linalg.svd(m_candidate)
         vec = vec[0]
         if vec.sum() < 0:
             return - vec * np.sqrt(vp[0])
@@ -92,7 +95,7 @@ class RuleSVDMax(RuleSVD):
                [0.28947845, 1.04510904],
                [0.22891028, 0.96967952]])
         """
-        return np.array([self._feature(candidate) for candidate in range(self.ratings_.shape[1])])
+        return np.array([self._feature(candidate) for candidate in range(self.ratings_.n_candidates)])
 
     def plot_features(self, plot_kind="3D", dim=None, row_size=5, show=True):
         """
