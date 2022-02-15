@@ -1,7 +1,8 @@
-from embedded_voting.rules.singlewinner_rules.rule import Rule
-from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
 import numpy as np
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
+from embedded_voting.ratings.ratings import Ratings
+from embedded_voting.rules.singlewinner_rules.rule import Rule
+from embedded_voting.utils.cached import cached_property
 
 
 class RuleMLEGaussian(Rule):
@@ -41,14 +42,13 @@ class RuleMLEGaussian(Rule):
             embeddings_from_ratings = EmbeddingsFromRatingsSelf(norm=False)
         super().__init__(score_components=1, embeddings_from_ratings=embeddings_from_ratings)
 
-    def __call__(self, ratings, embeddings=None):
-        super().__call__(ratings, embeddings)
-        self.inverse_cov = np.linalg.pinv(np.cov(self.embeddings_)).sum(axis=0)
-        return self
+    @cached_property
+    def inverse_cov_(self):
+        return np.linalg.pinv(np.cov(self.embeddings_)).sum(axis=0)
 
     def _score_(self, candidate):
         scores = self.ratings_.candidate_ratings(candidate)
-        sum_cov = self.inverse_cov
+        sum_cov = self.inverse_cov_
         score = 0
         for i in range(len(scores)):
             score += scores[i]*sum_cov[i]
