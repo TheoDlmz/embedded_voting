@@ -69,7 +69,7 @@ class RuleSVDMax(RuleSVD):
         if vec.sum() < 0:
             return - vec * np.sqrt(vp[0])
         else:
-            return vec * np.sqrt(vp[0])
+            return vec * np.sqrt(vp[0])  # TODO: vec OR vec * np.sqrt(vp[0]) OR vec * vp[0]? Idem above.
 
     @cached_property
     def features_(self):
