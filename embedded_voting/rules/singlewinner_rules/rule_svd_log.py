@@ -6,10 +6,8 @@ from embedded_voting.rules.singlewinner_rules.rule_svd import RuleSVD
 
 class RuleSVDLog(RuleSVD):
     """
-    Voting rule in which the aggregated score of
-    a candidate is the sum of `log(1 + sigma/C)`
-    where sigma are the singular values
-    of his embedding matrix and C is a constant.
+    Voting rule in which the aggregated score of a candidate is the sum of `log(1 + sigma/const)`
+    where sigma are the singular values of his embedding matrix and `const` is a constant.
 
     Parameters
     ----------
@@ -38,6 +36,9 @@ class RuleSVDLog(RuleSVD):
     [1.0, 0.7307579856610341, 0.0]
 
     """
-    def __init__(self, const=1, square_root=True, use_rank=False):
-        super().__init__(aggregation_rule=lambda x: np.sum(np.log(1+x/const)),
-                         square_root=square_root, use_rank=use_rank)
+    def __init__(self, const=1, square_root=True, use_rank=False, embedded_from_ratings=None):
+        self.const = const
+        super().__init__(
+            aggregation_rule=lambda x: np.sum(np.log(1 + x / self.const)),
+            square_root=square_root, use_rank=use_rank, embedded_from_ratings=embedded_from_ratings
+        )
