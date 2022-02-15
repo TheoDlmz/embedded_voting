@@ -14,10 +14,8 @@ from embedded_voting.utils.miscellaneous import singular_values_short
 
 class RuleSVD(Rule):
     """
-    Voting rule in which the aggregated score of
-    a candidate is based on singular values
-    of his embedding matrix
-    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
+    Voting rule in which the aggregated score of a candidate is based on singular values
+    of his embedding matrix (cf :meth:`~embedded_voting.Embeddings.times_ratings_candidate`).
 
     Parameters
     ----------
@@ -26,7 +24,7 @@ class RuleSVD(Rule):
         Input : float list. Output : float.
         By default, it is the product of the singular values.
     square_root: boolean
-        If True, use the square root of score in the matrix.
+        If True, use the square root of ratings in the matrix.
         By default, it is True.
     use_rank : boolean
         If True, consider the rank of the matrix when doing the ranking.
@@ -65,36 +63,3 @@ class RuleSVD(Rule):
             return matrix_rank, self.aggregation_rule(s[:matrix_rank])
         else:
             return self.aggregation_rule(s)
-
-    def set_rule(self, aggregation_rule):
-        """
-        A function to update the aggregation rule
-        :attr:`aggregation_rule`
-        used for the singular values.
-
-        Parameters
-        ----------
-        aggregation_rule : callable
-            The new aggregation rule for the singular values.
-            Input : float list. Output : float.
-
-        Return
-        ------
-        RuleSVD
-            The object itself.
-
-        Examples
-        --------
-        >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-        >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
-        >>> election = RuleSVD()(ratings, embeddings)
-        >>> election.ranking_
-        [0, 2, 1]
-        >>> election.set_rule(np.sum)
-        <embedded_voting.rules.singlewinner_rules.rule_svd.RuleSVD object at ...>
-        >>> election.ranking_
-        [1, 0, 2]
-        """
-        self.aggregation_rule = aggregation_rule
-        self.delete_cache()
-        return self
