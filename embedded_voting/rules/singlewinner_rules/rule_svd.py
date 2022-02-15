@@ -9,6 +9,7 @@ import numpy as np
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.utils.miscellaneous import singular_values_short
 
 
 class RuleSVD(Rule):
@@ -58,15 +59,7 @@ class RuleSVD(Rule):
             m_candidate = self.embeddings_.times_ratings_candidate(np.sqrt(self.ratings_.candidate_ratings(candidate)))
         else:
             m_candidate = self.embeddings_.times_ratings_candidate(self.ratings_.candidate_ratings(candidate))
-
-        if m_candidate.shape[0] < m_candidate.shape[1]:
-            embeddings_matrix = m_candidate.dot(m_candidate.T)
-        else:
-            embeddings_matrix = m_candidate.T.dot(m_candidate)
-
-        s = np.linalg.eigvals(embeddings_matrix)
-        s = np.maximum(s, np.zeros(len(s)))
-        s = np.sqrt(s)
+        s = singular_values_short(m_candidate)
         if self.use_rank:
             matrix_rank = np.linalg.matrix_rank(m_candidate)
             return matrix_rank, self.aggregation_rule(s[:matrix_rank])

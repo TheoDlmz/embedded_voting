@@ -191,3 +191,29 @@ def volume_parallelepiped(matrix):
     10.0...
     """
     return np.sqrt(np.linalg.det(matrix @ matrix.T))
+
+
+def singular_values_short(matrix):
+    """
+    Singular values of a matrix (short version).
+
+    Parameters
+    ----------
+    matrix: np.ndarray
+
+    Returns
+    -------
+    np.ndarray
+        Singular values of the matrix. In order to have a "short" version (and limit computation), we consider
+        the square matrix of smallest dimensions among `matrix @ matrix.T` and `matrix.T @ matrix`, and then output
+        the square roots of its eigenvalues.
+    """
+    r, c = matrix.shape
+    if r < c:
+        square_matrix = matrix @ matrix.T
+    else:
+        square_matrix = matrix.T @ matrix
+    s = np.linalg.eigvals(square_matrix)
+    s = np.maximum(s, np.zeros(len(s)))
+    s = np.sqrt(s)
+    return s
