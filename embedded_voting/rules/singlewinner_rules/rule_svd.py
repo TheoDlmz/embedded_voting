@@ -54,7 +54,10 @@ class RuleSVD(Rule):
         super().__init__(score_components=score_components, embeddings_from_ratings=embedded_from_ratings)
 
     def _score_(self, candidate):
-        m_candidate = self.embeddings_.times_ratings_candidate(np.sqrt(self.ratings_.candidate_ratings(candidate)))
+        if self.square_root:
+            m_candidate = self.embeddings_.times_ratings_candidate(np.sqrt(self.ratings_.candidate_ratings(candidate)))
+        else:
+            m_candidate = self.embeddings_.times_ratings_candidate(self.ratings_.candidate_ratings(candidate))
 
         if self.embeddings_.shape[1] == 0:
             return self.aggregation_rule(self.ratings_.candidate_ratings(candidate))
