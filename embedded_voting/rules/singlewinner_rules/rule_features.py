@@ -46,7 +46,7 @@ class RuleFeatures(Rule):
         """
         embeddings = np.array(self.embeddings_)
         ratings = np.array(self.ratings_)
-        return (np.linalg.pinv(embeddings.T @ embeddings) @ embeddings.T @ ratings).T
+        return (np.linalg.pinv(embeddings) @ ratings).T
 
     def _score_(self, candidate):
         return (self.features_[candidate] ** 2).sum()
