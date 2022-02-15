@@ -47,9 +47,4 @@ class RuleMLEGaussian(Rule):
         return np.linalg.pinv(np.cov(self.embeddings_)).sum(axis=0)
 
     def _score_(self, candidate):
-        scores = self.ratings_.candidate_ratings(candidate)
-        sum_cov = self.inverse_cov_
-        score = 0
-        for i in range(len(scores)):
-            score += scores[i]*sum_cov[i]
-        return score/sum_cov.sum()
+        return self.ratings_.candidate_ratings(candidate) @ self.inverse_cov_ / self.inverse_cov_.sum()
