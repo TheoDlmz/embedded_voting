@@ -1,6 +1,6 @@
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_identity import EmbeddingsFromRatingsIdentity
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
 import numpy as np
 
 
@@ -13,7 +13,7 @@ class RuleMLEGaussian(Rule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> election = RuleMLEGaussian(embeddings_from_ratings=EmbeddingsFromRatingsIdentity())(ratings)
+    >>> election = RuleMLEGaussian()(ratings)
     >>> election.scores_
     [0.507..., 0.606..., 0.275...]
     >>> election.ranking_
@@ -24,25 +24,26 @@ class RuleMLEGaussian(Rule):
     [0.70..., 1.0, 0.0]
 
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> embeddings = EmbeddingsFromRatingsIdentity()(ratings)
+    >>> embeddings = EmbeddingsFromRatingsSelf(norm=False)(ratings)
     >>> election = RuleMLEGaussian()(ratings, embeddings)
     >>> election.scores_
-    [-inf, -inf, inf]
+    [0.507..., 0.606..., 0.275...]
     >>> election.ranking_
-    [2, 0, 1]
+    [1, 0, 2]
     >>> election.winner_
-    2
+    1
     >>> election.welfare_
-    [nan, nan, nan]
+    [0.70..., 1.0, 0.0]
     """
+
+    def __init__(self, embeddings_from_ratings=None):
+        if embeddings_from_ratings is None:
+            embeddings_from_ratings = EmbeddingsFromRatingsSelf(norm=False)
+        super().__init__(score_components=1, embeddings_from_ratings=embeddings_from_ratings)
 
     def __call__(self, ratings, embeddings=None):
         super().__call__(ratings, embeddings)
-        if embeddings is None:
-            positions = np.array(ratings)
-        else:
-            positions = np.array(self.embeddings_)
-        self.inverse_cov = np.linalg.pinv(np.cov(positions)).sum(axis=0)
+        self.inverse_cov = np.linalg.pinv(np.cov(self.embeddings_)).sum(axis=0)
         return self
 
     def _score_(self, candidate):

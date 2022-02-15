@@ -75,4 +75,4 @@ def test_embeddings_copy():
 def test_embedder():
     ratings = np.array([[1, .8, .5], [.6, .5, .2], [.6, .9, .5]])
     EmbeddingsFromRatingsRandom(n_dim=5)(ratings)
-    EmbeddingsFromRatingsSelf()(ratings)
+    EmbeddingsFromRatingsSelf(norm=True)(ratings)
