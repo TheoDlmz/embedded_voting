@@ -35,13 +35,13 @@ class RuleFeatures(Rule):
     >>> embeddings = Embeddings(np.array([[1, 1], [1, 0], [0, 1]]), norm=True)
     >>> election = RuleFeatures()(ratings, embeddings)
     >>> election.scores_
-    [0.44..., 0.92..., 0.43...]
+    [0.669..., 0.962..., 0.658...]
     >>> election.ranking_
     [1, 0, 2]
     >>> election.winner_
     1
     >>> election.welfare_
-    [0.0289..., 1.0, 0.0]
+    [0.0353..., 1.0, 0.0]
     """
 
     @cached_property
@@ -58,7 +58,7 @@ class RuleFeatures(Rule):
         return np.array((np.linalg.pinv(self.embeddings_) @ self.ratings_).T)
 
     def _score_(self, candidate):
-        return (self.features_[candidate] ** 2).sum()
+        return np.linalg.norm(self.features_[candidate])
 
     def plot_features(self, plot_kind="3D", dim: list = None, row_size=5, show=True):
         """
