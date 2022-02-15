@@ -207,6 +207,17 @@ def singular_values_short(matrix):
         Singular values of the matrix. In order to have a "short" version (and limit computation), we consider
         the square matrix of smallest dimensions among `matrix @ matrix.T` and `matrix.T @ matrix`, and then output
         the square roots of its eigenvalues.
+
+    Examples
+    --------
+    >>> my_matrix = np.array([
+    ...     [0.2 , 0.5 , 0.7 , 0.9 , 0.4 ],
+    ...     [0.1 , 0.  , 1.  , 0.8 , 0.8 ],
+    ...     [0.17, 0.4 , 0.66, 0.8 , 0.4 ]
+    ... ])
+    >>> singular_values = singular_values_short(my_matrix)
+    >>> np.round(singular_values, 4)
+    array([2.2747, 0.    , 0.5387])
     """
     r, c = matrix.shape
     if r < c:
