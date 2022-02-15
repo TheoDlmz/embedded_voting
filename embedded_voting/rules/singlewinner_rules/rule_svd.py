@@ -17,6 +17,8 @@ class RuleSVD(Rule):
     Voting rule in which the aggregated score of a candidate is based on singular values
     of his embedding matrix (cf :meth:`~embedded_voting.Embeddings.times_ratings_candidate`).
 
+    Implicitly, ratings are assumed to be nonnegative.
+
     Parameters
     ----------
     aggregation_rule: callable
