@@ -42,7 +42,7 @@ class RuleFast(Rule):
     0
 
     """
-    def __init__(self,  f=None, aggregation_rule=np.prod):
+    def __init__(self, f=None, aggregation_rule=np.prod):
         super().__init__()
         self.aggregation_rule = aggregation_rule
         if f is None:
@@ -62,30 +62,30 @@ class RuleFast(Rule):
 
         embeddings_from_ratings = EmbeddingsFromRatingsCorrelation()
         if embeddings is None:
-            self.embeddings_ = embeddings_from_ratings(self.ratings_)
+            self.correlations_ = embeddings_from_ratings(self.ratings_)
         else:
-            self.embeddings_ = embeddings_from_ratings(np.concatenate([embeddings, self.ratings_], axis=1))
+            self.correlations_ = embeddings_from_ratings(np.concatenate([embeddings, self.ratings_], axis=1))
 
-        self.n_v = self.embeddings_.n_sing_val_  # embeddings_from_ratings.n_sing_val_
+        self.n_v = self.correlations_.n_sing_val_  # embeddings_from_ratings.n_sing_val_
         self.delete_cache()
 
         return self
 
     def _score_(self, candidate):
         try:
-            embeddings = np.array(self.embeddings_).copy()
+            correlations = np.array(self.correlations_).copy()
             for i in range(self.ratings_.n_voters):
                 s = self._modified_ratings[i, candidate]
-                embeddings[i, :] *= s
-                embeddings[:, i] *= s
+                correlations[i, :] *= s
+                correlations[:, i] *= s
         except AttributeError:
-            embeddings = np.array(self.embeddings_).copy()
+            correlations = np.array(self.correlations_).copy()
             for i in range(self.ratings_.n_voters):
                 s = self._modified_ratings[i, candidate]
-                embeddings[i, :] *= s
-            embeddings = np.dot(embeddings, embeddings.T)
+                correlations[i, :] *= s
+            correlations = np.dot(correlations, correlations.T)
 
-        s = np.linalg.eigvals(embeddings)
+        s = np.linalg.eigvals(correlations)
         s = np.maximum(s, np.zeros(len(s)))
         s = np.sqrt(s)
         s = np.sort(s)[::-1]
