@@ -43,8 +43,20 @@ class RuleMLEGaussian(Rule):
         super().__init__(score_components=1, embeddings_from_ratings=embeddings_from_ratings)
 
     @cached_property
-    def inverse_cov_(self):
-        return np.linalg.pinv(np.cov(self.embeddings_)).sum(axis=0)
+    def covariance_(self):
+        return np.cov(self.embeddings_)
+
+    @cached_property
+    def pinv_covariance_(self):
+        return np.linalg.pinv(self.covariance_)
+
+    @cached_property
+    def weights_(self):
+        return self.pinv_covariance_.sum(axis=0)
+
+    @cached_property
+    def weights_normalized_(self):
+        return self.weights_ / self.weights_.sum()
 
     def _score_(self, candidate):
-        return self.ratings_.candidate_ratings(candidate) @ self.inverse_cov_ / self.inverse_cov_.sum()
+        return self.ratings_.candidate_ratings(candidate) @ self.weights_normalized_
