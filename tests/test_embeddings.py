@@ -54,11 +54,14 @@ def test_embeddings_get_center():
 def test_embeddings_copy():
     """
     >>> embeddings = Embeddings(np.array([[.5,.9,.4],[.4,.7,.5],[.4,.2,.4]]), norm=False)
+    >>> embeddings.some_attribute = 51
     >>> second_embeddings = embeddings.copy()
     >>> second_embeddings
     Embeddings([[0.5, 0.9, 0.4],
                 [0.4, 0.7, 0.5],
                 [0.4, 0.2, 0.4]])
+    >>> second_embeddings.some_attribute
+    51
     >>> second_embeddings[0, 0] = 42
     >>> second_embeddings
     Embeddings([[42. ,  0.9,  0.4],

@@ -1,6 +1,5 @@
 import numpy as np
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation import EmbeddingsFromRatingsCorrelation
-from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_self import EmbeddingsFromRatingsSelf
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.utils.cached import cached_property
@@ -33,7 +32,7 @@ class RuleFast(Rule):
 
     """
     def __init__(self, f=None, aggregation_rule=np.prod):
-        super().__init__(embeddings_from_ratings=EmbeddingsFromRatingsSelf(norm=False))
+        super().__init__(embeddings_from_ratings=EmbeddingsFromRatingsCorrelation())
         self.aggregation_rule = aggregation_rule
         if f is None:
             f = lambda x: np.sqrt(np.maximum(0, x/np.linalg.norm(x)))
@@ -45,18 +44,13 @@ class RuleFast(Rule):
         return Ratings([self.f(x) for x in self.ratings_])
 
     @cached_property
-    def correlations_(self):
-        """Embeddings: `EmbeddingsFromRatingsCorrelation` applied to `self.embeddings_`."""
-        return EmbeddingsFromRatingsCorrelation()(self.embeddings_)
-
-    @cached_property
     def n_sing_val_(self):
         """int: The number of singular values we want to consider when computing the score
         of some candidate."""
-        return self.correlations_.n_sing_val_
+        return self.embeddings_.n_sing_val_
 
     def _score_(self, candidate):
-        correlations = np.array(self.correlations_).copy()
+        correlations = np.array(self.embeddings_).copy()
         for i in range(self.ratings_.n_voters):
             s = self.modified_ratings_[i, candidate]
             correlations[i, :] *= s

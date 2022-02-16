@@ -43,9 +43,19 @@ class Embeddings(np.ndarray):
     """
 
     def __new__(cls, positions, norm):
+        """
+        >>> embeddings = Embeddings([[1, 2], [3, 4]], norm=False)
+        >>> embeddings.n_sing_val_ = 42
+        >>> embeddings_2 = Embeddings(embeddings, norm=False)
+        >>> embeddings_2.n_sing_val_
+        42
+        """
         obj = np.asarray(positions).view(cls)
         if norm:
             obj = obj / np.linalg.norm(obj, axis=1)[:, np.newaxis]
+        if hasattr(positions, '__dict__'):
+            for key, val in positions.__dict__.items():
+                setattr(obj, key, getattr(positions, key))
         return obj
 
     def __array_finalize__(self, obj):
@@ -53,6 +63,12 @@ class Embeddings(np.ndarray):
             return
         if len(self.shape) == 2:
             self.n_voters, self.n_dim = self.shape
+
+    def copy(self, order='C'):
+        result = super().copy(order=order)
+        for key, val in self.__dict__.items():
+            setattr(result, key, getattr(self, key))
+        return result
 
     def voter_embeddings(self, i):
         return np.array(self[i:i + 1, :])[0]
