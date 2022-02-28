@@ -9,19 +9,20 @@ import ternary
 import numpy as np
 
 
-def create_3D_plot(fig, position=None):
+def create_3d_plot(fig, position=None):
     """
     Create the background for a 3D plot on the non-negative orthant.
 
     Parameters
     ----------
-    fig : The matplotlib figure on which we are drawing
-    position : The position of the subplot on which we are drawing
+    fig
+        The matplotlib figure on which we are drawing.
+    position
+        The position of the subplot on which we are drawing.
 
     Return
     ------
     matplotlib ax
-
     """
     if position is None:
         position = [1, 1, 1]
@@ -50,12 +51,11 @@ def create_3D_plot(fig, position=None):
 
 def create_ternary_plot(fig, position=None):
     """
-        Create the background for a 2D ternary plot of the non-negative orthant.
+    Create the background for a 2D ternary plot of the non-negative orthant.
 
-        Return
-        ______
-        matplotlib ax
-
+    Return
+    ______
+    matplotlib ax
     """
     if position is None:
         position = [1, 1, 1]
@@ -83,17 +83,17 @@ def create_map_plot(fig, image, position, title=""):
         The matplotlib figure on which we are drawing.
     image : np.ndarray
         The image to plot. Should be of size `map_size`, `map_size`.
-    position : list
-        The position of the subplot on which we are drawing
+    position: list
+        The position of the subplot on which we are drawing.
     title : str
-        Title of the plot
+        Title of the plot.
 
     Return
     ------
     matplotlib ax
-
     """
     map_size = len(image)
+    # noinspection PyUnresolvedReferences
     ax = fig.add_subplot(position[0], position[1], position[2])
     ax.imshow(image[::-1, ::], vmin=0, vmax=1)
     ax.set_xlabel('Correlation')

@@ -1,4 +1,5 @@
-
-from embedded_voting.embeddings.embeddings import *
-from embedded_voting.embeddings.embeddingsFromRatings import *
-from embedded_voting.embeddings.generator import *
+from embedded_voting.embeddings.embeddings import Embeddings
+from embedded_voting.embeddings.embeddings_generator import EmbeddingsGenerator
+from embedded_voting.embeddings.embeddings_generator_fully_polarized import EmbeddingsGeneratorFullyPolarized
+from embedded_voting.embeddings.embeddings_generator_polarized import EmbeddingsGeneratorPolarized
+from embedded_voting.embeddings.embeddings_generator_uniform import EmbeddingsGeneratorUniform

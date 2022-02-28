@@ -6,9 +6,9 @@ theo.delemazure@ens.fr
 This file is part of Embedded Voting.
 """
 
-from embedded_voting.scoring.singlewinner.fast import FastNash
+from embedded_voting.rules.singlewinner_rules.rule_fast_nash import RuleFastNash
 from embedded_voting.ratings.ratings import Ratings
-from embedded_voting.embeddings.embeddingsFromRatings import EmbeddingsFromRatingsCorrelation
+from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation import EmbeddingsFromRatingsCorrelation
 import numpy as np
 
 
@@ -20,8 +20,8 @@ class Aggregator:
 
     Parameters
     ----------
-    rule: ScoringRule
-        The aggregation rule you want to use in your elections. Default is :class:`~embedded_voting.FastNash`
+    rule: Rule
+        The aggregation rule you want to use in your elections. Default is :class:`~embedded_voting.RuleFastNash`
 
     Attributes
     ----------
@@ -32,7 +32,7 @@ class Aggregator:
         The history of all ratings given by the voter. Is used to compute correlations between
         voters.
 
-    rule: ScoringRule
+    rule: Rule
         The scoring rule used for the elections.
 
     Examples
@@ -43,27 +43,32 @@ class Aggregator:
     [5, 1, 0, 3, 4, 2]
     >>> results.winner_
     5
+    >>> results.embeddings_
+    Embeddings([[0.55388583, 0.55174221, 0.48302539, 0.39430635],
+                [0.54859116, 0.55072254, 0.48599893, 0.39944644],
+                [0.47676601, 0.48245636, 0.54670819, 0.49095845],
+                [0.42248019, 0.43044586, 0.5329445 , 0.59346188]])
     >>> results = aggregator([[2, 4, 8], [9, 2, 1], [0, 2, 5], [4, 5, 3]], train=True)
     >>> results.ranking_
     [2, 0, 1]
     """
 
-    def __init__(self, rule=None, embedder=None, default_train=False, name="aggregator"):
+    def __init__(self, rule=None, embeddings_from_ratings=None, default_train=False, name="aggregator"):
         if rule is None:
-            rule = FastNash()
+            rule = RuleFastNash()
         self.rule = rule
         self.embeddings = None
         self.ratings_history = None
-        if embedder is None:
-            self.embedder = EmbeddingsFromRatingsCorrelation()
+        if embeddings_from_ratings is None:
+            self.embeddings_from_ratings = EmbeddingsFromRatingsCorrelation()
         else:
-            self.embedder = embedder
+            self.embeddings_from_ratings = embeddings_from_ratings
         self.default_train = default_train
         self.name = name
 
     def __call__(self, ratings, train=None):
         """
-        This function run an election using the :attr:`embedder` and the scores.
+        This function run an election using the :attr:`embeddings_from_ratings` and the scores.
 
         Parameters
         ----------
@@ -72,7 +77,7 @@ class Aggregator:
             score given by the voter i to candidate j.
 
         train: bool
-            If True, we retrain the :attr:`embedder` before doing the election (using the
+            If True, we retrain the :attr:`embeddings_from_ratings` before doing the election (using the
             data of the election).
         """
         ratings = Ratings(ratings)
@@ -90,7 +95,7 @@ class Aggregator:
 
     def train(self):
         """
-        This function can be used to train the embedder on the newest data
+        This function can be used to train the embeddings_from_ratings on the newest data
         it gathered during the recent elections.
 
         Return
@@ -98,7 +103,7 @@ class Aggregator:
         Aggregator
             The object
         """
-        self.embeddings = self.embedder(self.ratings_history)
+        self.embeddings = self.embeddings_from_ratings(self.ratings_history)
         return self
 
     def reset(self):
