@@ -27,7 +27,7 @@ class EmbeddingsCorrelation(Embeddings):
                            [0.6       , 0.8       ]])
     >>> embeddings.n_sing_val
     2
-    >>> embeddings.means_voters
+    >>> embeddings.ratings_means
     [0.1, 0.2]
 
     >>> embeddings2 = embeddings.copy()
@@ -38,6 +38,6 @@ class EmbeddingsCorrelation(Embeddings):
     def __new__(cls, positions, n_sing_val, ratings_means, ratings_stds, norm):
         obj = super().__new__(cls, positions=positions, norm=norm)
         obj.n_sing_val = n_sing_val
-        obj.means_voters = ratings_means
-        obj.stds_voters = ratings_stds
+        obj.ratings_means = ratings_means
+        obj.ratings_stds = ratings_stds
         return obj
