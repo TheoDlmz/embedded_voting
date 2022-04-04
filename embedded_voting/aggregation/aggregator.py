@@ -52,12 +52,12 @@ class Aggregator:
     [5, 0, 1, 3, 4, 2]
     >>> results.winner_
     5
-    >>> results = aggregator([[2, 4, 8], [9, 2, 1], [0, 2, 5], [4, 5, 3]], train=True)
+    >>> results = aggregator([[2, 4, 8], [9, 2, 1], [0, 2, 5], [4, 5, 3]])
     >>> results.ranking_
     [2, 0, 1]
     """
 
-    def __init__(self, rule=None, embeddings_from_ratings=None, default_train=False, name="aggregator"):
+    def __init__(self, rule=None, embeddings_from_ratings=None, default_train=True, name="aggregator"):
         if rule is None:
             rule = RuleFastNash()
         if embeddings_from_ratings is None:
