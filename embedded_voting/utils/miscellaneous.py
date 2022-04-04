@@ -190,7 +190,9 @@ def volume_parallelepiped(matrix):
     >>> volume_parallelepiped(matrix=np.array([[10, 0, 0, 0]]))  # doctest: +ELLIPSIS
     10.0...
     """
-    return np.sqrt(np.linalg.det(matrix @ matrix.T))
+    det = np.linalg.det(matrix @ matrix.T)
+    det = max(det, 0)  # In theory, the determinant should be nonnegative, but there are numerical issues
+    return np.sqrt(det)
 
 
 def singular_values_short(matrix):
