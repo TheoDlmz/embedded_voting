@@ -11,26 +11,28 @@ class RuleFastLog(RuleFast):
 
     Parameters
     ----------
+    embeddings_from_ratings: EmbeddingsFromRatingsCorrelation
+        If no embeddings are specified in the call, this `EmbeddingsFromRatings` object is use to generate
+        the embeddings from the ratings. Default:
+        `EmbeddingsFromRatingsCorrelation(preprocess_ratings=center_and_normalize)`.
     f : callable
-        The transformation for the scores given by the voters.
-        Input : np.ndarray. Output : np.ndarray
-        By default, it is the normalization f.
+        The transformation for the ratings given by each voter.
+        Input : (ratings_v: np.ndarray, history_mean: Number, history_std: Number).
+        Output : modified_ratings_v: np.ndarray.
 
     Examples
     --------
     >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
     >>> election = RuleFastLog()(ratings)
     >>> election.ranking_
-    [0, 2, 1]
+    [1, 0, 2]
     >>> election.winner_
-    0
-
+    1
     """
-    def __init__(self, f=None):
-        super().__init__(f=f)
+    def __init__(self, embeddings_from_ratings=None, f=None):
+        super().__init__(embeddings_from_ratings=embeddings_from_ratings, f=f)
 
     def __call__(self, ratings, embeddings=None):
         ratings = Ratings(ratings)
         self.aggregation_rule = lambda x: np.sum(np.log(1+x*ratings.n_voters))
-        super().__call__(ratings, embeddings)
-        return self
+        return super().__call__(ratings, embeddings)

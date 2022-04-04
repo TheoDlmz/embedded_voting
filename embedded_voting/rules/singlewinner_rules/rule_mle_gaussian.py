@@ -56,14 +56,14 @@ class RuleMLEGaussian(Rule):
 
     >>> embeddings = EmbeddingsFromRatingsCovariance()(ratings)
     >>> election = RuleMLEGaussian()(ratings, embeddings)
-    >>> election.scores_
-    [12.90546983325631, 19.502265626617913]
+    >>> election.scores_  # doctest: +ELLIPSIS
+    [12.90546983325..., 19.502265626617...]
 
     Actually, this is the default behavior of `RuleMLEGaussian` when no embeddings are given:
 
     >>> election = RuleMLEGaussian()(ratings)
-    >>> election.scores_
-    [12.90546983325631, 19.502265626617913]
+    >>> election.scores_  # doctest: +ELLIPSIS
+    [12.90546983325..., 19.502265626617...]
 
     Unfortunately, this approximation is relevant if there are a large number of candidates (to have a good estimation
     of the covariance matrix) and if the noise is large compared to the differences between true values (so
@@ -71,7 +71,7 @@ class RuleMLEGaussian(Rule):
     example, the assumptions are not met, and the result is not even as good as the naive arithmetic mean:
 
     >>> np.linalg.norm(ratings_generator.ground_truth_ - election.scores_)  # Error estimation
-    0.839945516610202
+    0.839945516610...
     """
 
     def __init__(self, embeddings_from_ratings=None):

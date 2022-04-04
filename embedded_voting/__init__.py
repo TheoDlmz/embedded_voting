@@ -15,3 +15,4 @@ from embedded_voting.ratings_from_embeddings import *
 from embedded_voting.rules import *
 from embedded_voting.truth import *
 from embedded_voting.utils.plots import *
+from embedded_voting.utils.miscellaneous import *
