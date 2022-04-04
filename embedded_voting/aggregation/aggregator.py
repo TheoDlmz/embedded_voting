@@ -9,6 +9,7 @@ This file is part of Embedded Voting.
 from embedded_voting.rules.singlewinner_rules.rule_fast_nash import RuleFastNash
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation import EmbeddingsFromRatingsCorrelation
+from embedded_voting.utils.miscellaneous import normalize
 import numpy as np
 
 
@@ -39,15 +40,15 @@ class Aggregator:
     --------
     >>> aggregator = Aggregator()
     >>> results = aggregator([[7, 5, 9, 5, 1, 8], [7, 5, 9, 5, 2, 7], [6, 4, 2, 4, 4, 6], [3, 8, 1, 3, 7, 8]])
+    >>> results.embeddings_
+    Embeddings([[1.        , 0.99612985, 0.8720667 , 0.71189103],
+                [0.99612985, 1.        , 0.88247509, 0.7253134 ],
+                [0.8720667 , 0.88247509, 1.        , 0.89802651],
+                [0.71189103, 0.7253134 , 0.89802651, 1.        ]])
     >>> results.ranking_
-    [5, 1, 0, 3, 4, 2]
+    [5, 1, 0, 3, 2, 4]
     >>> results.winner_
     5
-    >>> results.embeddings_
-    Embeddings([[0.55388583, 0.55174221, 0.48302539, 0.39430635],
-                [0.54859116, 0.55072254, 0.48599893, 0.39944644],
-                [0.47676601, 0.48245636, 0.54670819, 0.49095845],
-                [0.42248019, 0.43044586, 0.5329445 , 0.59346188]])
     >>> results = aggregator([[2, 4, 8], [9, 2, 1], [0, 2, 5], [4, 5, 3]], train=True)
     >>> results.ranking_
     [2, 0, 1]
@@ -60,7 +61,7 @@ class Aggregator:
         self.embeddings = None
         self.ratings_history = None
         if embeddings_from_ratings is None:
-            self.embeddings_from_ratings = EmbeddingsFromRatingsCorrelation()
+            self.embeddings_from_ratings = EmbeddingsFromRatingsCorrelation(preprocess_ratings=normalize)
         else:
             self.embeddings_from_ratings = embeddings_from_ratings
         self.default_train = default_train

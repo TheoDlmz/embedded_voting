@@ -3,6 +3,7 @@ from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_correlation
 from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.utils.cached import cached_property
+from embedded_voting.utils.miscellaneous import normalize
 
 
 class RuleFast(Rule):
@@ -32,7 +33,7 @@ class RuleFast(Rule):
 
     """
     def __init__(self, f=None, aggregation_rule=np.prod):
-        super().__init__(embeddings_from_ratings=EmbeddingsFromRatingsCorrelation())
+        super().__init__(embeddings_from_ratings=EmbeddingsFromRatingsCorrelation(preprocess_ratings=normalize))
         self.aggregation_rule = aggregation_rule
         if f is None:
             f = lambda x: np.sqrt(np.maximum(0, x/np.linalg.norm(x)))
@@ -47,7 +48,7 @@ class RuleFast(Rule):
     def n_sing_val_(self):
         """int: The number of singular values we want to consider when computing the score
         of some candidate."""
-        return self.embeddings_.n_sing_val_
+        return self.embeddings_.n_sing_val
 
     def _score_(self, candidate):
         correlations = np.array(self.embeddings_).copy()

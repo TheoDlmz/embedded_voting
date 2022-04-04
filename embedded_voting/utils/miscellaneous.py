@@ -31,8 +31,39 @@ def normalize(x):
     >>> my_vector = [0, 1, 2]
     >>> normalize(my_vector)
     array([0.        , 0.4472136 , 0.89442719])
+
+    If `x` is null, then `x` is returned (only case where the result has not a norm of 1):
+
+    >>> my_vector = [0, 0, 0]
+    >>> normalize(my_vector)
+    array([0, 0, 0])
     """
-    return x / np.linalg.norm(x)
+    norm = np.linalg.norm(x)
+    if norm == 0:
+        return np.array(x)
+    return x / norm
+
+
+def center_and_normalize(x):
+    """
+    Center and normalize the input vector.
+
+    Parameters
+    ----------
+    x : np.ndarray or list
+
+    Returns
+    -------
+    np.ndarray
+        `x` minus its mean. Then the result is normalized (divided by its norm).
+
+    Examples
+    --------
+    >>> my_vector = [0, 1, 2]
+    >>> center_and_normalize(my_vector)
+    array([-0.70710678,  0.        ,  0.70710678])
+    """
+    return normalize(x - np.mean(x))
 
 
 def max_angular_dilatation_factor(vector, center):

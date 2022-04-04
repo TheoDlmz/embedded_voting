@@ -20,7 +20,7 @@ class RuleFastSum(RuleFast):
     >>> ratings = np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]])
     >>> election = RuleFastSum()(ratings)
     >>> election.ranking_
-    [0, 2, 1]
+    [0, 1, 2]
     >>> election.winner_
     0
 
