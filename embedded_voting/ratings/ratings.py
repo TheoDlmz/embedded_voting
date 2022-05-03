@@ -8,22 +8,23 @@ This file is part of Embedded Voting.
 import numpy as np
 
 
+# noinspection PyUnresolvedReferences
 class Ratings(np.ndarray):
     """
-    This class is a simple class that contains information about the ratings of voters in a given election
+    Ratings of the voters in a given election.
 
     Parameters
     ----------
     ratings: list, np.ndarray or Ratings
-        The ratings given by each voter to each candidate
+        The ratings given by each voter to each candidate.
 
     Attributes
     ----------
     n_voters: int
-        The number of voters
+        The number of voters.
 
     n_candidates: int
-        The number of candidates
+        The number of candidates.
 
     Examples
     --------
