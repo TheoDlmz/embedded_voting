@@ -1,7 +1,4 @@
 """
-Copyright Théo Delemazure
-theo.delemazure@ens.fr
-
 This file is part of Embedded Voting.
 """
 import numpy as np

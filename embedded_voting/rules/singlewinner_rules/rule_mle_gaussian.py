@@ -3,6 +3,7 @@ from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_covariance 
 from embedded_voting.ratings.ratings_generator_epistemic_multivariate import RatingsGeneratorEpistemicMultivariate
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.utils.cached import cached_property
+from embedded_voting.utils.miscellaneous import clean_zeros, pseudo_inverse_scalar
 
 
 class RuleMLEGaussian(Rule):
@@ -74,23 +75,36 @@ class RuleMLEGaussian(Rule):
     0.839945516610...
     """
 
-    def __init__(self, embeddings_from_ratings=None):
+    def __init__(self, embeddings_from_ratings=None, tol=1e-6):
+        self.tol = tol
         if embeddings_from_ratings is None:
             embeddings_from_ratings = EmbeddingsFromRatingsCovariance()
         super().__init__(score_components=1, embeddings_from_ratings=embeddings_from_ratings)
 
     @cached_property
     def pinv_covariance_(self):
-        return np.array(np.linalg.pinv(self.embeddings_))
+        tol = self.tol
+        n, m = self.embeddings_.shape
+        min_d = min(n, m)
+        u, s, v = np.linalg.svd(self.embeddings_)
+        clean_zeros(s, tol=tol)
+        dia = np.zeros((m, n))
+        dia[:min_d, :min_d] = np.diag([pseudo_inverse_scalar(e) for e in s])
+        inverse = v.T @ dia @ u.T
+        clean_zeros(inverse, tol=tol)
+        return inverse
+        # print(np.array(np.linalg.pinv(self.embeddings_)))
+        # print(np.array(np.linalg.pinv(self.embeddings_)).sum(axis=0))
+        # return np.array(np.linalg.pinv(self.embeddings_))
 
     @cached_property
     def weights_(self):
         return self.pinv_covariance_.sum(axis=0)
 
-    @cached_property
-    def weights_normalized_(self):
-        # TODO: see what to do if the sum is 0.
-        return self.weights_ / self.weights_.sum()
+    # @cached_property
+    # def weights_normalized_(self):
+    #     # TODO: see what to do if the sum is 0.
+    #     return self.weights_ / self.weights_.sum()
 
     def _score_(self, candidate):
-        return self.ratings_.candidate_ratings(candidate) @ self.weights_normalized_
+        return self.ratings_.candidate_ratings(candidate) @ self.weights_

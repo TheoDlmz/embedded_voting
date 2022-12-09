@@ -18,7 +18,9 @@ from embedded_voting.rules.singlewinner_rules.rule_positional_borda import RuleP
 from embedded_voting.rules.singlewinner_rules.rule_positional_k_approval import RulePositionalKApproval
 from embedded_voting.rules.singlewinner_rules.rule_positional_plurality import RulePositionalPlurality
 from embedded_voting.rules.singlewinner_rules.rule_positional_veto import RulePositionalVeto
-from embedded_voting.rules.singlewinner_rules.rule_product_ratings import RuleProductRatings
+from embedded_voting.rules.singlewinner_rules.rule_approval_product import RuleApprovalProduct
+from embedded_voting.rules.singlewinner_rules.rule_approval_sum import RuleApprovalSum
+from embedded_voting.rules.singlewinner_rules.rule_approval_random import RuleApprovalRandom
 from embedded_voting.rules.singlewinner_rules.rule_sum_ratings import RuleSumRatings
 from embedded_voting.rules.singlewinner_rules.rule_svd import RuleSVD
 from embedded_voting.rules.singlewinner_rules.rule_svd_log import RuleSVDLog
@@ -27,3 +29,6 @@ from embedded_voting.rules.singlewinner_rules.rule_svd_min import RuleSVDMin
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 from embedded_voting.rules.singlewinner_rules.rule_svd_sum import RuleSVDSum
 from embedded_voting.rules.singlewinner_rules.rule_zonotope import RuleZonotope
+from embedded_voting.rules.singlewinner_rules.rule_cut import RuleCut
+from embedded_voting.rules.singlewinner_rules.rule_ratings_history import RuleRatingsHistory
+from embedded_voting.rules.singlewinner_rules.rule_model_aware import RuleModelAware

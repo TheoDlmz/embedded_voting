@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Copyright Théo Delemazure
-theo.delemazure@ens.fr
-
 This file is part of Embedded Voting.
 """
 
@@ -263,3 +260,54 @@ def singular_values_short(matrix):
     # some of them are computed as very small negative values. Hence the np.maximum().
 
     return np.sort(np.sqrt(eigenvalues))[::-1]
+
+
+def pseudo_inverse_scalar(x):
+    """
+    Parameters
+    ----------
+    x: :class:`float`
+
+    Returns
+    -------
+    :class:`float`
+        Inverse of x if it is not 0.
+
+    Examples
+    --------
+
+    >>> pseudo_inverse_scalar(2.0)
+    0.5
+    >>> pseudo_inverse_scalar(0)
+    0.0
+    """
+    return 0.0 if x == 0 else 1 / x
+
+
+
+def clean_zeros(matrix, tol=1e-10):
+    """
+    Replace in-place all small values of a matrix by 0.
+
+    Parameters
+    ----------
+    matrix: :class:`~numpy.ndarray`
+        Matrix to clean.
+    tol: :class:`float`, optional
+        Threshold. All entries with absolute value lower than `tol` are put to zero.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+
+    >>> import numpy as np
+    >>> mat = np.array([[1e-12, -.3], [.8, -1e-13]])
+    >>> clean_zeros(mat)
+    >>> mat # doctest: +NORMALIZE_WHITESPACE
+    array([[ 0. , -0.3],
+           [ 0.8,  0. ]])
+    """
+    matrix[abs(matrix[:]) < tol] = 0

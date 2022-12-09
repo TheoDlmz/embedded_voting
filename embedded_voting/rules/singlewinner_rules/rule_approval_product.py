@@ -3,9 +3,10 @@ from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.ratings.ratings import Ratings
 
 
-class RuleProductRatings(Rule):
+class RuleApprovalProduct(Rule):
     """
-    Voting rule in which the score of a candidate is the product of her ratings.
+    Voting rule in which the score of a candidate is the number of approval (vote greater than 0)
+    that it gets. Ties are broken by the product of the positive ratings.
 
     More precisely, her score is a tuple whose components are:
 
@@ -19,7 +20,7 @@ class RuleProductRatings(Rule):
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
-    >>> election = RuleProductRatings()(ratings)
+    >>> election = RuleApprovalProduct()(ratings)
     >>> election.scores_
     [(3, 0.06999999999999999), (2, 0.6), (3, 0.048)]
     >>> election.ranking_

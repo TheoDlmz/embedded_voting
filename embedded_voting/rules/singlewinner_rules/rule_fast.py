@@ -41,7 +41,10 @@ class RuleFast(Rule):
             embeddings_from_ratings = EmbeddingsFromRatingsCorrelation(preprocess_ratings=center_and_normalize)
         if f is None:
             def f(ratings_v, history_mean, history_std):
-                return np.sqrt(np.maximum(0, 2 + (ratings_v - history_mean) / history_std))
+                if ratings_v.sum() == 0:
+                    return ratings_v
+                else:
+                    return np.sqrt(np.maximum(0, 2 + (ratings_v - history_mean) / history_std))
         super().__init__(embeddings_from_ratings=embeddings_from_ratings)
         self.f = f
         self.aggregation_rule = aggregation_rule
@@ -63,8 +66,10 @@ class RuleFast(Rule):
     def _score_(self, candidate):
         m_c_dot_m_c_t = np.array(self.embeddings_) * np.outer(self.modified_ratings_[:, candidate],
                                                               self.modified_ratings_[:, candidate])
+
         s = np.linalg.eigvals(m_c_dot_m_c_t)
         s = np.maximum(s, 0)
         s = np.sqrt(s)
         s = np.sort(s)[::-1]
+        #print(candidate, s, self.embeddings_.n_sing_val)
         return self.aggregation_rule(s[:self.embeddings_.n_sing_val])

@@ -2,7 +2,7 @@ from embedded_voting.aggregation.aggregator import Aggregator
 from embedded_voting.rules.singlewinner_rules.rule_fast_nash import RuleFastNash
 from embedded_voting.rules.singlewinner_rules.rule_fast_sum import RuleFastSum
 from embedded_voting.rules.singlewinner_rules.rule_sum_ratings import RuleSumRatings
-from embedded_voting.rules.singlewinner_rules.rule_product_ratings import RuleProductRatings
+from embedded_voting.rules.singlewinner_rules.rule_approval_product import RuleApprovalProduct
 from embedded_voting.rules.singlewinner_rules.rule_mle_gaussian import RuleMLEGaussian
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings_covariance import EmbeddingsFromRatingsCovariance
 
@@ -24,7 +24,7 @@ class AggregatorSumRatings(Aggregator):
 
 class AggregatorProductRatings(Aggregator):
     def __init__(self):
-        super().__init__(rule=RuleProductRatings(), default_train=False, name="RuleProductRatings")
+        super().__init__(rule=RuleApprovalProduct(), default_train=False, name="RuleProductRatings")
 
 
 class AggregatorMLEGaussian(Aggregator):

@@ -3,6 +3,7 @@ from embedded_voting.ratings.ratings import Ratings
 from embedded_voting.embeddings.embeddings_correlation import EmbeddingsCorrelation
 from embedded_voting.embeddings_from_ratings.embeddings_from_ratings import EmbeddingsFromRatings
 from embedded_voting.utils.miscellaneous import normalize, center_and_normalize
+from sklearn.decomposition import PCA
 
 
 class EmbeddingsFromRatingsCorrelation(EmbeddingsFromRatings):
@@ -50,8 +51,9 @@ class EmbeddingsFromRatingsCorrelation(EmbeddingsFromRatings):
     >>> embeddings.n_sing_val
     0
     """
-    def __init__(self, preprocess_ratings=None):
+    def __init__(self, preprocess_ratings=None, svd_factor=0.95):
         super().__init__()
+        self.svd_factor = svd_factor
         self.preprocess_ratings = preprocess_ratings
 
     def __call__(self, ratings):
@@ -64,14 +66,38 @@ class EmbeddingsFromRatingsCorrelation(EmbeddingsFromRatings):
         u, s, v = np.linalg.svd(ratings_preprocessed)
         s = np.sqrt(s)
         s_sum = s.sum()
-        if s_sum == 0:
-            n_v = 0
+        if self.svd_factor == "pca":
+            pca_sk = PCA(n_components='mle')
+            if ratings_preprocessed.shape[0] > ratings_preprocessed.shape[1]:
+                pca_sk.fit(ratings_preprocessed)
+            else:
+                pca_sk.fit(ratings_preprocessed.T)
+            n_v = pca_sk.n_components_
         else:
-            s /= s_sum
-            n_v = 0
-            for s_e in s:
-                if s_e >= max(1 / ratings.n_voters, 1 / ratings.n_candidates):
-                    n_v += 1
+            if self.svd_factor == "div":
+                add_div = 1
+                svd_factor = 1
+            else:
+                add_div = 0
+                svd_factor = self.svd_factor
+            if s_sum == 0:
+                n_v = 0
+            else:
+                s /= s_sum
+                n_v = 0
+                for s_e in s:
+                    if s_e >= svd_factor*max(1 / (ratings.n_voters+add_div), 1 / (ratings.n_candidates+add_div)):
+                        n_v += 1
+
+        # print(ratings.n_voters, ratings.n_candidates,
+        #       max(1 / (ratings.n_voters+1), 1 / (ratings.n_candidates+1)),
+        #       max(1 / (ratings.n_voters + 0), 1 / (ratings.n_candidates + 0)))
+        #
+        # pca_sk = PCA(n_components='mle')
+        # pca_sk.fit(ratings_preprocessed.T)
+        # nv_sklearn = pca_sk.n_components_
+        # print("sklearn :",nv_sklearn)
+        # print(s, n_v)
 
         embeddings = EmbeddingsCorrelation(
             positions=np.dot(ratings_preprocessed, ratings_preprocessed.T),

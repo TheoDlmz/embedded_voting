@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Copyright Théo Delemazure
-theo.delemazure@ens.fr
-
 This file is part of Embedded Voting.
 """
 import ternary

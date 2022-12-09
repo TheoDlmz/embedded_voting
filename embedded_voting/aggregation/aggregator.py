@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Copyright Théo Delemazure
-theo.delemazure@ens.fr
-
 This file is part of Embedded Voting.
 """
 
@@ -57,7 +54,7 @@ class Aggregator:
     [2, 0, 1]
     """
 
-    def __init__(self, rule=None, embeddings_from_ratings=None, default_train=True, name="aggregator"):
+    def __init__(self, rule=None, embeddings_from_ratings=None, default_train=True, name="aggregator", default_add=True):
         if rule is None:
             rule = RuleFastNash()
         if embeddings_from_ratings is None:
@@ -66,6 +63,7 @@ class Aggregator:
         self.rule = rule
         self.embeddings_from_ratings = embeddings_from_ratings
         self.default_train = default_train
+        self.default_add = default_add
         self.name = name
         # Variables
         self.ratings_history = None
@@ -91,7 +89,7 @@ class Aggregator:
         ratings = Ratings(ratings)
         if self.ratings_history is None:
             self.ratings_history = ratings
-        else:
+        elif self.default_add:
             self.ratings_history = np.concatenate([self.ratings_history, ratings], axis=1)
         if self.embeddings is None or train or (train is None and self.default_train):
             self.train()
