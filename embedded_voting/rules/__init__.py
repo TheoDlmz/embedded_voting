@@ -32,3 +32,4 @@ from embedded_voting.rules.singlewinner_rules.rule_zonotope import RuleZonotope
 from embedded_voting.rules.singlewinner_rules.rule_cut import RuleCut
 from embedded_voting.rules.singlewinner_rules.rule_ratings_history import RuleRatingsHistory
 from embedded_voting.rules.singlewinner_rules.rule_model_aware import RuleModelAware
+from embedded_voting.rules.singlewinner_rules.rule_shift_product import RuleShiftProduct

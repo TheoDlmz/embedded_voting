@@ -11,8 +11,8 @@ class RatingsGeneratorEpistemicGroupsMixFree(RatingsGeneratorEpistemicGroups):
                  group_noise=1,
                  independent_noise=0,
                  truth_generator=None,
-                 center_gap=100,
-                 max_scale=1,
+                 #center_gap=100,
+                 #max_scale=1,
                  group_noise_f=None,
                  independent_noise_f=None):
         super().__init__(truth_generator=truth_generator, groups_sizes=groups_sizes)
@@ -33,8 +33,8 @@ class RatingsGeneratorEpistemicGroupsMixFree(RatingsGeneratorEpistemicGroups):
             independent_noise_f = np.random.normal
         self.independent_noise_f = independent_noise_f
 
-        self.centers = (np.random.rand(self.n_features)-0.5)*center_gap
-        self.scales = 1 + np.random.rand(self.n_features)*(max_scale-1)
+        #self.centers = (np.random.rand(self.n_features)-0.5)*center_gap
+        #self.scales = 1 + np.random.rand(self.n_features)*(max_scale-1)
 
         noise_rescale_groups = self.groups_features.sum(1)/np.linalg.norm(self.groups_features, axis=1)
         self.noise_rescale = np.zeros(self.n_voters)
@@ -47,7 +47,8 @@ class RatingsGeneratorEpistemicGroupsMixFree(RatingsGeneratorEpistemicGroups):
         self.ground_truth_ = self.truth_generator(n_candidates=n_candidates)
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
-            noise_features = self.centers + self.group_noise_f(size=self.n_features)*self.group_noise*self.scales
+            #noise_features = self.centers + self.group_noise_f(size=self.n_features)*self.group_noise*self.scales
+            noise_features = self.group_noise_f(size=self.n_features)*self.group_noise
             v_noise_dependent = (
                 self.m_voter_group
                 @ self.groups_features_normalized

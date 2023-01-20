@@ -47,8 +47,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Embedded Voting'
-copyright = "2020, Théo Delemazure"
-author = "Théo Delemazure"
+copyright = "2020, Anonymous Authors"
+author = "Anonymous Authors"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -130,7 +130,7 @@ latex_elements = {
 latex_documents = [
     (master_doc, 'embedded_voting.tex',
      'Embedded Voting Documentation',
-     'Théo Delemazure', 'manual'),
+     'Anonymous Authors', 'manual'),
 ]
 
 
