@@ -51,7 +51,7 @@ class Aggregator:
     5
     >>> results = aggregator([[2, 4, 8], [9, 2, 1], [0, 2, 5], [4, 5, 3]])
     >>> results.ranking_
-    [2, 0, 1]
+    [2, 1, 0]
     """
 
     def __init__(self, rule=None, embeddings_from_ratings=None, default_train=True, name="aggregator", default_add=True):

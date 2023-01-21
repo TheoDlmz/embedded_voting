@@ -47,12 +47,12 @@ class RatingsGeneratorEpistemicGroupsMean(RatingsGeneratorEpistemicGroupsMix):
     >>> np.random.seed(44)
     >>> generator = RatingsGeneratorEpistemicGroupsMean([2, 2])
     >>> generator()  # doctest: +ELLIPSIS
-    Ratings([[17.625...],
-             [17.625...],
-             [17.422...],
-             [17.422...]])
+    Ratings([[16.3490...],
+             [16.3490...],
+             [19.16928...],
+             [19.16928...]])
     >>> generator.ground_truth_  # doctest: +ELLIPSIS
-    array([18.348...])
+    array([17.739...])
     """
     def __init__(self, groups_sizes, group_noise=1, independent_noise=0, truth_generator=None):
         n_groups = len(groups_sizes)

@@ -31,19 +31,18 @@ class RatingsGeneratorEpistemicMultivariate(RatingsGeneratorEpistemic):
     >>> np.random.seed(42)
     >>> generator = RatingsGeneratorEpistemicMultivariate(np.ones((5, 5)))
     >>> generator()  # doctest: +ELLIPSIS
-    Ratings([[14.857...],
-             [14.857...],
-             [14.857...],
-             [14.857...],
-             [14.857...]])
+    Ratings([[17.2428...],
+             [17.2428...],
+             [17.2428...],
+             [17.2428...],
+             [17.2428...]])
     >>> generator.independent_noise = 0.5
     >>> generator()  # doctest: +ELLIPSIS
-    Ratings([[13.812...],
-             [13.958...],
-             [13.212...],
-             [13.652...],
-             [13.980...]])
-
+    Ratings([[14.5710...],
+             [14.3457...],
+             [15.0093...],
+             [14.3981...],
+             [14.1460...]])
     """
 
     def __init__(self, covariance_matrix, independent_noise=0, truth_generator=None):

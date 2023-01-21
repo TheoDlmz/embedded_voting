@@ -1,12 +1,35 @@
 import numpy as np
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.utils.cached import cached_property
+from embedded_voting.ratings.ratings import Ratings
 
 
 class RuleModelAware(Rule):
     """
-    A rule that is aware of settings of the ratings generator (i.e. the algorithms) and use the maximum likelihood
+    A rule that is know the noise parameters of the model and use the maximum likelihood
     to select the best candidate.
+
+    Parameters
+    ----------
+    groups_sizes : list of int
+        The number of voters in each group.
+    groups_features : np.ndarray of shape (n_groups, n_features)
+        The features of each group.
+    group_noise : float
+        The value of the feature noise.
+    independent_noise : float
+        The value of the distinct noise.
+
+    Examples
+    --------
+    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
+    >>> election = RuleModelAware([2, 1], [[1, 0], [0, 1]], group_noise=1, independent_noise=1)(ratings)
+    >>> election.ranking_
+    [1, 2, 0]
+    >>> election.scores_
+    [0.5, 0.7, 0.5666666...]
+    >>> election.winner_
+    1
     """
 
     def __init__(self,

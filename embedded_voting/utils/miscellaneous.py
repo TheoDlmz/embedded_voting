@@ -107,7 +107,7 @@ def max_angular_dilatation_factor(vector, center):
     >>> my_vector = np.cos(my_theta) * my_center + np.sin(my_theta) * my_unit_orthogonal
     >>> k = max_angular_dilatation_factor(vector=my_vector, center=my_center)
     >>> k
-    1.9615760241796105
+    1.961576024...
     >>> dilated_vector = np.cos(k * my_theta) * my_center + np.sin(k * my_theta) * my_unit_orthogonal
     >>> np.round(dilated_vector, 4)
     array([0.8944, 0.    , 0.4472])

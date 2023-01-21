@@ -29,7 +29,6 @@ from embedded_voting.rules.singlewinner_rules.rule_svd_min import RuleSVDMin
 from embedded_voting.rules.singlewinner_rules.rule_svd_nash import RuleSVDNash
 from embedded_voting.rules.singlewinner_rules.rule_svd_sum import RuleSVDSum
 from embedded_voting.rules.singlewinner_rules.rule_zonotope import RuleZonotope
-from embedded_voting.rules.singlewinner_rules.rule_cut import RuleCut
 from embedded_voting.rules.singlewinner_rules.rule_ratings_history import RuleRatingsHistory
 from embedded_voting.rules.singlewinner_rules.rule_model_aware import RuleModelAware
 from embedded_voting.rules.singlewinner_rules.rule_shift_product import RuleShiftProduct

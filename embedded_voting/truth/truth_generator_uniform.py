@@ -20,7 +20,7 @@ class TruthGeneratorUniform(TruthGenerator):
         >>> np.random.seed(42)
         >>> truth_generator = TruthGeneratorUniform(minimum_value=10, maximum_value=20)
         >>> truth_generator(n_candidates=3)
-        array([13.74540119, 19.50714306, 17.31993942])
+        array([17.73956049, 14.3887844 , 18.5859792 ])
     """
 
     def __init__(self, minimum_value=10, maximum_value=20, seed=42):

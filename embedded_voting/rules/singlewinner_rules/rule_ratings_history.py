@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-This file is part of Embedded Voting.
-"""
 import numpy as np
 from embedded_voting.rules.singlewinner_rules.rule import Rule
 from embedded_voting.ratings.ratings import Ratings
@@ -15,7 +11,19 @@ from embedded_voting.utils.miscellaneous import center_and_normalize
 class RuleRatingsHistory(Rule):
     """
     Rule that use the ratings history to improve the embeddings, in particular the quality of the mean
-    and deviation of ratings for every voter.
+    and deviation of ratings for every voter. The original rule is then applied to the modified ratings.
+
+    Parameters
+    ----------
+    rule : Rule
+        The rule to apply to the modified ratings.
+    embeddings_from_ratings : EmbeddingsFromRatings
+        The function to convert ratings to embeddings.
+    f : callable
+        The function to apply to the ratings. It takes as input the ratings, the mean and the standard deviation of
+        the ratings in the historic. It returns the modified ratings.
+        By default, it is set to `f(ratings_v, history_mean, history_std) = np.sqrt(np.maximum(0, (ratings_v - history_mean) / history_std))`.
+
     """
     def __init__(self, rule, embeddings_from_ratings=None, f=None):
         if embeddings_from_ratings is None:

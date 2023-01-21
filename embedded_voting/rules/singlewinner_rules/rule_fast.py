@@ -71,5 +71,4 @@ class RuleFast(Rule):
         s = np.maximum(s, 0)
         s = np.sqrt(s)
         s = np.sort(s)[::-1]
-        #print(candidate, s, self.embeddings_.n_sing_val)
         return self.aggregation_rule(s[:self.embeddings_.n_sing_val])
