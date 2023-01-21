@@ -8,9 +8,11 @@ Single-Winner voting rules
 
    general
    trivial
+   approval
    geometric
    svd
    features
    fast
    mle
    ordinal
+   history

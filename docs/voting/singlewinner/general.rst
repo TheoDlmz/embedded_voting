@@ -2,6 +2,6 @@
 General Class
 ===============
 
-.. autoclass:: embedded_voting.ScoringRule
+.. autoclass:: embedded_voting.Rule
     :members:
 

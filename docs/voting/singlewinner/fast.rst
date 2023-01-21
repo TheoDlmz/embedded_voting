@@ -5,23 +5,23 @@ Fast Rules
 Fast
 ____
 
-.. autoclass:: embedded_voting.Fast
+.. autoclass:: embedded_voting.RuleFast
     :members:
 
 
 Variants
 ________
 
-.. autoclass:: embedded_voting.FastNash
+.. autoclass:: embedded_voting.RuleFastNash
     :members:
 
-.. autoclass:: embedded_voting.FastSum
+.. autoclass:: embedded_voting.RuleFastSum
     :members:
 
-.. autoclass:: embedded_voting.FastMin
+.. autoclass:: embedded_voting.RuleFastMin
     :members:
 
-.. autoclass:: embedded_voting.FastLog
+.. autoclass:: embedded_voting.RuleFastLog
     :members:
 
 
