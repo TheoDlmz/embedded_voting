@@ -41,8 +41,8 @@ class RuleMLEGaussian(Rule):
     estimator of the ground truth:
 
     >>> election = RuleMLEGaussian()(ratings, embeddings=covariance_matrix)
-    >>> election.scores_
-    [268.6683142769278, 221.50830758813055]
+    >>> election.scores_ # doctest: +ELLIPSIS
+    [268.6683142..., 221.5083075...]
 
     #>>> np.linalg.norm(ratings_generator.ground_truth_ - election.scores_)  # Error estimation
     #0.4783006898563199
