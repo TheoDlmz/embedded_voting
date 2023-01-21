@@ -5,11 +5,11 @@ Geometric Rules
 Zonotope
 __________
 
-.. autoclass:: embedded_voting.ZonotopeRule
+.. autoclass:: embedded_voting.RuleZonotope
     :members:
 
 MaxCube
 ________
 
-.. autoclass:: embedded_voting.MaxCubeRule
+.. autoclass:: embedded_voting.RuleMaxParallelepiped
     :members:

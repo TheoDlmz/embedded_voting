@@ -1,2 +1,4 @@
 from embedded_voting.truth.truth_generator import TruthGenerator
 from embedded_voting.truth.truth_generator_uniform import TruthGeneratorUniform
+from embedded_voting.truth.truth_generator_normal import TruthGeneratorNormal
+from embedded_voting.truth.truth_generator_general import TruthGeneratorGeneral

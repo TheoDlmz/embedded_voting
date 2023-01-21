@@ -52,25 +52,25 @@ class RatingsGeneratorEpistemicGroupsMix(RatingsGeneratorEpistemicGroups):
     >>> features = [[1, 0], [0, 1], [1, 1]]
     >>> generator = RatingsGeneratorEpistemicGroupsMix([2, 2, 2], features)
     >>> generator()  # doctest: +ELLIPSIS
-    Ratings([[14.039...],
-             [14.039...],
-             [14.316...],
-             [14.316...],
-             [14.177...],
-             [14.177...]])
+    Ratings([[18.1960...],
+             [18.1960...],
+             [18.3058...],
+             [18.3058...],
+             [18.2509...],
+             [18.2509...]])
     >>> generator.ground_truth_  # doctest: +ELLIPSIS
-    array([13.745...])
+    array([17.7395...])
 
     >>> np.random.seed(42)
     >>> features = [[1, 0, 1, 1], [0, 1, 0, 1], [1, 1, 0, 0]]
     >>> generator = RatingsGeneratorEpistemicGroupsMix([2, 2, 2], features)
-    >>> generator()
-    Ratings([[13.20254261],
-             [13.20254261],
-             [13.32010606],
-             [13.32010606],
-             [13.27781234],
-             [13.27781234]])
+    >>> generator() # doctest: +ELLIPSIS
+    Ratings([[17.951...],
+             [17.951...],
+             [17.737...],
+             [17.737...],
+             [18.438...],
+             [18.438...]])
     """
     def __init__(self, groups_sizes, groups_features, group_noise=1, independent_noise=0, truth_generator=None):
         super().__init__(truth_generator=truth_generator, groups_sizes=groups_sizes)

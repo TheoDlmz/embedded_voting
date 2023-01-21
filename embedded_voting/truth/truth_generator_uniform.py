@@ -20,15 +20,16 @@ class TruthGeneratorUniform(TruthGenerator):
         >>> np.random.seed(42)
         >>> truth_generator = TruthGeneratorUniform(minimum_value=10, maximum_value=20)
         >>> truth_generator(n_candidates=3)
-        array([13.74540119, 19.50714306, 17.31993942])
+        array([17.73956049, 14.3887844 , 18.5859792 ])
     """
 
-    def __init__(self, minimum_value=10, maximum_value=20):
+    def __init__(self, minimum_value=10, maximum_value=20, seed=42):
         self.minimum_value = minimum_value
         self.maximum_value = maximum_value
+        self.rng = np.random.default_rng(seed)
 
     def __call__(self, n_candidates):
         return (
             self.minimum_value
-            + np.random.rand(n_candidates) * (self.maximum_value - self.minimum_value)
+            + self.rng.random(n_candidates) * (self.maximum_value - self.minimum_value)
         )

@@ -5,25 +5,25 @@ SVD Rules
 General SVD
 ______________
 
-.. autoclass:: embedded_voting.SVDRule
+.. autoclass:: embedded_voting.RuleSVD
     :members:
 
 Special cases
 _______________
 
-.. autoclass:: embedded_voting.SVDSum
+.. autoclass:: embedded_voting.RuleSVDSum
     :members:
 
-.. autoclass:: embedded_voting.SVDNash
+.. autoclass:: embedded_voting.RuleSVDNash
     :members:
 
-.. autoclass:: embedded_voting.SVDMin
+.. autoclass:: embedded_voting.RuleSVDMin
     :members:
 
-.. autoclass:: embedded_voting.SVDMax
+.. autoclass:: embedded_voting.RuleSVDMax
     :members:
 
-.. autoclass:: embedded_voting.SVDLog
+.. autoclass:: embedded_voting.RuleSVDLog
     :members:
 
 

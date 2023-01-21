@@ -2,5 +2,5 @@
 Features Rule
 =============
 
-.. autoclass:: embedded_voting.FeaturesRule
+.. autoclass:: embedded_voting.RuleFeatures
     :members:

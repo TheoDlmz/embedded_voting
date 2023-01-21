@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Copyright Théo Delemazure
-theo.delemazure@ens.fr
-
 This file is part of Embedded Voting.
 """
 from embedded_voting.ratings.ratings import Ratings
-
+import numpy as np
 
 class RatingsGenerator:
     """
@@ -34,3 +31,9 @@ class RatingsGenerator:
         Ratings
         """
         raise NotImplementedError
+
+    def save_scores(self, n_candidates, filename):
+        ratings = self(n_candidates)
+        ratings.tofile('%s.csv' % filename, sep=',')
+
+

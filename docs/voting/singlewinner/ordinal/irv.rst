@@ -2,5 +2,5 @@
 Instant Runoff voting
 =====================
 
-.. autoclass:: embedded_voting.InstantRunoffExtension
+.. autoclass:: embedded_voting.RuleInstantRunoff
     :members:

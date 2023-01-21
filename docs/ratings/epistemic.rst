@@ -26,3 +26,8 @@ Multivariate
 _______________
 .. autoclass:: embedded_voting.RatingsGeneratorEpistemicMultivariate
     :members:
+
+Grouped Mix Free
+_______________
+.. autoclass:: embedded_voting.RatingsGeneratorEpistemicGroupsMixFree
+    :members:

@@ -1,9 +1,8 @@
 """Top-level package for Embedded Voting."""
 
-__author__ = """Théo Delemazure"""
-__email__ = 'theo.delemazure@ens.fr'
-__version__ = '0.1.5'
-
+__author__ = """Anonymous Authors"""
+__email__ = 'anonymous@authors.edu'
+__version__ = '0.1.6'
 
 from embedded_voting.aggregation import *
 from embedded_voting.embeddings import *

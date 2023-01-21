@@ -39,12 +39,12 @@ class RatingsGeneratorEpistemicGroupsNoise(RatingsGeneratorEpistemicGroups):
     >>> np.random.seed(42)
     >>> generator = RatingsGeneratorEpistemicGroupsNoise([2, 2])
     >>> generator()  # doctest: +ELLIPSIS
-    Ratings([[14.0396...],
-             [14.8109...],
-             [13.4173...],
-             [13.4488...]])
+    Ratings([[18.196...],
+             [18.812...],
+             [17.652...],
+             [17.652...]])
     >>> generator.ground_truth_  # doctest: +ELLIPSIS
-    array([13.7454...])
+    array([17.739...])
     """
     def __init__(self, groups_sizes, group_noise=1, truth_generator=None):
         super().__init__(truth_generator=truth_generator, groups_sizes=groups_sizes)

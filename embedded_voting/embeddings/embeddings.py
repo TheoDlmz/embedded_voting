@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Copyright Théo Delemazure
-theo.delemazure@ens.fr
-
 This file is part of Embedded Voting.
 """
 from itertools import combinations
@@ -310,9 +307,9 @@ class Embeddings(np.ndarray):
                     [0.52981294, 0.66226618, 0.52981294]])
         >>> dilated_embeddings = embeddings.dilated_new()
         >>> np.round(dilated_embeddings, 4)
-        array([[ 1., -0.,  0.],
-               [ 0., -0.,  1.],
-               [ 0.,  1.,  0.]])
+        array([[1., 0., 0.],
+               [0., 0., 1.],
+               [0., 1., 0.]])
 
         >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True)
         >>> dilated_embeddings = embeddings.dilated_new()
@@ -424,9 +421,9 @@ class Embeddings(np.ndarray):
                     [0.5      , 0.8660254]])
         >>> new_embeddings = embeddings.recentered_and_dilated(approx=False)
         >>> np.round(new_embeddings, 4)
-        array([[ 1.    ,  0.    ],
-               [ 0.7071,  0.7071],
-               [-0.    ,  1.    ]])
+        array([[1.    , 0.    ],
+               [0.7071, 0.7071],
+               [0.    , 1.    ]])
         """
         return self.recentered(approx=approx).dilated_new(approx=approx)
 

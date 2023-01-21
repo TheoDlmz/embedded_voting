@@ -4,19 +4,19 @@ Positional scoring rules
 
 General class
 -------------
-.. autoclass:: embedded_voting.PositionalRuleExtension
+.. autoclass:: embedded_voting.RulePositional
     :members:
 
 Particular cases
 ----------------
-.. autoclass:: embedded_voting.PluralityExtension
+.. autoclass:: embedded_voting.RulePositionalPlurality
     :members:
 
-.. autoclass:: embedded_voting.VetoExtension
+.. autoclass:: embedded_voting.RulePositionalVeto
     :members:
 
-.. autoclass:: embedded_voting.KApprovalExtension
+.. autoclass:: embedded_voting.RulePositionalKApproval
     :members:
 
-.. autoclass:: embedded_voting.BordaExtension
+.. autoclass:: embedded_voting.RulePositionalBorda
     :members:
