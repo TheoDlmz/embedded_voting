@@ -89,15 +89,6 @@ class EmbeddingsFromRatingsCorrelation(EmbeddingsFromRatings):
                     if s_e >= svd_factor*max(1 / (ratings.n_voters+add_div), 1 / (ratings.n_candidates+add_div)):
                         n_v += 1
 
-        # print(ratings.n_voters, ratings.n_candidates,
-        #       max(1 / (ratings.n_voters+1), 1 / (ratings.n_candidates+1)),
-        #       max(1 / (ratings.n_voters + 0), 1 / (ratings.n_candidates + 0)))
-        #
-        # pca_sk = PCA(n_components='mle')
-        # pca_sk.fit(ratings_preprocessed.T)
-        # nv_sklearn = pca_sk.n_components_
-        # print("sklearn :",nv_sklearn)
-        # print(s, n_v)
 
         embeddings = EmbeddingsCorrelation(
             positions=np.dot(ratings_preprocessed, ratings_preprocessed.T),
