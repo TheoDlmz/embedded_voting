@@ -59,11 +59,11 @@ class RatingsGeneratorEpistemicGroupsMixFree(RatingsGeneratorEpistemicGroups):
     >>> generator = RatingsGeneratorEpistemicGroupsMixFree([2, 2, 2], features, group_noise_f=np.random.normal, independent_noise_f=np.random.normal)
     >>> generator()  # doctest: +ELLIPSIS
     Ratings([[18.23627...],
-            [18.23627...],
-            [17.60129...],
-            [17.60129...],
-            [17.99302...],
-            [17.99302...]])
+             [18.23627...],
+             [17.60129...],
+             [17.60129...],
+             [17.99302...],
+             [17.99302...]])
     >>> generator.ground_truth_  # doctest: +ELLIPSIS
     array([17.73956...])
     """
