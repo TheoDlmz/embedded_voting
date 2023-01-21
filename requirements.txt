@@ -5,7 +5,7 @@ matplotlib
 python-ternary
 nbsphinx
 IPython
-
+sklearn
 scikit-learn
 tqdm
 python-ternary
