@@ -208,8 +208,8 @@ class Embeddings(np.ndarray):
         >>> embeddings = Embeddings([[1, 0], [1, 1]], norm=False)
         >>> dilated_embeddings = embeddings.dilated_aux(center=np.array([1, 0]), k=2)
         >>> np.round(dilated_embeddings, 4)
-        array([[ 1.    ,  0.    ],
-               [-0.    ,  1.4142]])
+        array([[1.    , 0.    ],
+               [0.    , 1.4142]])
         """
         new_positions = np.zeros((self.n_voters, self.n_dim))
         for i in range(self.n_voters):
