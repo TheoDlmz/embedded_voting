@@ -207,9 +207,9 @@ class Embeddings(np.ndarray):
 
         >>> embeddings = Embeddings([[1, 0], [1, 1]], norm=False)
         >>> dilated_embeddings = embeddings.dilated_aux(center=np.array([1, 0]), k=2)
-        >>> np.round(dilated_embeddings, 4)
-        array([[ 1.    ,  0.    ],
-               [-0.    ,  1.4142]])
+        >>> np.abs(np.round(dilated_embeddings, 4)) # Abs for rounding errors
+        array([[1.    , 0.    ],
+               [0.    , 1.4142]])
         """
         new_positions = np.zeros((self.n_voters, self.n_dim))
         for i in range(self.n_voters):
@@ -306,14 +306,14 @@ class Embeddings(np.ndarray):
                     [0.52981294, 0.52981294, 0.66226618],
                     [0.52981294, 0.66226618, 0.52981294]])
         >>> dilated_embeddings = embeddings.dilated_new()
-        >>> np.round(dilated_embeddings, 4)
+        >>> np.abs(np.round(dilated_embeddings, 4))
         array([[1., 0., 0.],
                [0., 0., 1.],
                [0., 1., 0.]])
 
         >>> embeddings = Embeddings([[1, 0], [.7, .7]], norm=True)
         >>> dilated_embeddings = embeddings.dilated_new()
-        >>> np.round(dilated_embeddings, 4)
+        >>> np.abs(np.round(dilated_embeddings, 4))
         array([[1.    , 0.    ],
                [0.7071, 0.7071]])
 
@@ -420,7 +420,7 @@ class Embeddings(np.ndarray):
                     [0.8660254, 0.5      ],
                     [0.5      , 0.8660254]])
         >>> new_embeddings = embeddings.recentered_and_dilated(approx=False)
-        >>> np.round(new_embeddings, 4)
+        >>> np.abs(np.round(new_embeddings, 4))
         array([[1.    , 0.    ],
                [0.7071, 0.7071],
                [0.    , 1.    ]])
