@@ -32,10 +32,10 @@ class RuleMLEGaussian(Rule):
     array([17.73956049, 14.3887844 ])
     >>> ratings
     Ratings([[17.56232759, 14.51592899],
-            [16.82544972, 15.78818081],
-            [17.51952581, 14.44449175],
-            [17.34964888, 14.4010885 ],
-            [16.69480298, 14.9281998 ]])
+             [16.82544972, 15.78818081],
+             [17.51952581, 14.44449175],
+             [17.34964888, 14.4010885 ],
+             [16.69480298, 14.9281998 ]])
 
     If we know the covariance matrix of the noises, then `RuleMLEGaussian` is the maximum likelihood
     estimator of the ground truth:
