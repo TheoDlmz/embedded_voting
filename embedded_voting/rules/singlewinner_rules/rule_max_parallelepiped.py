@@ -19,6 +19,16 @@ class RuleMaxParallelepiped(Rule):
     maximize the volume of the parallelepiped associated to the submatrix keeping only these voters
     (cf. :func:`volume_parallelepiped`). The score of the candidate is then `(r, volume)`.
 
+    Parameters
+    ----------
+    score_components : int
+        The number of components in the aggregated
+        score of every candidate. If `> 1`, we
+        perform a lexical sort to obtain the ranking.
+    embeddings_from_ratings: EmbeddingsFromRatings
+        If no embeddings are specified in the call, this `EmbeddingsFromRatings` object is use to generate
+        the embeddings from the ratings. Default: `EmbeddingsFromRatingsIdentity()`.
+        
     Examples
     --------
     >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))
