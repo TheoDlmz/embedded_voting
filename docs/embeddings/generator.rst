@@ -13,5 +13,5 @@ _________________
 
 From correlations
 _________________
-.. autoclass:: embedded_voting.EmbeddingsCorrelations
+.. autoclass:: embedded_voting.EmbeddingsCorrelation
     :members:
