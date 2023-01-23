@@ -17,10 +17,6 @@ class RuleApprovalSum(Rule):
     
     Parameters
     ----------
-    score_components : int
-        The number of components in the aggregated
-        score of every candidate. If `> 1`, we
-        perform a lexical sort to obtain the ranking.
     embeddings_from_ratings: EmbeddingsFromRatings
         If no embeddings are specified in the call, this `EmbeddingsFromRatings` object is use to generate
         the embeddings from the ratings. Default: `EmbeddingsFromRatingsIdentity()`.
