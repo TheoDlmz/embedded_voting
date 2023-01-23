@@ -19,7 +19,7 @@ class EmbeddingsFromRatingsCorrelation(EmbeddingsFromRatings):
     Other attributes are computed and recorded:
 
     * `n_sing_val`: the number of relevant singular values when we compute the SVD.
-       This is based on the Principal Component Analysis (PCA).
+      This is based on the Principal Component Analysis (PCA).
     * `ratings_means`: the mean rating for each voter (without preprocessing).
     * `ratings_stds`: the standard deviation of the ratings for each voter (without preprocessing).
 

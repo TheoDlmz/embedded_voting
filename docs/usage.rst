@@ -7,7 +7,11 @@ To use Embedded Voting in a project::
     import embedded_voting as ev
 
 
-To see how to use this library, take a look at the tutorials :
+The following notebook will help you to get started with the library.
+
+* `Fast tutorial <https://embedded-voting.readthedocs.io/en/latest/notebooks/tutoagg.html>`_
+
+For more details, the following series of notebooks will guide you through the different aspects of the library:
 
 * `1. My first Profile <https://embedded-voting.readthedocs.io/en/latest/notebooks/profile.html>`_
 
@@ -15,7 +19,7 @@ This notebook cover the creation of a profile of voters with embeddings, and det
 functions you can use to build and display this profile.
 
 * `2. Run an election <https://embedded-voting.readthedocs.io/en/latest/notebooks/election.html>`_
-* `3. The rules in more details <https://embedded-voting.readthedocs.io/en/latest/notebooks/moving.html>`_
+* `3. Analysis of the voting rules <https://embedded-voting.readthedocs.io/en/latest/notebooks/moving.html>`_
 
 In these notebooks, you will learn how to run a single-winner election on a
 profile and what are the different scoring rules you can use.
@@ -34,8 +38,7 @@ the different rules and their ordinal extensions.
 
 In this notebook, you will learn how to run a multi-winner election on a profile of voters.
 
-* `7. Introduction to algorithms aggregation <https://embedded-voting.readthedocs.io/en/latest/notebooks/aggregation_intro.html>`_
-* `8. Analysis of algorithms aggregation <https://embedded-voting.readthedocs.io/en/latest/notebooks/aggregation_2.html>`_
+* `7. Algorithms aggregation <https://embedded-voting.readthedocs.io/en/latest/notebooks/onlinelearning.html>`_
 
-Finally, these notebooks show how profile with embedded voters can be used for the aggregation
+Finally, this notebook show how profile with embedded voters can be used for the aggregation
 of decision algorithms.

@@ -1,6 +1,6 @@
-==================================
-Correlated Ratings From Embeddings
-==================================
+===================================
+Embeddings From Ratings Correlation
+===================================
 
 
 .. autoclass:: embedded_voting.EmbeddingsFromRatingsCorrelation

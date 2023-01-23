@@ -8,6 +8,17 @@ class RuleShiftProduct(Rule):
     Voting rule in which the score of a candidate is the product of her ratings, shifted by 2, and clamped at 0.1.
 
     No embeddings are used for this rule.
+    
+    Parameters
+    ----------
+    score_components : int
+        The number of components in the aggregated
+        score of every candidate. If `> 1`, we
+        perform a lexical sort to obtain the ranking.
+    embeddings_from_ratings: EmbeddingsFromRatings
+        If no embeddings are specified in the call, this `EmbeddingsFromRatings` object is use to generate
+        the embeddings from the ratings. Default: `EmbeddingsFromRatingsIdentity()`.
+        
 
     Examples
     --------

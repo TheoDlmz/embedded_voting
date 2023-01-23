@@ -142,7 +142,7 @@ class MovingVoter:
         This function plot the evolution
         of the features of the candidates
         when the moving voters' embeddings
-        are changing. Only works for :class:`SVDMax` and :class:`RuleFeatures`.
+        are changing. Only works for :class:`RuleSVDMax` and :class:`RuleFeatures`.
 
         Parameters
         ----------

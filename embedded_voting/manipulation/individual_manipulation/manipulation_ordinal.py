@@ -16,6 +16,8 @@ class ManipulationOrdinal(Manipulation):
     ----------
     ratings : Profile
         The ratings of voters on which we do the analysis.
+    embeddings : Embeddings
+        The embeddings of the voters.
     rule_positional : RulePositional
         The ordinal rule_positional used.
     rule : Rule

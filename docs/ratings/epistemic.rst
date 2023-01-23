@@ -28,6 +28,6 @@ _______________
     :members:
 
 Grouped Mix Free
-_______________
+________________________
 .. autoclass:: embedded_voting.RatingsGeneratorEpistemicGroupsMixFree
     :members:

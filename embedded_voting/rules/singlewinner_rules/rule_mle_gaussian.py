@@ -44,6 +44,37 @@ class RuleMLEGaussian(Rule):
     >>> election.scores_ # doctest: +ELLIPSIS
     [268.6683142..., 221.5083075...]
 
+
+    """
+
+    def __init__(self, embeddings_from_ratings=None, tol=1e-6):
+        self.tol = tol
+        if embeddings_from_ratings is None:
+            embeddings_from_ratings = EmbeddingsFromRatingsCovariance()
+        super().__init__(score_components=1, embeddings_from_ratings=embeddings_from_ratings)
+
+    @cached_property
+    def pinv_covariance_(self):
+        tol = self.tol
+        n, m = self.embeddings_.shape
+        min_d = min(n, m)
+        u, s, v = np.linalg.svd(self.embeddings_)
+        clean_zeros(s, tol=tol)
+        dia = np.zeros((m, n))
+        dia[:min_d, :min_d] = np.diag([pseudo_inverse_scalar(e) for e in s])
+        inverse = v.T @ dia @ u.T
+        clean_zeros(inverse, tol=tol)
+        return inverse
+
+    @cached_property
+    def weights_(self):
+        return self.pinv_covariance_.sum(axis=0)
+
+    def _score_(self, candidate):
+        return float(self.ratings_.candidate_ratings(candidate) @ self.weights_)
+
+
+"""
     #>>> np.linalg.norm(ratings_generator.ground_truth_ - election.scores_)  # Error estimation
     #0.4783006898563199
 
@@ -74,30 +105,5 @@ class RuleMLEGaussian(Rule):
 
     #>>> np.linalg.norm(ratings_generator.ground_truth_ - election.scores_)  # Error estimation
     #0.839945516610...
-    """
-
-    def __init__(self, embeddings_from_ratings=None, tol=1e-6):
-        self.tol = tol
-        if embeddings_from_ratings is None:
-            embeddings_from_ratings = EmbeddingsFromRatingsCovariance()
-        super().__init__(score_components=1, embeddings_from_ratings=embeddings_from_ratings)
-
-    @cached_property
-    def pinv_covariance_(self):
-        tol = self.tol
-        n, m = self.embeddings_.shape
-        min_d = min(n, m)
-        u, s, v = np.linalg.svd(self.embeddings_)
-        clean_zeros(s, tol=tol)
-        dia = np.zeros((m, n))
-        dia[:min_d, :min_d] = np.diag([pseudo_inverse_scalar(e) for e in s])
-        inverse = v.T @ dia @ u.T
-        clean_zeros(inverse, tol=tol)
-        return inverse
-
-    @cached_property
-    def weights_(self):
-        return self.pinv_covariance_.sum(axis=0)
-
-    def _score_(self, candidate):
-        return float(self.ratings_.candidate_ratings(candidate) @ self.weights_)
+    
+"""
