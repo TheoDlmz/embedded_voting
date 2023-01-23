@@ -3,7 +3,7 @@ from embedded_voting.embeddings.embeddings import Embeddings
 
 # noinspection PyUnresolvedReferences
 class EmbeddingsCorrelation(Embeddings):
-    """Embeddings based on correlation, dedicated to :cls:`RuleFast`.
+    """Embeddings based on correlation, dedicated to :class:`RuleFast`.
 
     Parameters
     ----------
