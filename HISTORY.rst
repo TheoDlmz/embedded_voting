@@ -2,8 +2,11 @@
 History
 =======
 
-Next release (work in progress)
+0.1.6 (2023-01-23)
 -------------------------------
+
+* `Aggregators`:
+  * Possibility to add or not the current ratings to the training set.
 
 * `Embeddings`:
 
@@ -27,6 +30,8 @@ Next release (work in progress)
   * Add `EmbeddingsGeneratorFullyPolarized`: create embeddings that are random vectors of the canonical basis.
   * `EmbeddingsGeneratorPolarized` now relies on `EmbeddingsGeneratorUniform`, `EmbeddingsGeneratorFullyPolarized`
     and the method `Embeddings.mixed_with`.
+  * Move `EmbeddingCorrelation` and renamed it.
+  * Rewrote the `EmbeddingsFromRatingsCorrelation` and how it compute the number of singular values to take.
 
 * Epistemic ratings generators:
 
@@ -42,11 +47,13 @@ Next release (work in progress)
     `RatingsGeneratorEpistemicGroupedNoise` to `RatingsGeneratorEpistemicGroupsNoise`.
   * Remove method `RatingsGeneratorEpistemic.generate_true_values`: the same result can be obtained with
     `RatingsGeneratorEpistemic.truth_generator`.
+  * Add `RatingsGeneratorEpistemicGroupedMixFree` and `RatingsGeneratorEpistemicGroupsMixScale`.
 
 * Ratings generators:
 
   * `RatingsGenerator` and subclasses: remove `*args` in call because it was not used.
   * `RatingsGeneratorUniform`: add optional parameters `minimum_rating` and `maximum_rating`.
+  * Possibility to save scores in a csv file
 
 * `RatingsFromEmbeddingsCorrelated`:
 
@@ -63,6 +70,12 @@ Next release (work in progress)
   * Rename `SumScores` to `RuleSumRatings` and `ProductScores` to `RuleProductRatings`.
   * Rename `RulePositionalExtension` to `RulePositional` and rename subclasses accordingly.
   * Rename `RuleInstantRunoffExtension` to `RuleInstantRunoff`.
+  * Add `RuleApprovalSum`, `RuleApprovalProduct`, `RuleApprovalRandom`.
+  * Changed the default renormalization function in `RuleFast`.
+  * Change the method in `RuleMLEGaussian`.
+  * Add `RuleModelAware`.
+  * Add `RuleRatingsHistory`.
+  * Add `RuleShiftProduct` which replace `RuleProductRatings`.
 
 * Multiwinner rules: rename all rules with prefix `MultiwinnerRule`. For example, rename `IterFeatures` to
   `MultiwinnerRuleIterFeatures`.
@@ -76,7 +89,16 @@ Next release (work in progress)
 * Rename `AggregatorSum` to `AggregatorSumRatings` and `AggregatorProduct` to `AggregatorProductRatings`.
 * Add `max_angular_dilatation_factor`: maximum angular dilatation factor to stay in the positive orthant.
 * Rename `create_3D_plot` to `create_3d_plot`.
+* Moved function to the utils module.
 * Reorganize the file structure of the project.
+
+0.1.5 (2022-01-04)
+------------------
+
+* Aggregator functions.
+* Online learning.
+* Refactoring Truth epistemic generators.
+* Rule taking history into account.
 
 0.1.4 (2021-12-06)
 ------------------
