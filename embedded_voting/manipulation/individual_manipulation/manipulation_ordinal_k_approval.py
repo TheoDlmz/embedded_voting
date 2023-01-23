@@ -18,6 +18,8 @@ class ManipulationOrdinalKApproval(ManipulationOrdinal):
     ----------
     ratings : Profile
         The ratings of voters on which we do the analysis.
+    embeddings : Embeddings
+        The embeddings of the voters.
     k : int
         The k parameter for the k-approval rule.
     rule : Rule

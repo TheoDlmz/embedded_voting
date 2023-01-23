@@ -6,6 +6,17 @@ import matplotlib.pyplot as plt
 
 
 class OnlineLearning:
+    """
+    Class to compare the performance of different aggregators on a given generator.
+    
+    Parameters
+    ----------
+    list_agg: list of Aggregator
+        List of aggregators to compare.
+    generator: TruthGenerator
+        Generator to use for the true ratings of the candidates
+    
+    """
 
     def __init__(self, list_agg, generator=None):
         self.list_agg = list_agg

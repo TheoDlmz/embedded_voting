@@ -20,6 +20,9 @@ class RuleSVDLog(RuleSVD):
     use_rank : boolean
         If True, consider the rank of the matrix when doing the ranking.
         By default, it is False.
+    embedded_from_ratings: EmbeddingsFromRatings
+        If no embeddings are specified in the call, this `EmbeddingsFromRatings` object is use to generate
+        the embeddings from the ratings. Default: `EmbeddingsFromRatingsIdentity()`.
 
     Examples
     --------

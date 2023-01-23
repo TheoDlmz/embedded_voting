@@ -10,6 +10,20 @@ class MultiwinnerRuleIterFeatures(MultiwinnerRuleIter):
     based on the :class:`RuleFeatures`
     aggregation rule.
 
+    Parameters
+    ----------
+    k : int
+        The size of the committee.
+    quota : str
+        The quota used for the re-weighing step.
+        Either ``'droop'`` quota `(n/(k+1) +1)` or
+        ``'classic'`` quota `(n/k)`.
+    take_min : bool
+        If True, when the total
+        satisfaction is less than the :attr:`quota`,
+        we replace the quota by the total
+        satisfaction. By default, it is set to False.
+    
     Examples
     --------
     >>> np.random.seed(42)

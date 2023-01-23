@@ -8,8 +8,8 @@ __________
 .. autoclass:: embedded_voting.RuleZonotope
     :members:
 
-MaxCube
-________
+Max Parallelepiped
+____________________
 
 .. autoclass:: embedded_voting.RuleMaxParallelepiped
     :members:

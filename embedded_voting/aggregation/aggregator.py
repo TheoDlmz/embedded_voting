@@ -28,6 +28,8 @@ class Aggregator:
         If True, then by default, train the embeddings at each election.
     name: str, optional
         Name of the aggregator.
+    default_add: bool
+        If True, then by default, add the ratings to the history.
 
     Attributes
     ----------
