@@ -78,7 +78,7 @@ class RatingsGeneratorEpistemicGroupsMixFree(RatingsGeneratorEpistemicGroups):
                  independent_noise_f=None):
         super().__init__(truth_generator=truth_generator, groups_sizes=groups_sizes)
         self.groups_features = np.array(groups_features)
-        self.groups_features_normalized = (
+        self.groups_features_normalized = ( 
             self.groups_features
             / self.groups_features.sum(1)[:, np.newaxis]
         )
@@ -106,7 +106,7 @@ class RatingsGeneratorEpistemicGroupsMixFree(RatingsGeneratorEpistemicGroups):
         ratings = np.zeros((self.n_voters, n_candidates))
         for i in range(n_candidates):
             noise_features = self.group_noise_f(size=self.n_features)*self.group_noise
-            v_noise_dependent = (
+            v_noise_dependent = ( 
                 self.m_voter_group
                 @ self.groups_features_normalized
                 @ noise_features

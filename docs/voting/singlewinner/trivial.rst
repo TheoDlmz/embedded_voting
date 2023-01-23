@@ -5,7 +5,7 @@ Trivial Rules
 Sum of scores (Range Voting)
 ______________________________
 
-.. autoclass:: embedded_voting.RuleSumScores
+.. autoclass:: embedded_voting.RuleSumRatings
     :members:
 
 Product of scores (Nash)
