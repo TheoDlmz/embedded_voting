@@ -285,7 +285,7 @@ class Embeddings(np.ndarray):
 
         The `center` is computed with :meth:`get_center`. The angular dilatation
         factor the largest possible so that all vectors stay in the positive orthant.
-        Cf. :func:`max_angular_dilatation_factor`.
+        Cf. :func:`~embedded_voting.utils.miscellaneous.max_angular_dilatation_factor`.
 
         Parameters
         ----------
@@ -728,7 +728,7 @@ class Embeddings(np.ndarray):
             Matrix of ratings given by voters to the candidates.
         candidate : int
             The candidate for which we want to show the ratings.
-            Should be lower than :attr:`n_candidates`.
+            Should be lower than :attr:`n_candidates` of ratings.
         plot_kind : str
             The kind of plot we want to show.
             Can be ``'3D'`` or ``'ternary'``.

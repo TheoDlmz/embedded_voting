@@ -15,11 +15,22 @@ class RuleZonotope(Rule):
     Voting rule in which the aggregated score of
     a candidate is the volume of the zonotope described by
     his embedding matrix `M` such that `M[i] = score[i, candidate] * embeddings[i]`.
-    (cf :meth:`~embedded_voting.Embeddings.scored_embeddings`).
+    (cf :meth:`~embedded_voting.Embeddings.times_ratings_candidate`).
 
     For each candidate, the rank `r` of her associated matrix is computed. The volume of the zonotope is
     the sum of the volumes of all the parallelepipeds associated to a submatrix keeping only `r` voters
-    (cf. :func:`volume_parallelepiped`). The score of the candidate is then `(r, volume)`.
+    (cf. :func:`~embedded_voting.utils.miscellaneous.volume_parallelepiped`). The score of the candidate is then `(r, volume)`.
+
+    
+    Parameters
+    ----------
+    score_components : int
+        The number of components in the aggregated
+        score of every candidate. If `> 1`, we
+        perform a lexical sort to obtain the ranking.
+    embeddings_from_ratings: EmbeddingsFromRatings
+        If no embeddings are specified in the call, this `EmbeddingsFromRatings` object is use to generate
+        the embeddings from the ratings. Default: `EmbeddingsFromRatingsIdentity()`.
 
     Examples
     --------

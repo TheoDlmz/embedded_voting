@@ -1,5 +1,5 @@
 ==================================
-Correlated Embeddings From Ratings
+Correlated Ratings From Embeddings
 ==================================
 
 
