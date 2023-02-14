@@ -22,7 +22,7 @@ Embedded Voting
 
 
 
-This contains the code for the work on embedded voting done during my internship at Nokia
+This contains the code for our work on embedded voting.
 
 
 * Free software: GNU General Public License v3
