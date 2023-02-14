@@ -8,3 +8,4 @@ IPython
 scikit-learn
 tqdm
 python-ternary
+multiprocess

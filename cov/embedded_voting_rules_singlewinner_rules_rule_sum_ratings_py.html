@@ -65,28 +65,38 @@
     <p id="t12" class="pln"><span class="n"><a href="#t12">12</a></span><span class="t"><span class="str">    Voting rule in which the score of a candidate is the sum of her ratings.</span>&nbsp;</span><span class="r"></span></p>
     <p id="t13" class="pln"><span class="n"><a href="#t13">13</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t14" class="pln"><span class="n"><a href="#t14">14</a></span><span class="t"><span class="str">    No embeddings are used for this rule.</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t15" class="pln"><span class="n"><a href="#t15">15</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t16" class="pln"><span class="n"><a href="#t16">16</a></span><span class="t"><span class="str">    Examples</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t17" class="pln"><span class="n"><a href="#t17">17</a></span><span class="t"><span class="str">    --------</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t18" class="pln"><span class="n"><a href="#t18">18</a></span><span class="t"><span class="str">    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t19" class="pln"><span class="n"><a href="#t19">19</a></span><span class="t"><span class="str">    >>> election = RuleSumRatings()(ratings)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t20" class="pln"><span class="n"><a href="#t20">20</a></span><span class="t"><span class="str">    >>> election.scores_</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t21" class="pln"><span class="n"><a href="#t21">21</a></span><span class="t"><span class="str">    [1.4, 1.6, 1.3]</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t22" class="pln"><span class="n"><a href="#t22">22</a></span><span class="t"><span class="str">    >>> election.ranking_</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t23" class="pln"><span class="n"><a href="#t23">23</a></span><span class="t"><span class="str">    [1, 0, 2]</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t24" class="pln"><span class="n"><a href="#t24">24</a></span><span class="t"><span class="str">    >>> election.winner_</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t25" class="pln"><span class="n"><a href="#t25">25</a></span><span class="t"><span class="str">    1</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t26" class="pln"><span class="n"><a href="#t26">26</a></span><span class="t"><span class="str">    >>> election.welfare_</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t27" class="pln"><span class="n"><a href="#t27">27</a></span><span class="t"><span class="str">    [0.3333333333333328, 1.0, 0.0]</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t28" class="pln"><span class="n"><a href="#t28">28</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t29" class="run"><span class="n"><a href="#t29">29</a></span><span class="t">    <span class="key">def</span> <span class="nam">_score_</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">candidate</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t30" class="run"><span class="n"><a href="#t30">30</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">ratings_</span><span class="op">.</span><span class="nam">candidate_ratings</span><span class="op">(</span><span class="nam">candidate</span><span class="op">)</span><span class="op">.</span><span class="nam">sum</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t15" class="pln"><span class="n"><a href="#t15">15</a></span><span class="t"><span class="str">    </span>&nbsp;</span><span class="r"></span></p>
+    <p id="t16" class="pln"><span class="n"><a href="#t16">16</a></span><span class="t"><span class="str">    Parameters</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t17" class="pln"><span class="n"><a href="#t17">17</a></span><span class="t"><span class="str">    ----------</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t18" class="pln"><span class="n"><a href="#t18">18</a></span><span class="t"><span class="str">    score_components : int</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t19" class="pln"><span class="n"><a href="#t19">19</a></span><span class="t"><span class="str">        The number of components in the aggregated</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t20" class="pln"><span class="n"><a href="#t20">20</a></span><span class="t"><span class="str">        score of every candidate. If `> 1`, we</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t21" class="pln"><span class="n"><a href="#t21">21</a></span><span class="t"><span class="str">        perform a lexical sort to obtain the ranking.</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t22" class="pln"><span class="n"><a href="#t22">22</a></span><span class="t"><span class="str">    embeddings_from_ratings: EmbeddingsFromRatings</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t23" class="pln"><span class="n"><a href="#t23">23</a></span><span class="t"><span class="str">        If no embeddings are specified in the call, this `EmbeddingsFromRatings` object is use to generate</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t24" class="pln"><span class="n"><a href="#t24">24</a></span><span class="t"><span class="str">        the embeddings from the ratings. Default: `EmbeddingsFromRatingsIdentity()`.</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t25" class="pln"><span class="n"><a href="#t25">25</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t26" class="pln"><span class="n"><a href="#t26">26</a></span><span class="t"><span class="str">    Examples</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t27" class="pln"><span class="n"><a href="#t27">27</a></span><span class="t"><span class="str">    --------</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t28" class="pln"><span class="n"><a href="#t28">28</a></span><span class="t"><span class="str">    >>> ratings = Ratings(np.array([[.5, .6, .3], [.7, 0, .2], [.2, 1, .8]]))</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t29" class="pln"><span class="n"><a href="#t29">29</a></span><span class="t"><span class="str">    >>> election = RuleSumRatings()(ratings)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t30" class="pln"><span class="n"><a href="#t30">30</a></span><span class="t"><span class="str">    >>> election.scores_</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t31" class="pln"><span class="n"><a href="#t31">31</a></span><span class="t"><span class="str">    [1.4, 1.6, 1.3]</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t32" class="pln"><span class="n"><a href="#t32">32</a></span><span class="t"><span class="str">    >>> election.ranking_</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t33" class="pln"><span class="n"><a href="#t33">33</a></span><span class="t"><span class="str">    [1, 0, 2]</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t34" class="pln"><span class="n"><a href="#t34">34</a></span><span class="t"><span class="str">    >>> election.winner_</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t35" class="pln"><span class="n"><a href="#t35">35</a></span><span class="t"><span class="str">    1</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t36" class="pln"><span class="n"><a href="#t36">36</a></span><span class="t"><span class="str">    >>> election.welfare_</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t37" class="pln"><span class="n"><a href="#t37">37</a></span><span class="t"><span class="str">    [0.3333333333333328, 1.0, 0.0]</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t38" class="pln"><span class="n"><a href="#t38">38</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t39" class="run"><span class="n"><a href="#t39">39</a></span><span class="t">    <span class="key">def</span> <span class="nam">_score_</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">candidate</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t40" class="run"><span class="n"><a href="#t40">40</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">ratings_</span><span class="op">.</span><span class="nam">candidate_ratings</span><span class="op">(</span><span class="nam">candidate</span><span class="op">)</span><span class="op">.</span><span class="nam">sum</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </div>
 <div id="footer">
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2023-01-21 13:17 +0100
+            created at 2023-02-14 11:15 +0100
         </p>
     </div>
 </div>

@@ -9,6 +9,7 @@ Welcome to Embedded Voting's documentation!
    installation
    usage
    notebooks/tuto
+   ijcai/index
    reference
    contributing
    authors
