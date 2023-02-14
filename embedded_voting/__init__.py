@@ -2,7 +2,7 @@
 
 __author__ = """Anonymous Authors"""
 __email__ = 'anonymous@authors.edu'
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 from embedded_voting.aggregation import *
 from embedded_voting.embeddings import *
