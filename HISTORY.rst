@@ -2,6 +2,15 @@
 History
 =======
 
+
+0.1.7 (2023-02-14)
+-------------------------------
+
+* New API for aggregation simulations: `evaluate`, `make_generator`, `f_max`, `f_renorm`, `SingleEstimator`,
+  `RandomWinner`, `make_aggs`.
+* Notebooks for IJCAI-23 paper submission
+
+
 0.1.6 (2023-01-23)
 -------------------------------
 
